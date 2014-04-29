@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/webkitbrowser">
+        <file>js/fix/webobjects.js</file>
+        <file>js/fix/XMLHttpRequest.js</file>
+        <file>js/keyboardevent.js</file>
+        <file>js/mouseevent.js</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,7 @@
+{
+  "name":"Webkit browser plugin",
+  "version": "0.1",
+  "id": "webkit-browser",
+    "roles": ["browser"],
+    "dependencies": ["stbapi","webserver"]
+}
