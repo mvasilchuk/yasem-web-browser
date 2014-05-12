@@ -49,7 +49,9 @@ OTHER_FILES += \
     js/fix/webobjects.js \
     js/fix/XMLHttpRequest.js \
     js/keyboardevent.js \
-    js/mouseevent.js
+    js/mouseevent.js \
+    LICENSE \
+    README.md
 
 include(../common.pri)
 DESTDIR = $$DEFAULT_PLUGIN_DIR
