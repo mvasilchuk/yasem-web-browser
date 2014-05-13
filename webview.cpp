@@ -190,8 +190,8 @@ void WebView::onLinkClicked(const QUrl &url)
 
 void WebView::onSelectionChanged()
 {
-    DEBUG(QString("onSelectionChanged()"));
-    findText(""); // Disabling selection
+    //DEBUG(QString("onSelectionChanged()"));
+    //findText(""); // Disabling selection
 }
 
 void WebView::onIconChanged()

@@ -191,7 +191,7 @@ bool WebPage::event(QEvent *event)
 
         switch(mouseEvent->button())
         {
-            case Qt::LeftButton:    result = parent->browser->receiveKeyCode(RC_KEY_OK);        break;
+            //case Qt::LeftButton:    result = parent->browser->receiveKeyCode(RC_KEY_OK);        break;
             //case Qt::RightButton:   result = parent->browser->receiveKeyCode(RC_KEY_BACK);      break;
             default:
             {

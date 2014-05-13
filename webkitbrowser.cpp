@@ -262,8 +262,11 @@ bool WebkitBrowser::receiveKeyCode(RC_KEY keyCode)
 {
     STUB_WITH_PARAMS(QVariant::fromValue((int)keyCode));
 
-    if(!keyEventValues.contains(keyCode)) return false;
-    //else qDebug() << keyEventValues[keyCode]->keyCode;
+    if(!keyEventValues.contains(keyCode))
+    {
+        qDebug() << "Key code not registered:" << keyCode;
+        return false;
+    }
 
     BrowserKeyEvent* keyEvent = keyEventValues[keyCode];
     if(keyEvent != NULL)

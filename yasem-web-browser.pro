@@ -4,13 +4,14 @@
 #
 #-------------------------------------------------
 
+VERSION = 1.0.0
+
 QT       += core gui widgets webkit webkitwidgets
 
-CONFIG += C++11
+CONFIG += c++11
 
 TARGET = yasem-web-browser
 TEMPLATE = lib
-CONFIG += plugin
 
 DEFINES += WEBKITBROWSER_LIBRARY
 
