@@ -179,6 +179,13 @@ bool WebPage::event(QEvent *event)
             case Qt::Key_7:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_7);  break;
             case Qt::Key_8:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_8);  break;
             case Qt::Key_9:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_9);  break;
+
+            case Qt::Key_F11:
+            {
+                result = true;
+                parent->gui->setFullscreen(!parent->gui->getFullscreen());
+                break;
+            }
             default:
             {
                 WARN(QString("No keycode found: %1").arg(keyEvent->key()));
