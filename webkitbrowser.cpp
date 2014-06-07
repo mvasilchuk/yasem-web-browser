@@ -191,7 +191,6 @@ void WebkitBrowser::stb(StbPlugin *stbPlugin)
 
 void WebkitBrowser::resize(QResizeEvent* event)
 {
-    STUB();
     Q_UNUSED(event);
     QWidget *parentWidget = parent();
     float scale = (float)innerSize.width() / innerSize.height();

@@ -46,9 +46,6 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
     req.setHeader(QNetworkRequest::UserAgentHeader, page->userAgentForUrl(QUrl()));
 
     QNetworkReply* real = QNetworkAccessManager::createRequest(op, req, outgoingData);
-
-    Q_ASSERT(real != 0);
-
     return real;
 }
 
