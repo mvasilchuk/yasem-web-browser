@@ -88,10 +88,10 @@ void WebPage::attachJsStbApi()
 
             if(object == NULL)
             {
-                ERROR("JS API object is not an instance of QObject");
+                ERROR() << "JS API object is not an instance of QObject";
                 continue;
             }
-            LOG(QString("Inserting API: %1").arg(object->metaObject()->className()));
+            LOG() << "Inserting API:" << object->metaObject()->className();
 
             this->mainFrame()->addToJavaScriptWindowObject(name, object);
         }
@@ -111,25 +111,25 @@ void WebPage::triggerAction(QWebPage::WebAction action, bool checked)
 void WebPage::javaScriptAlert ( QWebFrame * frame, const QString & msg )
 {
     Q_UNUSED(frame);
-    LOG(QString("[JS ALERT]: %1").arg(msg));
+    LOG() << "[JS ALERT]:" << msg;
 }
 
 bool WebPage::javaScriptConfirm ( QWebFrame * frame, const QString & msg )
 {
     Q_UNUSED(frame);
-    LOG(QString("[JS CONFIRM]: %1").arg(msg));
+    LOG() << "[JS CONFIRM]:" << msg;
     return false;
 }
 
 void WebPage::javaScriptConsoleMessage ( const QString & message, int lineNumber, const QString & sourceID )
 {
-    LOG(QString("[JS MESSAGE] (%1: %2): %3").arg(sourceID).arg(lineNumber).arg(message));
+    LOG() << QString("[JS MESSAGE] (%1: %2): %3").arg(sourceID).arg(lineNumber).arg(message);
 }
 
 bool WebPage::javaScriptPrompt ( QWebFrame * frame, const QString & msg, const QString & defaultValue, QString * result )
 {
     Q_UNUSED(frame);
-    LOG(QString("WebPage::javaScriptPrompt(%1, %2, %3)").arg(msg).arg(defaultValue).arg(*result));
+    LOG() << QString("WebPage::javaScriptPrompt(%1, %2, %3)").arg(msg).arg(defaultValue).arg(*result);
     return false;
 }
 
@@ -140,7 +140,7 @@ bool WebPage::event(QEvent *event)
     {
         if(!stb())
         {
-            WARN("No STB API found!");
+            qWarning() << "No STB API found!";
             return false;
         }
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
@@ -188,7 +188,7 @@ bool WebPage::event(QEvent *event)
             }
             default:
             {
-                WARN(QString("No keycode found: %1").arg(keyEvent->key()));
+                qWarning() << "No keycode found: %1" << keyEvent->key();
             }
         }
     }
@@ -231,7 +231,7 @@ StbPlugin *WebPage::stb()
 
 void WebPage::setUserAgent(const QString &userAgent)
 {
-    STUB_WITH_PARAMS(userAgent);
+    STUB() << userAgent;
     customUserAgent = userAgent;
 }
 
@@ -259,7 +259,7 @@ void WebPage::recreateObjects()
         stbPlugin->init();
     }
     else
-        WARN(QString("Profile not found!"));
+        qWarning() << "Profile not found!";
 
 }
 
@@ -279,11 +279,11 @@ void WebPage::resetPage()
             pluginFactory->refreshPlugins();
         }
         else
-            WARN(QString("STB plugin not found!"));
+            qWarning() << "STB plugin not found!";
     }
     else
     {
-        WARN(QString("Profile not found!"));
+        qWarning() << "Profile not found!";
     }
 }
 

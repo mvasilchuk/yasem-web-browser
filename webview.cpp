@@ -142,14 +142,13 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 void WebView::onLoadStarted()
 {
     STUB();
-    DEBUG(QString("onLoadStarted()"));
     triggered = false;
 
 }
 
 void WebView::onLoadProgress(int progress)
 {
-    DEBUG(QString("onLoadProgress(%1)").arg(progress));
+    DEBUG() << "onLoadProgress(" << progress << ")";
     if(progress > 10 && !triggered)
     {
         Q_ASSERT(page());
@@ -170,22 +169,22 @@ void WebView::onLoadProgress(int progress)
 
 void WebView::onLoadFinished(bool finished)
 {
-    DEBUG(QString("onLoadFinished(%1)").arg(QVariant::fromValue(finished).toString()));
+    DEBUG() << "onLoadFinished(" << finished << ")";
 }
 
 void WebView::onTitleChanged(const QString &title)
 {
-    DEBUG(QString("onTitleChanged(%1)").arg(title));
+    DEBUG() << "onTitleChanged(" << title << ")";
 }
 
 void WebView::onStatusBarMessage(const QString &text)
 {
-    DEBUG(QString("onStatusBarMessage(%1)").arg(text));
+    DEBUG() << "onStatusBarMessage(" << text << ")";
 }
 
 void WebView::onLinkClicked(const QUrl &url)
 {
-    DEBUG(QString("onLinkClicked(%1)").arg(url.toString()));
+    DEBUG() << "onLinkClicked(" << url << ")";
 }
 
 void WebView::onSelectionChanged()
@@ -196,12 +195,12 @@ void WebView::onSelectionChanged()
 
 void WebView::onIconChanged()
 {
-    DEBUG(QString("onIconChanged()"));
+    DEBUG() << "onIconChanged()";
 }
 
 void WebView::onUrlChanged(const QUrl &url)
 {
-    DEBUG(QString("onUrlChanged(%1)").arg(url.toString()));
+    DEBUG() << QString("onUrlChanged(%1)").arg(url.toString());
 
     #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
         QWebSecurityOrigin origin(url);

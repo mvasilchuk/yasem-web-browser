@@ -65,7 +65,7 @@ QObject *WebPluginFactoryImpl::create(const QString &mimeType, const QUrl &url, 
 
 QList<QWebPluginFactory::Plugin> WebPluginFactoryImpl::plugins() const
 {
-    STATIC_STUB();
+    STUB();
 
     QList<QWebPluginFactory::Plugin> list;
 
@@ -106,7 +106,7 @@ bool WebPluginFactoryImpl::extension(QWebPluginFactory::Extension extension, con
 
 bool WebPluginFactoryImpl::supportsExtension(QWebPluginFactory::Extension extension) const
 {
-    STATIC_STUB();
+    STUB();
     return true;
 }
 

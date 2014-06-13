@@ -213,9 +213,9 @@ void WebkitBrowser::resize(QResizeEvent* event)
         browserRect.setTop(0);
     }
 
-    DEBUG(QString("scale: %1 -> %2").arg(scale).arg(browserScale));
-    DEBUG(QString("parent:[%1, %2]").arg(parentWidget->width()).arg(parentWidget->height()));
-    DEBUG(QString("browserRect:[%1, %2, %3, %4]").arg(browserRect.left()).arg(browserRect.top()).arg(browserRect.width()).arg(browserRect.height()));
+    DEBUG() << QString("scale: %1 -> %2").arg(scale).arg(browserScale);
+    DEBUG() << QString("parent:[%1, %2]").arg(parentWidget->width()).arg(parentWidget->height());
+    DEBUG() << QString("browserRect:[%1, %2, %3, %4]").arg(browserRect.left()).arg(browserRect.top()).arg(browserRect.width()).arg(browserRect.height());
 
     browserScale = (qreal)browserRect.width() / innerSize.width();
 
@@ -259,7 +259,7 @@ void WebkitBrowser::clearKeyEvents()
 
 bool WebkitBrowser::receiveKeyCode(RC_KEY keyCode)
 {
-    STUB_WITH_PARAMS(QVariant::fromValue((int)keyCode));
+    STUB() << (int)keyCode;
 
     if(!keyEventValues.contains(keyCode))
     {
