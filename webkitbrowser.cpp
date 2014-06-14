@@ -11,6 +11,8 @@
 #include <QDir>
 #include <QPalette>
 #include <QFontDatabase>
+#include <QResizeEvent>
+#include <QMoveEvent>
 
 using namespace yasem;
 
@@ -26,6 +28,7 @@ PLUGIN_ERROR_CODES WebkitBrowser::initialize()
     qDebug() << "wtf child:" << webViewList;
 
     this->innerSize = QSize(1280, 720);
+    fullscreen(false);
 
     //TODO: fix
 
@@ -97,7 +100,7 @@ QWidget *WebkitBrowser::widget()
 void WebkitBrowser::rect(const QRect &rect)
 {
     this->browserRect = rect;
-    resize();
+    //resize();
 }
 
 QRect WebkitBrowser::rect()
@@ -142,7 +145,7 @@ void WebkitBrowser::setInnerSize(const QSize &size)
         {
             WebPage* childPage = (WebPage*)childView->page();
             childPage->setViewportSize(size);
-            qDebug() << "viewport" << childPage->viewportSize();
+            DEBUG() << "viewport" << childPage->viewportSize();
         }
     }
     resize();
@@ -190,38 +193,64 @@ void WebkitBrowser::stb(StbPlugin *stbPlugin)
 }
 
 void WebkitBrowser::resize(QResizeEvent* event)
-{
+{   
     Q_UNUSED(event);
+
+    DEBUG() << event;
+    moveEvent(0);
+}
+
+void WebkitBrowser::moveEvent ( QMoveEvent * event )
+{
     QWidget *parentWidget = parent();
     float scale = (float)innerSize.width() / innerSize.height();
+
+    DEBUG() << "============== PAINT ===================";
+
+    DEBUG() << "parentWidget" <<  parentWidget->geometry();
     browserScale = (float)parentWidget->width() / (float)parentWidget->height();
 
-    //qDebug() << "start zoom:" << browserScale << scale;
+    DEBUG() << event;
 
-    if(scale > browserScale)
+    if(fullscreen())
     {
-        browserRect.setWidth(parentWidget->width());
-        browserRect.setHeight(parentWidget->width() / scale);
-        browserRect.setLeft(0);
-        browserRect.setTop((parentWidget->height() - browserRect.height()) / 2);
+        browserRect = parentWidget->rect();
     }
     else
     {
-        browserRect.setHeight(parentWidget->height());
-        browserRect.setWidth(parentWidget->height() * scale);
-        browserRect.setLeft((parentWidget->width() - browserRect.width()) / 2);
-        browserRect.setTop(0);
+        //FIXME: Resize bug after returning from fullscreen mode
+        if(scale > browserScale)
+        {
+            DEBUG() << "case 1" << browserRect;
+
+            int containerHeight = parentWidget->height() - browserRect.height();
+            if(containerHeight < 0) containerHeight = 0;
+
+            browserRect.setLeft(0);
+            browserRect.setTop(containerHeight / 2);
+            browserRect.setWidth(parentWidget->width());
+            browserRect.setHeight(parentWidget->width() / scale);
+        }
+        else
+        {
+            DEBUG() << "case 2" << browserRect;
+
+            int containerWidth = parentWidget->width() - browserRect.width();
+            if(containerWidth < 0) containerWidth = 0;
+
+            browserRect.setLeft(containerWidth / 2);
+            browserRect.setTop(0);
+            browserRect.setHeight(parentWidget->height());
+            browserRect.setWidth(parentWidget->height() * scale);
+        }
+
     }
 
-    DEBUG() << QString("scale: %1 -> %2").arg(scale).arg(browserScale);
-    DEBUG() << QString("parent:[%1, %2]").arg(parentWidget->width()).arg(parentWidget->height());
-    DEBUG() << QString("browserRect:[%1, %2, %3, %4]").arg(browserRect.left()).arg(browserRect.top()).arg(browserRect.width()).arg(browserRect.height());
+    DEBUG() << "scale:"<< scale << browserScale;
+    DEBUG() << "parent:" << parentWidget->rect();
+    DEBUG() << "browserRect:" << browserRect;
 
     browserScale = (qreal)browserRect.width() / innerSize.width();
-
-    //qDebug() << "zoom: " << browserScale;
-
-    qDebug() << "children:" << webViewList;
 
     QRect actualRect(0, 0, browserRect.width(), browserRect.height());
     foreach(QWidget* child, webViewList)
@@ -229,15 +258,20 @@ void WebkitBrowser::resize(QResizeEvent* event)
         WebView* vChild = qobject_cast<WebView*>(child);
         if(vChild != NULL)
         {
-            qDebug() << "child:" << vChild;
-            vChild->setGeometry(browserRect);
+           DEBUG() << "child:" << vChild << browserRect;
+
             vChild->setZoomFactor(browserScale);
-
-
             vChild->page()->setActualVisibleContentRect(actualRect);
         }
+
         else qWarning() << "child warn:" << child;
     }
+
+
+    widget()->setGeometry(browserRect);
+    widget()->update();
+
+    DEBUG() << "======================================";
 }
 
 
@@ -301,4 +335,14 @@ void WebkitBrowser::removeWebView(WebView* view)
 QList<WebView *> WebkitBrowser::getWebViewList()
 {
     return webViewList;
+}
+
+void WebkitBrowser::fullscreen(bool setFullscreen)
+{
+    isFullscreen = setFullscreen;
+}
+
+bool WebkitBrowser::fullscreen()
+{
+    return isFullscreen;
 }

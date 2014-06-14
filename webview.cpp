@@ -110,9 +110,6 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
     webView->setPage(webPage);
     webView->show();
     webView->setFocus();
-    webView->setGeometry(browser->rect());
-    webView->setZoomFactor(browser->scale());
-    webView->setStyleSheet("background-color: white;");
     browser->addWebView(webView);
     browser->setWebView(webView);
 
@@ -120,20 +117,16 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 
     connect(webPage, &WebPage::windowCloseRequested, [=]() {
         browser->removeWebView(webView);
-        //Q_ASSERT(webPage->view());
         webPage->view()->close();
-        qDebug() << "close window";
 
         WebView* last = static_cast<WebView*>(browser->getWebViewList().last());
         Q_ASSERT(last);
-
         browser->setWebView(last);
         browser->resize();
 
     });
 
-
-    //emit setTopLevelWebView(webView);
+    browser->resize();
 
     return webView;
 }
@@ -213,6 +206,7 @@ void WebView::onUrlChanged(const QUrl &url)
     #endif
 
     triggered = false;
+
     //emit invalidateWebView();
 }
 

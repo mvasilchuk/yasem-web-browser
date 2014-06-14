@@ -212,11 +212,6 @@ bool WebPage::event(QEvent *event)
     return result ? false: QWebPage::event(event);
 }
 
-/*QSize WebPage::sizeHint() const
-{
-    return QSize(800, 600); // ####...
-}*/
-
 bool WebPage::stb(StbPlugin *plugin)
 {
     STUB();
@@ -297,6 +292,11 @@ QString WebPage::userAgentForUrl(const QUrl & url) const
     //qDebug() << "ua:" << ua;
     return ua;
 }
+
+/*QSize WebPage::sizeHint()
+{
+    return parent->size();
+}*/
 
 
 

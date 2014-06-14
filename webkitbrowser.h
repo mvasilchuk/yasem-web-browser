@@ -37,10 +37,10 @@ public:
     virtual qreal scale();
 
     virtual QWidget *widget();
-    virtual void resize(QResizeEvent* = 0);
+
     virtual void rect(const QRect &rect);
     virtual QRect rect();
-
+    void resize(QResizeEvent* = 0);
     virtual void stb(StbPlugin* stbPlugin) ;
     virtual StbPlugin* stb();
 
@@ -61,7 +61,9 @@ protected:
     QHash<RC_KEY, BrowserKeyEvent*> keyEventValues;
     WebView* activeWebView;
     QList<WebView*> webViewList;
+    bool isFullscreen;
     // BrowserPlugin interface
+
 
 public:
 
@@ -86,6 +88,12 @@ public:
     void addWebView(WebView* view);
     void removeWebView(WebView* view);
     QList<WebView*> getWebViewList();
+
+    void fullscreen(bool setFullscreen);
+    bool fullscreen();
+protected slots:
+
+    void moveEvent(QMoveEvent *event);
 };
 
 }
