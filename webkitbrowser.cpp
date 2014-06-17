@@ -277,11 +277,22 @@ void WebkitBrowser::moveEvent ( QMoveEvent * event )
 
 void WebkitBrowser::registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt, bool ctrl, bool shift)
 {
+    DEBUG() << "registerKeyEvent {key:"
+            << Core::instance()->getKeycodeHashes().key(rc_key)
+            << ", code:"
+            << keyCode
+            << ", which:"
+            << which << ", alt:"
+            << alt << ", ctrl:"
+            << ctrl << ", shift:"
+            << shift << "}";
+
     keyEventValues[rc_key] = new BrowserKeyEvent(keyCode, which, alt, ctrl, shift);
 }
 
 void WebkitBrowser::registerKeyEvent(RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt, bool ctrl, bool shift)
 {
+
     keyEventValues[rc_key] = new BrowserKeyEvent(keyCode, which, keyCode2, which2, alt, ctrl, shift);
 }
 
@@ -293,11 +304,11 @@ void WebkitBrowser::clearKeyEvents()
 
 bool WebkitBrowser::receiveKeyCode(RC_KEY keyCode)
 {
-    STUB() << (int)keyCode;
+    STUB() << Core::instance()->getKeycodeHashes().key(keyCode); //int)keyCode;
 
     if(!keyEventValues.contains(keyCode))
     {
-        qDebug() << "Key code not registered:" << keyCode;
+        qDebug() << "Key code not registered:" << keyCode << keyEventValues;
         return false;
     }
 

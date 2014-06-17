@@ -48,7 +48,7 @@ for(var index = 0; index < frames.length; index++)\
 }\
 if(activeFrame.document.activeElement) elem = activeFrame.document.activeElement; \
 else elem = activeFrame.document.body;\
-elem.focus();console.log(elem);";
+elem.focus();";
 
     for(int index = 0; index < MAX_EVENTS; index++)
     {
@@ -109,8 +109,6 @@ elem.focus();console.log(elem);";
 
     }
 
-    //qDebug() << result.join(" && ");
-
     return preData + result.join(" && ") + ";";
 }
 
@@ -121,7 +119,6 @@ void BrowserKeyEvent::initJsCode()
         QFile res(QString(":/webkitbrowser/js/keyboardevent.js"));
         res.open(QIODevice::ReadOnly|QIODevice::Text);
         BrowserKeyEvent::keyboardEventJs = res.readAll();
-        //qDebug() << "keyboardjs:" << BrowserKeyEvent::keyboardEventJs;
     }
 
     if(BrowserKeyEvent::mouseEventJs.isEmpty())
@@ -129,6 +126,5 @@ void BrowserKeyEvent::initJsCode()
         QFile res(QString(":/webkitbrowser/js/mouseevent.js"));
         res.open(QIODevice::ReadOnly|QIODevice::Text);
         BrowserKeyEvent::mouseEventJs = res.readAll();
-        //qDebug() << "mousejs:" << BrowserKeyEvent::mouseEventJs;
     }
 }
