@@ -5,9 +5,12 @@
 #include "profilemanager.h"
 #include "webkitbrowser.h"
 
+#include "cmd_line.h"
+
 #include <QWebInspector>
 #include <QWebFrame>
 #include <QKeyEvent>
+#include <QMessageBox>
 
 using namespace yasem;
 
@@ -35,6 +38,7 @@ WebPage::WebPage(WebView *parent) :
     settings()->setAttribute(QWebSettings::SpatialNavigationEnabled, true);
     settings()->setAttribute(QWebSettings::LinksIncludedInFocusChain, true);
     settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
+    settings()->enablePersistentStorage();
 
     //settings()->setAttribute(QWebSettings::LinksIncludedInFocusChain, true);
 
@@ -50,19 +54,16 @@ WebPage::WebPage(WebView *parent) :
     settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
     webInspector.setPage(this);
-    //webInspector.setVisible(true);
+    webInspector.setGeometry(QRect(0, 0, 1000, 800));
+
+    if(QCoreApplication::arguments().contains(CMD_LINE_DEVELOPER_TOOLS))
+        webInspector.show();
 
     setForwardUnsupportedContent(true);
     connect(this, &WebPage::unsupportedContent, []( QNetworkReply * reply ){
         qDebug() << "FIXME: Unsupported content" << reply;
         delete reply;
     });
-
-
-    //inspector.show();
-    //inspector.
-
-
 }
 
 WebView *WebPage::webView()
@@ -118,7 +119,13 @@ bool WebPage::javaScriptConfirm ( QWebFrame * frame, const QString & msg )
 {
     Q_UNUSED(frame);
     LOG() << "[JS CONFIRM]:" << msg;
-    return false;
+
+    const QString title = QObject::tr("Confirm action");
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this->parent, title, msg,
+                                QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
+    return reply == QMessageBox::Yes;
 }
 
 void WebPage::javaScriptConsoleMessage ( const QString & message, int lineNumber, const QString & sourceID )
@@ -202,7 +209,8 @@ bool WebPage::event(QEvent *event)
             //case Qt::RightButton:   result = parent->browser->receiveKeyCode(RC_KEY_BACK);      break;
             default:
             {
-                //WARN(QString("No keycode found: %1").arg(keyEvent->key()));
+                //WARN() << "No keycode found:" << mouseEvent->button();
+                return QWebPage::event(event);
                 break;
             }
         }

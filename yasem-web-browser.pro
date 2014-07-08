@@ -15,7 +15,7 @@ TEMPLATE = lib
 
 DEFINES += WEBKITBROWSER_LIBRARY
 
-INCLUDEPATH += ../yasem-core
+INCLUDEPATH += ../../yasem-core
 
 SOURCES += webkitbrowser.cpp \
         webpage.cpp \
@@ -34,7 +34,8 @@ HEADERS += webkitbrowser.h\
     interceptormanager.h \
     networkinterceptorentry.h \
     networkreply.h \
-    browserkeyevent.h
+    browserkeyevent.h \
+    cmd_line.h
 
 unix:!symbian {
     maemo5 {
@@ -54,7 +55,7 @@ OTHER_FILES += \
     LICENSE \
     README.md
 
-include(../common.pri)
+include(../../common.pri)
 DESTDIR = $$DEFAULT_PLUGIN_DIR
 
 RESOURCES += \

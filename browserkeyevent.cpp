@@ -69,8 +69,8 @@ elem.focus();";
         else if(index == CustomKeyEvent::KeyRelease)
         {
             continue;
-            eventName = "keyup";
-            type = TypeKeyboard;
+            //eventName = "keyup";
+            //type = TypeKeyboard;
         }
         else if(index == CustomKeyEvent::MouseDown)
         {
@@ -87,8 +87,8 @@ elem.focus();";
         else if(index == CustomKeyEvent::MouseUp)
         {
             continue;
-            eventName = "mouseup";
-            type = TypeMouse;
+            //eventName = "mouseup";
+            //type = TypeMouse;
         }
 
 

@@ -34,6 +34,7 @@ public slots:
 
     void paintEvent(QPaintEvent *e);
 
+    void mouseMoveEvent(QMouseEvent *e);
 protected:
     virtual void keyPressEvent(QKeyEvent*);
     virtual void keyReleaseEvent(QKeyEvent*);
@@ -47,6 +48,9 @@ protected:
     // Some fixed
     QString webObjectsFix;
     QString xmlHttpRequestFix;
+
+signals:
+    void mousePositionChanged(int position);
 };
 
 }

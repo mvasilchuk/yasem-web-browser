@@ -15,7 +15,7 @@
 namespace yasem
 {
 
-class WEBKITBROWSERSHARED_EXPORT WebkitBrowser: public QObject, public virtual Plugin, public virtual BrowserPlugin
+class WEBKITBROWSERSHARED_EXPORT WebkitBrowser: public QObject, public BrowserPlugin, public Plugin
 {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "com.mvas.yasem.WebkitBrowserPlugin/1.0" FILE "metadata.json")
@@ -54,6 +54,7 @@ public:
 
 protected:
     QRect browserRect;
+    QRect normalWindowRect; // Use to save webview geometry after switching to fullscreen mode
     float browserScale;
     StbPlugin* stbPlugin;
     QUrl indexUrl;
@@ -62,6 +63,7 @@ protected:
     WebView* activeWebView;
     QList<WebView*> webViewList;
     bool isFullscreen;
+    bool is_last_state_fullscreen;
     // BrowserPlugin interface
 
 
@@ -91,9 +93,13 @@ public:
 
     void fullscreen(bool setFullscreen);
     bool fullscreen();
+
+    void passEvent(QEvent *event);
+    void setupMousePositionHandler(const QObject *receiver, const char* method);
 protected slots:
 
     void moveEvent(QMoveEvent *event);
+
 };
 
 }

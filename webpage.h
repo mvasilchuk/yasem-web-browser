@@ -56,6 +56,8 @@ public:
     QString userAgentForUrl(const QUrl &url) const;
 public:
     void triggerAction(WebAction action, bool checked);
+
+
 };
 
 }

@@ -41,8 +41,12 @@ WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
     palette.setBrush(QPalette::Base, Qt::transparent);
     page()->setPalette(palette);
     setAttribute(Qt::WA_OpaquePaintEvent, false);
-    //setAttribute(Qt::WA_NoSystemBackground, true);
+
     setStyleSheet("background: transparent;");
+
+    setAttribute(Qt::WA_TranslucentBackground);
+
+    setMouseTracking(true);
 
 }
 
@@ -79,6 +83,31 @@ bool WebView::event(QEvent *event)
         }
     }*/
     return QWebView::event(event);
+}
+
+void WebView::mouseMoveEvent(QMouseEvent *e)
+{
+    //qDebug() << e;
+    int position = MOUSE_POSITION::MIDDLE;
+
+    int threshold = 100;
+    int y_pos = e->pos().y();
+    int x_pos = e->pos().x();
+    int height = this->height();
+    int width = this->width();
+
+    if(y_pos < threshold)
+        position |= MOUSE_POSITION::TOP;
+    else if(y_pos > height - threshold)
+        position |= MOUSE_POSITION::BOTTOM;
+
+    if(x_pos < threshold)
+        position |= MOUSE_POSITION::LEFT;
+    else if(x_pos > width - threshold)
+        position |= MOUSE_POSITION::RIGHT;
+    emit mousePositionChanged(position);
+
+    QWebView::mouseMoveEvent(e);
 }
 
 void WebView::loadFixes()
@@ -126,6 +155,7 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 
     });
 
+
     browser->resize();
 
     return webView;
@@ -163,6 +193,7 @@ void WebView::onLoadProgress(int progress)
 void WebView::onLoadFinished(bool finished)
 {
     DEBUG() << "onLoadFinished(" << finished << ")";
+    browser->resize();
 }
 
 void WebView::onTitleChanged(const QString &title)
@@ -212,13 +243,46 @@ void WebView::onUrlChanged(const QUrl &url)
 
 void WebView::paintEvent(QPaintEvent *e)
 {
-    /*QPainter p(this);
-    p.fillRect(e->rect(), Qt::transparent);
-    p.setPen(Qt::NoPen);
-    p.setBrush(gradient);
-    p.setOpacity(0.6);
-    p.drawRoundedRect(rect(), 100, 100);
-    p.end();*/
     QWebView::paintEvent(e);
+
+    /*
+    QPainter painter(this);
+    // If painter redirection was turned on, the painter will *not* paint on `this`!
+    // Painting code
+    //...
+    DEBUG() << painter.device();
+    if ( this == dynamic_cast<QWidget*>(painter.device()) )
+    {
+        QPixmap pixmap;
+        this->grab(e->rect());
+        QImage imgProcessed = pixmap.toImage();
+        QBrush brush(Qt::transparent);
+
+        const QRgb black = 0;
+        const QRgb blue = Qt::transparent;
+
+        QRect rect = e->rect();
+
+        int left = rect.left();
+        int top = rect.top();
+        int right = left + rect.width();
+        int bottom = top + rect.height();
+
+        QRgb color;  // Not QColor
+
+
+
+        for(int x = left; x < right; x++)
+        {
+            for(int y = top; y < bottom; y++)
+            {
+                color = imgProcessed.pixel(x,y);
+                 if (qRed(color) == 0 && qGreen(color) == 0 && qBlue(color) == 0) {
+                      imgProcessed.setPixel(x,y,QColor(Qt::blue).rgb()); // Qt::blue is a QColor constant.
+                 }
+            }
+        }
+    }*/
+
 }
 
