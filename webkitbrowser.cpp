@@ -20,7 +20,6 @@ using namespace yasem;
 
 WebkitBrowser::WebkitBrowser()
 {
-    is_last_state_fullscreen = false;
 }
 
 PLUGIN_ERROR_CODES WebkitBrowser::initialize()
@@ -56,7 +55,6 @@ PLUGIN_ERROR_CODES WebkitBrowser::deinitialize()
 void WebkitBrowser::parent(QWidget *parent)
 {
     activeWebView->setParent(parent);
-    normalWindowRect = parent->geometry();
 }
 
 QWidget *WebkitBrowser::parent()
@@ -111,7 +109,6 @@ QWidget *WebkitBrowser::widget()
 void WebkitBrowser::rect(const QRect &rect)
 {
     this->browserRect = rect;
-    //resize();
 }
 
 QRect WebkitBrowser::rect()
@@ -149,17 +146,7 @@ void WebkitBrowser::setInnerSize(const QSize &size)
 {
     Q_ASSERT(size.width() != -1 && size.height() != -1);
     this->innerSize = size;
-    foreach(QObject* child, webViewList)
-    {
-        WebView* childView = qobject_cast<WebView*>(child);
-        if(childView != NULL)
-        {
-            WebPage* childPage = (WebPage*)childView->page();
-            childPage->setViewportSize(size);
-            DEBUG() << "viewport" << childPage->viewportSize();
-        }
-    }
-    resize();
+    moveEvent(0);
 }
 
 QUrl WebkitBrowser::url()
@@ -211,49 +198,37 @@ void WebkitBrowser::resize(QResizeEvent* event)
 
 void WebkitBrowser::moveEvent ( QMoveEvent * event )
 {
+    Q_UNUSED(event)
+
     QWidget *parentWidget = parent();
 
-    if(is_last_state_fullscreen && normalWindowRect.width() > 0)
-    {
-        browserRect = normalWindowRect;
-    }
+    //Core::printCallStack();
 
-    float scale = (float)innerSize.width() / innerSize.height();
-    browserScale = (float)parentWidget->width() / (float)parentWidget->height();
+    float w_ratio = (float)innerSize.width() / parentWidget->width();
+    float h_ratio = (float)innerSize.height() / parentWidget->height();
 
-    if(fullscreen())
+    int width;
+    int height;
+
+    if(w_ratio > h_ratio)
     {
-        if(!is_last_state_fullscreen)
-        {
-            normalWindowRect = browserRect;
-        }
-        is_last_state_fullscreen = true;
-        browserRect = parentWidget->rect();
+        width = parentWidget->width();
+        height = (int)((float)innerSize.height() / w_ratio);
     }
     else
     {
-        is_last_state_fullscreen = false;
-        if(scale > browserScale)
-        {
-            int containerHeight = parentWidget->height() - browserRect.height();
-            if(containerHeight < 0) containerHeight = 0;
-
-            browserRect.setLeft(0);
-            browserRect.setTop(containerHeight / 2);
-            browserRect.setWidth(parentWidget->width());
-            browserRect.setHeight(parentWidget->width() / scale);
-        }
-        else
-        {
-            int containerWidth = parentWidget->width() - browserRect.width();
-            if(containerWidth < 0) containerWidth = 0;
-
-            browserRect.setLeft(containerWidth / 2);
-            browserRect.setTop(0);
-            browserRect.setHeight(parentWidget->height());
-            browserRect.setWidth(parentWidget->height() * scale);
-        }
+        height = parentWidget->height();
+        width = (int)((float)innerSize.width() / h_ratio);
     }
+
+
+    int left =  (int)(((float)parentWidget->width() - width) / 2);
+    int top = (int)(((float)parentWidget->height() - height) / 2);
+
+    browserRect.setLeft(left);
+    browserRect.setTop(top);
+    browserRect.setWidth(width);
+    browserRect.setHeight(height);
 
     browserScale = (qreal)browserRect.width() / innerSize.width();
 
@@ -269,10 +244,7 @@ void WebkitBrowser::moveEvent ( QMoveEvent * event )
 
         else qWarning() << "child warn:" << child;
     }
-
-
     widget()->setGeometry(browserRect);
-    //widget()->update();
 }
 
 
@@ -362,4 +334,15 @@ bool WebkitBrowser::fullscreen()
 void WebkitBrowser::passEvent(QEvent *event)
 {
     QCoreApplication::sendEvent(activeWebView, event);
+}
+
+
+void yasem::WebkitBrowser::register_dependencies()
+{
+    add_dependency(ROLE_GUI);
+}
+
+void yasem::WebkitBrowser::register_roles()
+{
+    register_role(ROLE_BROWSER);
 }

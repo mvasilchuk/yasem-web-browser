@@ -76,7 +76,7 @@ QList<QWebPluginFactory::Plugin> WebPluginFactoryImpl::plugins() const
         wPlugin.description = plugin->description;
         wPlugin.mimeTypes = QList<MimeType>();
 
-        foreach(StbPlugin::WebObjectInfo info, plugin->getWebObjects())
+        foreach(WebObjectInfo info, plugin->getWebObjects())
         {
             QWebPluginFactory::MimeType mimeType;
             mimeType.name = info.mimeType;
@@ -117,11 +117,11 @@ QWidget* WebPluginFactoryImpl::getWebObjectByMimeType(const QString &mimeType, c
 
     foreach(StbPlugin* plugin, pluginList)
     {
-        foreach(StbPlugin::WebObjectInfo info, plugin->getWebObjects())
+        foreach(WebObjectInfo info, plugin->getWebObjects())
         {
             if(info.mimeType.compare(mimeType, Qt::CaseInsensitive) == 0 &&  info.classid == classid)
             {
-                qDebug() <<  QString("Found mime type '%1' classid '%2' in '%3'").arg(mimeType).arg(classid).arg(dynamic_cast<yasem::Plugin*>(plugin)->id);
+                qDebug() <<  QString("Found mime type '%1' classid '%2' in '%3'").arg(mimeType).arg(classid).arg(dynamic_cast<yasem::Plugin*>(plugin)->getId());
                 QWidget* webObject;
                 if(info.widgetFactory != NULL)
                     webObject = info.widgetFactory();

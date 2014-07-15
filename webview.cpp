@@ -17,7 +17,7 @@ WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
 {
     setObjectName("WebView");
     this->browser = browser;
-    gui = dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole("gui"));
+    gui = dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(ROLE_GUI));
 
     connect(this, &WebView::loadStarted, this, &WebView::onLoadStarted);
     connect(this, &WebView::loadProgress, this, &WebView::onLoadProgress);
@@ -28,8 +28,6 @@ WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
     connect(this, &WebView::selectionChanged, this, &WebView::onSelectionChanged);
     connect(this, &WebView::iconChanged, this, &WebView::onIconChanged);
     connect(this, &WebView::urlChanged, this, &WebView::onUrlChanged);
-
-
 
     //connect(this, &WebView::invalidateWebView, gui, &AbstractOutputPlugin::invalidateWebView);
 
@@ -47,7 +45,16 @@ WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
     setAttribute(Qt::WA_TranslucentBackground);
 
     setMouseTracking(true);
+    readSettings();
 
+}
+
+void WebView::readSettings()
+{
+    QSettings* settings = Core::instance()->settings();
+    settings->beginGroup("WebBrowser");
+    mouseBorderThreshold = settings->value("mouse_border_threshold", 50).toInt();
+    settings->endGroup();
 }
 
 void WebView::keyPressEvent(QKeyEvent *event)
@@ -90,21 +97,21 @@ void WebView::mouseMoveEvent(QMouseEvent *e)
     //qDebug() << e;
     int position = MOUSE_POSITION::MIDDLE;
 
-    int threshold = 100;
     int y_pos = e->pos().y();
     int x_pos = e->pos().x();
     int height = this->height();
     int width = this->width();
 
-    if(y_pos < threshold)
+    if(y_pos < mouseBorderThreshold)
         position |= MOUSE_POSITION::TOP;
-    else if(y_pos > height - threshold)
+    else if(y_pos > height - mouseBorderThreshold)
         position |= MOUSE_POSITION::BOTTOM;
 
-    if(x_pos < threshold)
+    if(x_pos < mouseBorderThreshold)
         position |= MOUSE_POSITION::LEFT;
-    else if(x_pos > width - threshold)
+    else if(x_pos > width - mouseBorderThreshold)
         position |= MOUSE_POSITION::RIGHT;
+
     emit mousePositionChanged(position);
 
     QWebView::mouseMoveEvent(e);

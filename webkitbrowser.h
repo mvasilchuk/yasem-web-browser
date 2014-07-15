@@ -54,7 +54,6 @@ public:
 
 protected:
     QRect browserRect;
-    QRect normalWindowRect; // Use to save webview geometry after switching to fullscreen mode
     float browserScale;
     StbPlugin* stbPlugin;
     QUrl indexUrl;
@@ -63,7 +62,6 @@ protected:
     WebView* activeWebView;
     QList<WebView*> webViewList;
     bool isFullscreen;
-    bool is_last_state_fullscreen;
     // BrowserPlugin interface
 
 
@@ -100,6 +98,11 @@ protected slots:
 
     void moveEvent(QMoveEvent *event);
 
+
+    // Plugin interface
+public:
+    void register_dependencies();
+    void register_roles();
 };
 
 }
