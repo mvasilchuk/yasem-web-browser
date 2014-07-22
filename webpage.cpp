@@ -151,14 +151,37 @@ bool WebPage::event(QEvent *event)
             return false;
         }
         QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        Qt::KeyboardModifiers modifiers = keyEvent->modifiers();
+        bool hasShift = (modifiers & Qt::ShiftModifier) == Qt::ShiftModifier;
+        //bool hasCtrl = (modifiers & Qt::ControlModifier) == Qt::ControlModifier;
+        //bool hasAlt = (modifiers & Qt::AltModifier) == Qt::AltModifier;
+        //bool hasMeta = (modifiers & Qt::MetaModifier) == Qt::MetaModifier;
 
 
         switch(keyEvent->key())
         {
-            case Qt::Key_Left:      result = parent->browser->receiveKeyCode(RC_KEY_LEFT);      break;
-            case Qt::Key_Right:     result = parent->browser->receiveKeyCode(RC_KEY_RIGHT);     break;
-            case Qt::Key_Up:        result = parent->browser->receiveKeyCode(RC_KEY_UP);        break;
-            case Qt::Key_Down:      result = parent->browser->receiveKeyCode(RC_KEY_DOWN);      break;
+            case Qt::Key_Left:      {
+                if(hasShift)
+                    result = parent->browser->receiveKeyCode(RC_KEY_REWIND);
+                else
+                    result = parent->browser->receiveKeyCode(RC_KEY_LEFT);
+                break;
+            }
+            case Qt::Key_Right:     {
+                if(hasShift)
+                    result = parent->browser->receiveKeyCode(RC_KEY_FAST_FORWARD);
+                else
+                    result = parent->browser->receiveKeyCode(RC_KEY_RIGHT);
+                break;
+            }
+            case Qt::Key_Up:        {
+                    result = parent->browser->receiveKeyCode(RC_KEY_UP);
+                break;
+            }
+            case Qt::Key_Down:      {
+                result = parent->browser->receiveKeyCode(RC_KEY_DOWN);
+                break;
+            }
 
             case Qt::Key_Return:
             case Qt::Key_Enter:     result = parent->browser->receiveKeyCode(RC_KEY_OK);        break;
@@ -193,6 +216,18 @@ bool WebPage::event(QEvent *event)
                 parent->gui->setFullscreen(!parent->gui->getFullscreen());
                 break;
             }
+
+            case Qt::Key_VolumeDown:    result = parent->browser->receiveKeyCode(RC_KEY_VOLUME_DOWN);  break;
+            case Qt::Key_VolumeUp:      result = parent->browser->receiveKeyCode(RC_KEY_VOLUME_UP);    break;
+            case Qt::Key_VolumeMute:    result = parent->browser->receiveKeyCode(RC_KEY_MUTE);        break;
+
+            case Qt::Key_MediaTogglePlayPause:      result = parent->browser->receiveKeyCode(RC_KEY_PLAY_PAUSE);    break;
+            case Qt::Key_MediaPlay:                 result = parent->browser->receiveKeyCode(RC_KEY_PLAY);          break;
+            case Qt::Key_MediaPause:                result = parent->browser->receiveKeyCode(RC_KEY_PAUSE);         break;
+            case Qt::Key_MediaStop:                 result = parent->browser->receiveKeyCode(RC_KEY_STOP);          break;
+            case Qt::Key_MediaPrevious:             result = parent->browser->receiveKeyCode(RC_KEY_REWIND);        break;
+            case Qt::Key_MediaNext:                 result = parent->browser->receiveKeyCode(RC_KEY_FAST_FORWARD);  break;
+
             default:
             {
                 qWarning() << "No keycode found: %1" << keyEvent->key();

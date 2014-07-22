@@ -50,6 +50,8 @@ protected:
     QString webObjectsFix;
     QString xmlHttpRequestFix;
 
+    bool rendering_started;
+
     int mouseBorderThreshold;
 
 signals:

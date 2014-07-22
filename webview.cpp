@@ -8,7 +8,9 @@
 
 #include <QKeyEvent>
 #include <QPalette>
+#include <QPaintEngine>
 #include <QPainter>
+#include <QBackingStore>
 
 using namespace yasem;
 
@@ -18,6 +20,8 @@ WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
     setObjectName("WebView");
     this->browser = browser;
     gui = dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(ROLE_GUI));
+
+    rendering_started = false;
 
     connect(this, &WebView::loadStarted, this, &WebView::onLoadStarted);
     connect(this, &WebView::loadProgress, this, &WebView::onLoadProgress);
@@ -42,7 +46,7 @@ WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
 
     setStyleSheet("background: transparent;");
 
-    setAttribute(Qt::WA_TranslucentBackground);
+    //setAttribute(Qt::WA_TranslucentBackground);
 
     setMouseTracking(true);
     readSettings();
@@ -252,44 +256,42 @@ void WebView::paintEvent(QPaintEvent *e)
 {
     QWebView::paintEvent(e);
 
+    // TODO: Fix chroma key
     /*
-    QPainter painter(this);
-    // If painter redirection was turned on, the painter will *not* paint on `this`!
-    // Painting code
-    //...
-    DEBUG() << painter.device();
-    if ( this == dynamic_cast<QWidget*>(painter.device()) )
+    QPainter painter;
+    painter.begin(this);
+
+    QImage* baseImg = dynamic_cast<QImage*>(this->backingStore()->paintDevice());
+    QRect thisRect(this->x(), this->y(), this->width(), this->height());
+
+    QImage image = baseImg->copy(thisRect);
+
+    QRect rect = e->rect();
+
+    int left = 0;
+    int top = 0;
+    int right = rect.size().width();
+    int bottom = rect.size().height();
+
+    DEBUG() << left << top << right << bottom;
+
+    QRgb color;
+    for(int x = left; x < right; x++)
     {
-        QPixmap pixmap;
-        this->grab(e->rect());
-        QImage imgProcessed = pixmap.toImage();
-        QBrush brush(Qt::transparent);
-
-        const QRgb black = 0;
-        const QRgb blue = Qt::transparent;
-
-        QRect rect = e->rect();
-
-        int left = rect.left();
-        int top = rect.top();
-        int right = left + rect.width();
-        int bottom = top + rect.height();
-
-        QRgb color;  // Not QColor
-
-
-
-        for(int x = left; x < right; x++)
+        for(int y = top; y < bottom; y++)
         {
-            for(int y = top; y < bottom; y++)
+            color = image.pixel(x,y);
+            if (qRed(color) == 0 && qGreen(color) == 0 && qBlue(color) == 0)
             {
-                color = imgProcessed.pixel(x,y);
-                 if (qRed(color) == 0 && qGreen(color) == 0 && qBlue(color) == 0) {
-                      imgProcessed.setPixel(x,y,QColor(Qt::blue).rgb()); // Qt::blue is a QColor constant.
-                 }
+                image.setPixel(x,y,QColor(Qt::transparent).rgb());
             }
         }
-    }*/
+    }
 
+    //image->save("/tmp/pixmap.png");
+
+    painter.drawImage(QPoint(0, 0), image);
+    painter.end();
+    */
 }
 
