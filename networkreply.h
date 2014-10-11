@@ -11,6 +11,7 @@ public:
     explicit NetworkReply(QObject *parent = 0);
 
     void setRawHeaderPublic(const QByteArray &headerName, const QByteArray &value);
+    void setHeaderPublic(QNetworkRequest::KnownHeaders header, const QVariant &value);
     void setAttributePublic(QNetworkRequest::Attribute code, const QVariant &value);
 signals:
 

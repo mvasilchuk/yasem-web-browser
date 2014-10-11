@@ -3,6 +3,7 @@
 
 #include "networkinterceptorentry.h"
 
+
 #include <QObject>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
@@ -31,11 +32,9 @@ protected:
 
 public slots:
 
-   void onMetadataChanged();
+   void onError(QNetworkReply::NetworkError err);
    void replyFinished(QNetworkReply*);
-
-
-
+   void onMetadataChanged(NetworkReply* reply);
 };
 
 }

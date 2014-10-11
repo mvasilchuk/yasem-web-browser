@@ -1,6 +1,8 @@
 #ifndef NETWORKINTERCEPTORENTRY_H
 #define NETWORKINTERCEPTORENTRY_H
 
+#include "networkreply.h"
+
 #include <QObject>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>

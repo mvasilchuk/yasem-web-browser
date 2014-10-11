@@ -10,6 +10,11 @@ void NetworkReply::setRawHeaderPublic(const QByteArray &headerName, const QByteA
     QNetworkReply::setRawHeader(headerName, value);
 }
 
+void NetworkReply::setHeaderPublic(QNetworkRequest::KnownHeaders header, const QVariant &value)
+{
+    QNetworkReply::setHeader(header, value);
+}
+
 void NetworkReply::setAttributePublic(QNetworkRequest::Attribute code, const QVariant &value)
 {
     QNetworkReply::setAttribute(code, value);
