@@ -31,9 +31,6 @@ public slots:
     void onIconChanged();
     void onUrlChanged(const QUrl&);
 
-
-    void paintEvent(QPaintEvent *e);
-
     void mouseMoveEvent(QMouseEvent *e);
     void readSettings();
 protected:
