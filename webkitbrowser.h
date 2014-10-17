@@ -103,6 +103,9 @@ protected slots:
 public:
     void register_dependencies();
     void register_roles();
+public slots:
+    void setOpacity(qint32 alpha);
+    qint32 getOpacity();
 };
 
 }

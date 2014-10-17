@@ -15,6 +15,8 @@
 #include <QFontDatabase>
 #include <QResizeEvent>
 #include <QMoveEvent>
+#include <QGraphicsOpacityEffect>
+#include <QLinearGradient>
 
 using namespace yasem;
 
@@ -345,4 +347,38 @@ void yasem::WebkitBrowser::register_dependencies()
 void yasem::WebkitBrowser::register_roles()
 {
     register_role(ROLE_BROWSER);
+}
+
+void WebkitBrowser::setOpacity(qint32 alpha)
+{
+    qDebug() << "setOpacity" << alpha;
+    foreach(QWidget* child, webViewList)
+    {
+        WebView* vChild = qobject_cast<WebView*>(child);
+        if(vChild != NULL)
+        {
+            //QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(vChild);
+            //effect->setOpacity((float)alpha / 255);
+
+            //QLinearGradient alphaGradient(child->rect().topLeft(), child->rect().bottomLeft());
+            /*alphaGradient.setColorAt(0.12, Qt::transparent);
+            alphaGradient.setColorAt(0.20, Qt::black);
+            alphaGradient.setColorAt(0.8, Qt::black);
+            alphaGradient.setColorAt(0.9, Qt::transparent);
+
+            effect->setOpacityMask(QBrush(alphaGradient));*/
+            //effect->setOpacity((float)alpha / 255);
+            //effect->setOpacityMask(QBrush(QColor( 128, 128, 128, 128)));
+            //vChild->setGraphicsEffect(effect);
+        }
+
+        else qWarning() << "child warn:" << child;
+    }
+    GuiPlugin* gui = dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(PluginRole::ROLE_GUI));
+    gui->repaintGui();
+}
+;
+qint32 WebkitBrowser::getOpacity()
+{
+    return 100;
 }

@@ -11,6 +11,7 @@
 #include <QPaintEngine>
 #include <QPainter>
 #include <QBackingStore>
+#include <QGraphicsOpacityEffect>
 
 using namespace yasem;
 
@@ -39,18 +40,8 @@ WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
 
     loadFixes();
 
-    QPalette palette = this->palette();
-    palette.setBrush(QPalette::Base, Qt::transparent);
-    page()->setPalette(palette);
-    setAttribute(Qt::WA_OpaquePaintEvent, false);
-
-    setStyleSheet("background: transparent;");
-
-    //setAttribute(Qt::WA_TranslucentBackground);
-
     setMouseTracking(true);
     readSettings();
-
 }
 
 void WebView::readSettings()
@@ -251,47 +242,3 @@ void WebView::onUrlChanged(const QUrl &url)
 
     //emit invalidateWebView();
 }
-
-void WebView::paintEvent(QPaintEvent *e)
-{
-    QWebView::paintEvent(e);
-
-    // TODO: Fix chroma key
-    /*
-    QPainter painter;
-    painter.begin(this);
-
-    QImage* baseImg = dynamic_cast<QImage*>(this->backingStore()->paintDevice());
-    QRect thisRect(this->x(), this->y(), this->width(), this->height());
-
-    QImage image = baseImg->copy(thisRect);
-
-    QRect rect = e->rect();
-
-    int left = 0;
-    int top = 0;
-    int right = rect.size().width();
-    int bottom = rect.size().height();
-
-    DEBUG() << left << top << right << bottom;
-
-    QRgb color;
-    for(int x = left; x < right; x++)
-    {
-        for(int y = top; y < bottom; y++)
-        {
-            color = image.pixel(x,y);
-            if (qRed(color) == 0 && qGreen(color) == 0 && qBlue(color) == 0)
-            {
-                image.setPixel(x,y,QColor(Qt::transparent).rgb());
-            }
-        }
-    }
-
-    //image->save("/tmp/pixmap.png");
-
-    painter.drawImage(QPoint(0, 0), image);
-    painter.end();
-    */
-}
-

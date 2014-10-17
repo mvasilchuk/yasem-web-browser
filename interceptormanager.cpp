@@ -48,7 +48,7 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
     req.setHeader(QNetworkRequest::UserAgentHeader, page->userAgentForUrl(QUrl()));
     req.setRawHeader("Accept", "Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 
-    //TODO: Remove or fix patch for those who doeen't send valid Content-Type header
+    //TODO: Remove or fix patch for those who doesn't send valid Content-Type header
     //************** PATCH *********************************
     if((op == PostOperation) && !req.hasRawHeader("Content-Type"))
     {
