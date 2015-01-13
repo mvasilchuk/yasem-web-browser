@@ -42,6 +42,8 @@ WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
 
     setMouseTracking(true);
     readSettings();
+
+    setStyleSheet("background: transparent");
 }
 
 void WebView::readSettings()
