@@ -58,9 +58,6 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
 
     QNetworkReply* real = QNetworkAccessManager::createRequest(op, req, outgoingData);
     real->ignoreSslErrors();
-    connect(real, &QNetworkReply::metaDataChanged, [=](){
-
-    });
 
     connect(real, &QNetworkReply::metaDataChanged, [=]() {
         //WARN() << "metadata" << real->url() << real->errorString();
@@ -92,5 +89,10 @@ void InterceptorManager::replyFinished(QNetworkReply *reply)
     //DEBUG() << "URL" << reply->url();
     //DEBUG() << reply->readAll();
     //reply->reset();
+}
+
+void InterceptorManager::onMetadataChanged(NetworkReply *reply)
+{
+
 }
 
