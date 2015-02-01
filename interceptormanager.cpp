@@ -22,7 +22,7 @@ InterceptorManager::InterceptorManager(WebPage *parent): QNetworkAccessManager(p
 
 QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkRequest &request, QIODevice *outgoingData)
 {
-    //DEBUG(QString("Loading URL (before): %1").arg(request.url().toString()));
+    //DEBUG() << QString("Loading URL (before): %1").arg(request.url().toString());
 
     QUrl url;
     if(!request.url().toString().startsWith("data:"))
