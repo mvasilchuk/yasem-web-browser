@@ -230,7 +230,7 @@ bool WebPage::event(QEvent *event)
 
             default:
             {
-                qWarning() << "No keycode found: %1" << keyEvent->key();
+                qWarning() << "No keycode found: %1" <<  QString("0x").append(QString::number(keyEvent->key(), 16));
             }
         }
     }

@@ -279,11 +279,11 @@ void WebkitBrowser::clearKeyEvents()
 
 bool WebkitBrowser::receiveKeyCode(RC_KEY keyCode)
 {
-    STUB() << Core::instance()->getKeycodeHashes().key(keyCode); //int)keyCode;
+    STUB() << Core::instance()->getKeycodeHashes().key(keyCode) << keyCode; //int)keyCode;
 
     if(!keyEventValues.contains(keyCode))
     {
-        qDebug() << "Key code not registered:" << keyCode << keyEventValues;
+        qDebug() << "Key code not registered:" <<  QString("0x").append(QString::number(keyCode, 16)) << keyEventValues;
         return false;
     }
 
