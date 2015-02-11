@@ -47,9 +47,6 @@ public slots:
 
     bool receiveKeyCode(RC_KEY keyCode);
     void evalJs(const QString &js);
-    void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt, bool ctrl, bool shift);
-    void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt, bool ctrl, bool shift);
-    void clearKeyEvents();
 
 protected slots:
     void attachJsStbApi();
