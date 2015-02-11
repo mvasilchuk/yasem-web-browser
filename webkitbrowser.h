@@ -29,10 +29,9 @@ public:
     virtual PLUGIN_ERROR_CODES initialize();
     virtual PLUGIN_ERROR_CODES deinitialize();
 
-    virtual void parent(QWidget *parent);
-    virtual QWidget* parent();
+    virtual void setParentWidget(QWidget *parent);
+    virtual QWidget* getParentWidget();
     virtual bool load(const QUrl &url);
-    virtual void evalJs(const QString &js);
     virtual void scale(qreal scale);
     virtual qreal scale();
 
@@ -66,6 +65,8 @@ protected:
 
 
 public:
+    QHash<RC_KEY, BrowserKeyEvent*> getKeyEventValues();
+
 
 
     // BrowserPlugin interface
@@ -82,7 +83,6 @@ public:
     void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt = false, bool ctrl = false, bool shift = false);
     void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false) ;
     void clearKeyEvents();
-    bool receiveKeyCode(RC_KEY keyCode);
     WebView *getWebView();
     void setWebView(WebView* view);
     void addWebView(WebView* view);
@@ -106,6 +106,10 @@ public:
 public slots:
     void setOpacity(qint32 alpha);
     qint32 getOpacity();
+
+    // BrowserPlugin interface
+public:
+    AbstractWebPage *getFirstPage();
 };
 
 }

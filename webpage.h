@@ -4,6 +4,7 @@
 #include "macros.h"
 #include "webview.h"
 #include "stbplugin.h"
+#include "abstractwebpage.h"
 #include "interceptormanager.h"
 #include "webpluginfactory.h"
 #include "customkeyevent.h"
@@ -15,7 +16,7 @@
 namespace yasem
 {
 
-class WebPage : public QWebPage
+class WebPage : public QWebPage, public AbstractWebPage
 {
     Q_OBJECT
 public:
@@ -34,6 +35,7 @@ public:
 public:
     InterceptorManager* interceptor;
 public slots:
+    void close();
     virtual bool event(QEvent*);
 
     bool stb(StbPlugin* plugin);
@@ -41,6 +43,13 @@ public slots:
     QUrl handleUrl(QUrl url);
     void recreateObjects();
     void resetPage();
+    void showWebInspector();
+
+    bool receiveKeyCode(RC_KEY keyCode);
+    void evalJs(const QString &js);
+    void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt, bool ctrl, bool shift);
+    void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt, bool ctrl, bool shift);
+    void clearKeyEvents();
 
 protected slots:
     void attachJsStbApi();
@@ -51,12 +60,13 @@ protected:
     WebPluginFactory* pluginFactory;
     QWebInspector webInspector;
 
+
 public:
+     bool isChildWindow();
     // QWebPage interface
     QString userAgentForUrl(const QUrl &url) const;
 public:
     void triggerAction(WebAction action, bool checked);
-
 
 };
 

@@ -45,13 +45,12 @@ WebPage::WebPage(WebView *parent) :
     mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     mainFrame()->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
 
-
-
     pluginFactory = WebPluginFactory::setInstance(new WebPluginFactoryImpl());
 
     connect(this->mainFrame(), &QWebFrame::javaScriptWindowObjectCleared, this, &WebPage::attachJsStbApi);
 
     settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+
 
     webInspector.setPage(this);
     webInspector.setGeometry(QRect(0, 0, 1000, 800));
@@ -71,9 +70,15 @@ WebView *WebPage::webView()
     return parent;
 }
 
+bool WebPage::isChildWindow()
+{
+    return this->objectName() == "Popup web page";
+}
+
 void WebPage::attachJsStbApi()
 {
     STUB();
+
     recreateObjects();
     if(stbPlugin)
     {
@@ -92,18 +97,19 @@ void WebPage::attachJsStbApi()
                 ERROR() << "JS API object is not an instance of QObject";
                 continue;
             }
-            LOG() << "Inserting API:" << object->metaObject()->className();
+            DEBUG() << "Inserting API:" << this << object->metaObject()->className();
 
             this->mainFrame()->addToJavaScriptWindowObject(name, object);
         }
     }
+    DEBUG() << "JS API attached";
 }
 
 void WebPage::triggerAction(QWebPage::WebAction action, bool checked)
 {
     if(action == QWebPage::Back)
     {
-        ProfileManager::instance()->backToPreviousProifile();
+        ProfileManager::instance()->backToPreviousProfile();
     }
     else
         QWebPage::triggerAction(action, checked);
@@ -130,7 +136,7 @@ bool WebPage::javaScriptConfirm ( QWebFrame * frame, const QString & msg )
 
 void WebPage::javaScriptConsoleMessage ( const QString & message, int lineNumber, const QString & sourceID )
 {
-    LOG() << QString("[JS MESSAGE] (%1: %2): %3").arg(sourceID).arg(lineNumber).arg(message);
+    LOG() << qPrintable(QString("[JS MESSAGE] (%1: %2): %3").arg(sourceID).arg(lineNumber).arg(message));
 }
 
 bool WebPage::javaScriptPrompt ( QWebFrame * frame, const QString & msg, const QString & defaultValue, QString * result )
@@ -162,53 +168,53 @@ bool WebPage::event(QEvent *event)
         {
             case Qt::Key_Left:      {
                 if(hasShift)
-                    result = parent->browser->receiveKeyCode(RC_KEY_REWIND);
+                    result = receiveKeyCode(RC_KEY_REWIND);
                 else
-                    result = parent->browser->receiveKeyCode(RC_KEY_LEFT);
+                    result = receiveKeyCode(RC_KEY_LEFT);
                 break;
             }
             case Qt::Key_Right:     {
                 if(hasShift)
-                    result = parent->browser->receiveKeyCode(RC_KEY_FAST_FORWARD);
+                    result = receiveKeyCode(RC_KEY_FAST_FORWARD);
                 else
-                    result = parent->browser->receiveKeyCode(RC_KEY_RIGHT);
+                    result = receiveKeyCode(RC_KEY_RIGHT);
                 break;
             }
             case Qt::Key_Up:        {
-                    result = parent->browser->receiveKeyCode(RC_KEY_UP);
+                    result = receiveKeyCode(RC_KEY_UP);
                 break;
             }
             case Qt::Key_Down:      {
-                result = parent->browser->receiveKeyCode(RC_KEY_DOWN);
+                result = receiveKeyCode(RC_KEY_DOWN);
                 break;
             }
 
             case Qt::Key_Return:
-            case Qt::Key_Enter:     result = parent->browser->receiveKeyCode(RC_KEY_OK);        break;
+            case Qt::Key_Enter:     result = receiveKeyCode(RC_KEY_OK);        break;
 
-            case Qt::Key_Home:      result = parent->browser->receiveKeyCode(RC_KEY_BACK);      break;
-            case Qt::Key_Escape:    result = parent->browser->receiveKeyCode(RC_KEY_EXIT);      break;
+            case Qt::Key_Home:      result = receiveKeyCode(RC_KEY_BACK);      break;
+            case Qt::Key_Escape:    result = receiveKeyCode(RC_KEY_EXIT);      break;
 
-            case Qt::Key_F1:        result = parent->browser->receiveKeyCode(RC_KEY_RED);       break;
-            case Qt::Key_F2:        result = parent->browser->receiveKeyCode(RC_KEY_GREEN);     break;
-            case Qt::Key_F3:        result = parent->browser->receiveKeyCode(RC_KEY_YELLOW);    break;
-            case Qt::Key_F4:        result = parent->browser->receiveKeyCode(RC_KEY_BLUE);      break;
+            case Qt::Key_F1:        result = receiveKeyCode(RC_KEY_RED);       break;
+            case Qt::Key_F2:        result = receiveKeyCode(RC_KEY_GREEN);     break;
+            case Qt::Key_F3:        result = receiveKeyCode(RC_KEY_YELLOW);    break;
+            case Qt::Key_F4:        result = receiveKeyCode(RC_KEY_BLUE);      break;
 
-            case Qt::Key_Tab:       result = parent->browser->receiveKeyCode(RC_KEY_MENU);      break;
-            case Qt::Key_PageUp:    result = parent->browser->receiveKeyCode(RC_KEY_PAGE_UP);   break;
-            case Qt::Key_PageDown:  result = parent->browser->receiveKeyCode(RC_KEY_PAGE_DOWN); break;
-            case Qt::Key_Control:   result = parent->browser->receiveKeyCode(RC_KEY_INFO);      break;
+            case Qt::Key_Tab:       result = receiveKeyCode(RC_KEY_MENU);      break;
+            case Qt::Key_PageUp:    result = receiveKeyCode(RC_KEY_PAGE_UP);   break;
+            case Qt::Key_PageDown:  result = receiveKeyCode(RC_KEY_PAGE_DOWN); break;
+            case Qt::Key_Control:   result = receiveKeyCode(RC_KEY_INFO);      break;
 
-            case Qt::Key_0:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_0);  break;
-            case Qt::Key_1:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_1);  break;
-            case Qt::Key_2:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_2);  break;
-            case Qt::Key_3:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_3);  break;
-            case Qt::Key_4:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_4);  break;
-            case Qt::Key_5:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_5);  break;
-            case Qt::Key_6:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_6);  break;
-            case Qt::Key_7:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_7);  break;
-            case Qt::Key_8:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_8);  break;
-            case Qt::Key_9:         result = parent->browser->receiveKeyCode(RC_KEY_NUMBER_9);  break;
+            case Qt::Key_0:         result = receiveKeyCode(RC_KEY_NUMBER_0);  break;
+            case Qt::Key_1:         result = receiveKeyCode(RC_KEY_NUMBER_1);  break;
+            case Qt::Key_2:         result = receiveKeyCode(RC_KEY_NUMBER_2);  break;
+            case Qt::Key_3:         result = receiveKeyCode(RC_KEY_NUMBER_3);  break;
+            case Qt::Key_4:         result = receiveKeyCode(RC_KEY_NUMBER_4);  break;
+            case Qt::Key_5:         result = receiveKeyCode(RC_KEY_NUMBER_5);  break;
+            case Qt::Key_6:         result = receiveKeyCode(RC_KEY_NUMBER_6);  break;
+            case Qt::Key_7:         result = receiveKeyCode(RC_KEY_NUMBER_7);  break;
+            case Qt::Key_8:         result = receiveKeyCode(RC_KEY_NUMBER_8);  break;
+            case Qt::Key_9:         result = receiveKeyCode(RC_KEY_NUMBER_9);  break;
 
             case Qt::Key_F11:
             {
@@ -217,16 +223,16 @@ bool WebPage::event(QEvent *event)
                 break;
             }
 
-            case Qt::Key_VolumeDown:    result = parent->browser->receiveKeyCode(RC_KEY_VOLUME_DOWN);  break;
-            case Qt::Key_VolumeUp:      result = parent->browser->receiveKeyCode(RC_KEY_VOLUME_UP);    break;
-            case Qt::Key_VolumeMute:    result = parent->browser->receiveKeyCode(RC_KEY_MUTE);        break;
+            case Qt::Key_VolumeDown:    result = receiveKeyCode(RC_KEY_VOLUME_DOWN);  break;
+            case Qt::Key_VolumeUp:      result = receiveKeyCode(RC_KEY_VOLUME_UP);    break;
+            case Qt::Key_VolumeMute:    result = receiveKeyCode(RC_KEY_MUTE);        break;
 
-            case Qt::Key_MediaTogglePlayPause:      result = parent->browser->receiveKeyCode(RC_KEY_PLAY_PAUSE);    break;
-            case Qt::Key_MediaPlay:                 result = parent->browser->receiveKeyCode(RC_KEY_PLAY);          break;
-            case Qt::Key_MediaPause:                result = parent->browser->receiveKeyCode(RC_KEY_PAUSE);         break;
-            case Qt::Key_MediaStop:                 result = parent->browser->receiveKeyCode(RC_KEY_STOP);          break;
-            case Qt::Key_MediaPrevious:             result = parent->browser->receiveKeyCode(RC_KEY_REWIND);        break;
-            case Qt::Key_MediaNext:                 result = parent->browser->receiveKeyCode(RC_KEY_FAST_FORWARD);  break;
+            case Qt::Key_MediaTogglePlayPause:      result = receiveKeyCode(RC_KEY_PLAY_PAUSE);    break;
+            case Qt::Key_MediaPlay:                 result = receiveKeyCode(RC_KEY_PLAY);          break;
+            case Qt::Key_MediaPause:                result = receiveKeyCode(RC_KEY_PAUSE);         break;
+            case Qt::Key_MediaStop:                 result = receiveKeyCode(RC_KEY_STOP);          break;
+            case Qt::Key_MediaPrevious:             result = receiveKeyCode(RC_KEY_REWIND);        break;
+            case Qt::Key_MediaNext:                 result = receiveKeyCode(RC_KEY_FAST_FORWARD);  break;
 
             default:
             {
@@ -240,8 +246,8 @@ bool WebPage::event(QEvent *event)
 
         switch(mouseEvent->button())
         {
-            //case Qt::LeftButton:    result = parent->browser->receiveKeyCode(RC_KEY_OK);        break;
-            //case Qt::RightButton:   result = parent->browser->receiveKeyCode(RC_KEY_BACK);      break;
+            //case Qt::LeftButton:    result = receiveKeyCode(RC_KEY_OK);        break;
+            //case Qt::RightButton:   result = receiveKeyCode(RC_KEY_BACK);      break;
             default:
             {
                 //WARN() << "No keycode found:" << mouseEvent->button();
@@ -253,6 +259,33 @@ bool WebPage::event(QEvent *event)
     }
 
     return result ? false: QWebPage::event(event);
+}
+
+bool WebPage::receiveKeyCode(RC_KEY keyCode)
+{
+    STUB() << Core::instance()->getKeycodeHashes().key(keyCode) << keyCode; //int)keyCode;
+
+    BrowserKeyEvent* keyEvent = parent->browser->getKeyEventValues()[keyCode];
+
+    if(keyEvent == NULL)
+    {
+        qDebug() << "Key code not registered:" <<  QString("0x").append(QString::number(keyCode, 16)) <<  parent->browser->getKeyEventValues();
+        return false;
+    }
+    else
+    {
+        QString str = keyEvent->toString();
+        evalJs(QString("javascript: %1").arg(str));
+        return true;
+    }
+    return false;
+}
+
+
+
+void WebPage::evalJs(const QString &js)
+{
+    mainFrame()->evaluateJavaScript(js);
 }
 
 bool WebPage::stb(StbPlugin *plugin)
@@ -287,6 +320,7 @@ QUrl WebPage::handleUrl(QUrl url)
 void WebPage::recreateObjects()
 {
     STUB();
+
     Profile* profile = ProfileManager::instance()->getActiveProfile();
 
     if(profile)
@@ -294,7 +328,7 @@ void WebPage::recreateObjects()
         Plugin* obj = profile->getProfilePlugin();
         StbPlugin* stbPlugin = dynamic_cast<StbPlugin*>(obj);
         stb(stbPlugin);
-        stbPlugin->init();
+        stbPlugin->init(this);
     }
     else
         qWarning() << "Profile not found!";
@@ -325,7 +359,10 @@ void WebPage::resetPage()
     }
 }
 
-
+void WebPage::showWebInspector()
+{
+    webInspector.show();
+}
 
 QString WebPage::userAgentForUrl(const QUrl & url) const
 {
@@ -336,12 +373,7 @@ QString WebPage::userAgentForUrl(const QUrl & url) const
     return ua;
 }
 
-/*QSize WebPage::sizeHint()
+void yasem::WebPage::close()
 {
-    return parent->size();
-}*/
-
-
-
-
-
+    this->parent->close();
+}

@@ -65,6 +65,7 @@ QObject *WebPluginFactoryImpl::create(const QString &mimeType, const QUrl &url, 
 
 QList<QWebPluginFactory::Plugin> WebPluginFactoryImpl::plugins() const
 {
+    return QList<QWebPluginFactory::Plugin>();
     STUB();
 
     QList<QWebPluginFactory::Plugin> list;

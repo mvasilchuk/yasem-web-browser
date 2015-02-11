@@ -27,7 +27,9 @@ WebkitBrowser::WebkitBrowser()
 PLUGIN_ERROR_CODES WebkitBrowser::initialize()
 {
     activeWebView = new WebView(NULL, this);
-    activeWebView->setPage(new WebPage(activeWebView));
+    WebPage* page = new WebPage(activeWebView);
+    page->setObjectName("Main web page");
+    activeWebView->setPage(page);
     webViewList.append(activeWebView);
     qDebug() << "wtf child:" << webViewList;
 
@@ -54,15 +56,16 @@ PLUGIN_ERROR_CODES WebkitBrowser::deinitialize()
     return PLUGIN_ERROR_NO_ERROR;
 }
 
-void WebkitBrowser::parent(QWidget *parent)
+void WebkitBrowser::setParentWidget(QWidget *parent)
 {
-    activeWebView->setParent(parent);
+    this->setParent(parent);
+    //activeWebView->setParent(parent);
 }
 
-QWidget *WebkitBrowser::parent()
+QWidget *WebkitBrowser::getParentWidget()
 {
     Q_ASSERT(activeWebView);
-    return activeWebView->parentWidget();
+    return static_cast<QWidget*>(this->parent());
 }
 
 bool WebkitBrowser::load(const QUrl &url)
@@ -86,11 +89,7 @@ bool WebkitBrowser::load(const QUrl &url)
     return true;
 }
 
-void WebkitBrowser::evalJs(const QString &js)
-{
-    Q_ASSERT(activeWebView);
-    activeWebView->page()->mainFrame()->evaluateJavaScript(js);
-}
+
 
 void WebkitBrowser::scale(qreal scale)
 {
@@ -137,6 +136,11 @@ void WebkitBrowser::show()
 void WebkitBrowser::hide()
 {
     activeWebView->hide();
+}
+
+QHash<RC_KEY, BrowserKeyEvent *> WebkitBrowser::getKeyEventValues()
+{
+    return keyEventValues;
 }
 
 void WebkitBrowser::setInnerSize(int width, int height)
@@ -202,7 +206,7 @@ void WebkitBrowser::moveEvent ( QMoveEvent * event )
 {
     Q_UNUSED(event)
 
-    QWidget *parentWidget = parent();
+    QWidget *parentWidget = getParentWidget();
 
     //Core::printCallStack();
 
@@ -277,25 +281,7 @@ void WebkitBrowser::clearKeyEvents()
 }
 
 
-bool WebkitBrowser::receiveKeyCode(RC_KEY keyCode)
-{
-    STUB() << Core::instance()->getKeycodeHashes().key(keyCode) << keyCode; //int)keyCode;
 
-    if(!keyEventValues.contains(keyCode))
-    {
-        qDebug() << "Key code not registered:" <<  QString("0x").append(QString::number(keyCode, 16)) << keyEventValues;
-        return false;
-    }
-
-    BrowserKeyEvent* keyEvent = keyEventValues[keyCode];
-    if(keyEvent != NULL)
-    {
-        QString str = keyEvent->toString();
-        evalJs(QString("javascript: %1").arg(str));
-        return true;
-    }
-    return false;
-}
 
 WebView *WebkitBrowser::getWebView()
 {
@@ -357,8 +343,10 @@ void WebkitBrowser::setOpacity(qint32 alpha)
         WebView* vChild = qobject_cast<WebView*>(child);
         if(vChild != NULL)
         {
+            //vChild->setStyleSheet("background: transparent");
             //QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(vChild);
             //effect->setOpacity((float)alpha / 255);
+            //effect->setOpacity(0.5);
 
             //QLinearGradient alphaGradient(child->rect().topLeft(), child->rect().bottomLeft());
             /*alphaGradient.setColorAt(0.12, Qt::transparent);
@@ -377,8 +365,14 @@ void WebkitBrowser::setOpacity(qint32 alpha)
     GuiPlugin* gui = dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(PluginRole::ROLE_GUI));
     gui->repaintGui();
 }
-;
+
 qint32 WebkitBrowser::getOpacity()
 {
     return 100;
+}
+
+
+AbstractWebPage *yasem::WebkitBrowser::getFirstPage()
+{
+    return (WebPage*)activeWebView->page();
 }

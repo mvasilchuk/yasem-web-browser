@@ -1,5 +1,6 @@
 #include "webview.h"
 #include "webkitbrowser.h"
+#include "profilemanager.h"
 
 #include "pluginmanager.h"
 #include "webpage.h"
@@ -23,6 +24,7 @@ WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
     gui = dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(ROLE_GUI));
 
     rendering_started = false;
+    m_is_context_menu_valid = false;
 
     connect(this, &WebView::loadStarted, this, &WebView::onLoadStarted);
     connect(this, &WebView::loadProgress, this, &WebView::onLoadProgress);
@@ -44,6 +46,51 @@ WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
     readSettings();
 
     setStyleSheet("background: transparent");
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(showContextMenu(const QPoint&)));
+}
+
+void WebView::setupContextMenu()
+{
+    m_contextMenu = new QMenu(this);
+
+    // Context menu shouldn't be transparent like a browser
+    m_contextMenu->setStyleSheet("background: none");
+
+    for(QMenu* submenu: gui->getMenuItems())
+    {
+        m_contextMenu->addMenu(submenu);
+    }
+    m_contextMenu->addSeparator();
+
+    m_backToPreviousPageAction = new QAction(tr("Back"), m_contextMenu);
+    connect(m_backToPreviousPageAction, &QAction::triggered, []() {
+        ProfileManager::instance()->backToPreviousProfile();
+    });
+    m_contextMenu->addAction(m_backToPreviousPageAction);
+
+
+    m_openWebInspectorAction = new QAction(tr("Open Developer Tools"), m_contextMenu);
+    connect(m_openWebInspectorAction, &QAction::triggered, [=]() {
+        ((WebPage*)this->page())->showWebInspector();
+    });
+    m_contextMenu->addAction(m_openWebInspectorAction);
+
+
+}
+
+void WebView::showContextMenu(const QPoint &pos)
+{
+    if(!m_is_context_menu_valid)
+        setupContextMenu();
+
+    if(ProfileManager::instance()->canGoBack())
+        m_backToPreviousPageAction->setVisible(true);
+    else
+        m_backToPreviousPageAction->setVisible(false);
+
+    m_contextMenu->exec(mapToGlobal(pos));
 }
 
 void WebView::readSettings()
@@ -99,7 +146,7 @@ void WebView::mouseMoveEvent(QMouseEvent *e)
     int height = this->height();
     int width = this->width();
 
-    if(y_pos < mouseBorderThreshold)
+    if(y_pos < (mouseBorderThreshold))
         position |= MOUSE_POSITION::TOP;
     else if(y_pos > height - mouseBorderThreshold)
         position |= MOUSE_POSITION::BOTTOM;
@@ -133,35 +180,37 @@ QString WebView::loadFix(const QString &name)
 QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 {
     STUB();
-    //emit debug(QString("WebView::createWindow(%1)").arg(type));
-    Q_UNUSED(type);
 
-    WebView *webView = new WebView(this->parentWidget(), browser);
+    WebView *webView = new WebView(NULL, browser);
+    webView->setObjectName("Popup web view");
     WebPage *webPage = new WebPage(webView);
-    webPage->stb(qobject_cast<WebPage*>(this->page())->stb());
+    webPage->setObjectName("Popup web page");
+
+    //webPage->stb(qobject_cast<WebPage*>(this->page())->stb());
     webView->setAttribute(Qt::WA_DeleteOnClose, true);
     webView->setPage(webPage);
     webView->show();
     webView->setFocus();
+
     browser->addWebView(webView);
     browser->setWebView(webView);
 
-    //webView->repaint();
+    if(type == QWebPage::WebModalDialog)
+        webView->setWindowModality(Qt::ApplicationModal);
+
 
     connect(webPage, &WebPage::windowCloseRequested, [=]() {
         browser->removeWebView(webView);
         webPage->view()->close();
 
         WebView* last = static_cast<WebView*>(browser->getWebViewList().last());
-        Q_ASSERT(last);
+        //Q_ASSERT(last);
         browser->setWebView(last);
         browser->resize();
 
     });
 
-
-    browser->resize();
-
+    //browser->resize();
     return webView;
 }
 
@@ -170,7 +219,6 @@ void WebView::onLoadStarted()
 {
     STUB();
     triggered = false;
-
 }
 
 void WebView::onLoadProgress(int progress)
@@ -188,7 +236,9 @@ void WebView::onLoadProgress(int progress)
          * The other fix is for object that are not visible;
         */
 
+        DEBUG() << "Applying fix for <object> tags";
         page()->mainFrame()->evaluateJavaScript(webObjectsFix);
+        DEBUG() << "Applying other fixes";
         browser->stb()->applyFixes();
         triggered = true;
     }

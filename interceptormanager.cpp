@@ -93,6 +93,5 @@ void InterceptorManager::replyFinished(QNetworkReply *reply)
 
 void InterceptorManager::onMetadataChanged(NetworkReply *reply)
 {
-
 }
 

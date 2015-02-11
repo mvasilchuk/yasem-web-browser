@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QWebView>
 #include <QLinearGradient>
+#include <QMenu>
+#include <QAction>
 
 namespace yasem
 {
@@ -33,7 +35,12 @@ public slots:
 
     void mouseMoveEvent(QMouseEvent *e);
     void readSettings();
+
+    void showContextMenu(const QPoint &pos);
+
 protected:
+
+    void setupContextMenu();
     virtual void keyPressEvent(QKeyEvent*);
     virtual void keyReleaseEvent(QKeyEvent*);
     virtual bool event(QEvent *event);
@@ -48,8 +55,13 @@ protected:
     QString xmlHttpRequestFix;
 
     bool rendering_started;
+    bool m_is_context_menu_valid;
 
     int mouseBorderThreshold;
+
+    QMenu* m_contextMenu;
+    QAction* m_backToPreviousPageAction;
+    QAction* m_openWebInspectorAction;
 
 signals:
     void mousePositionChanged(int position);
