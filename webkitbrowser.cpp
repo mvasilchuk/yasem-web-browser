@@ -7,6 +7,7 @@
 #include "stbplugin.h"
 #include "webpage.h"
 #include "browserkeyevent.h"
+#include "webviewqml.h"
 
 #include <QWebSecurityOrigin>
 #include <QFile>
@@ -17,30 +18,26 @@
 #include <QMoveEvent>
 #include <QGraphicsOpacityEffect>
 #include <QLinearGradient>
+#include <QQmlEngine>
+#include <qqml.h>
 
 using namespace yasem;
 
-WebkitBrowser::WebkitBrowser()
+WebkitBrowser::WebkitBrowser(QObject * parent): QObject(parent)
 {
+    DEBUG() << "registering QML type";
+
+    guiPlugin = NULL;
+    qmlRegisterType<WebViewQml>("com.mvas.yasem.WebViewQml", 1, 0, "WebViewQml");
 }
 
 PLUGIN_ERROR_CODES WebkitBrowser::initialize()
 {
-    activeWebView = new WebView(NULL, this);
-    WebPage* page = new WebPage(activeWebView);
-    page->setObjectName("Main web page");
-    activeWebView->setPage(page);
-    webViewList.append(activeWebView);
-    qDebug() << "wtf child:" << webViewList;
-
-    this->innerSize = QSize(1280, 720);
-    fullscreen(false);
-
     //TODO: fix
 
+    emit initialized();
+
     stbPlugin = NULL;
-
-
 
     return PLUGIN_ERROR_NO_ERROR;
 }
@@ -70,6 +67,7 @@ QWidget *WebkitBrowser::getParentWidget()
 
 bool WebkitBrowser::load(const QUrl &url)
 {
+    DEBUG() << "load:" << url;
     this->indexUrl = url;
 
     if(indexUrl.toString().startsWith("file://"))
@@ -87,6 +85,11 @@ bool WebkitBrowser::load(const QUrl &url)
 
     activeWebView->load(url);
     return true;
+}
+
+bool WebkitBrowser::load(const QString &url)
+{
+    return load(QUrl(url));
 }
 
 
@@ -110,6 +113,11 @@ QWidget *WebkitBrowser::widget()
 void WebkitBrowser::rect(const QRect &rect)
 {
     this->browserRect = rect;
+}
+
+void WebkitBrowser::rect(int x, int y, int width, int height)
+{
+    rect(QRect(x, y, width, height));
 }
 
 QRect WebkitBrowser::rect()
@@ -206,30 +214,36 @@ void WebkitBrowser::moveEvent ( QMoveEvent * event )
 {
     Q_UNUSED(event)
 
-    QWidget *parentWidget = getParentWidget();
+    if(!guiPlugin) {
+        guiPlugin = dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(ROLE_GUI));
+        if(!guiPlugin) return;
+    }
+
+
+    QRect parentWidgetRect = guiPlugin->widgetRect();
 
     //Core::printCallStack();
 
-    float w_ratio = (float)innerSize.width() / parentWidget->width();
-    float h_ratio = (float)innerSize.height() / parentWidget->height();
+    float w_ratio = (float)innerSize.width() / parentWidgetRect.width();
+    float h_ratio = (float)innerSize.height() / parentWidgetRect.height();
 
     int width;
     int height;
 
     if(w_ratio > h_ratio)
     {
-        width = parentWidget->width();
+        width = parentWidgetRect.width();
         height = (int)((float)innerSize.height() / w_ratio);
     }
     else
     {
-        height = parentWidget->height();
+        height = parentWidgetRect.height();
         width = (int)((float)innerSize.width() / h_ratio);
     }
 
 
-    int left =  (int)(((float)parentWidget->width() - width) / 2);
-    int top = (int)(((float)parentWidget->height() - height) / 2);
+    int left =  (int)(((float)parentWidgetRect.width() - width) / 2);
+    int top = (int)(((float)parentWidgetRect.height() - height) / 2);
 
     browserRect.setLeft(left);
     browserRect.setTop(top);
@@ -372,7 +386,29 @@ qint32 WebkitBrowser::getOpacity()
 }
 
 
-AbstractWebPage *yasem::WebkitBrowser::getFirstPage()
+AbstractWebPage *WebkitBrowser::getFirstPage()
 {
     return (WebPage*)activeWebView->page();
 }
+
+void WebkitBrowser::createNewPage()
+{
+    activeWebView = new WebView(NULL, this);
+    WebPage* page = new WebPage(activeWebView);
+    page->setObjectName("Main web page");
+    activeWebView->setPage(page);
+    webViewList.append(activeWebView);
+    qDebug() << "wtf child:" << webViewList;
+
+    this->innerSize = QSize(1280, 720);
+    fullscreen(false);
+}
+
+/*
+void WebkitBrowser::componentComplete()
+{
+    // Call superclass method to set CustomElement() parent
+    QQuickItem::componentComplete();
+}*/
+
+

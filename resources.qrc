@@ -5,4 +5,7 @@
         <file>js/keyboardevent.js</file>
         <file>js/mouseevent.js</file>
     </qresource>
+    <qresource prefix="/">
+        <file>qmlwebbrowser.qml</file>
+    </qresource>
 </RCC>

@@ -4,6 +4,8 @@
 #include "networkreply.h"
 #include "webkitbrowser.h"
 #include "core.h"
+#include "browserplugin.h"
+#include "pluginmanager.h"
 
 #include <QtNetwork/QNetworkRequest>
 #include <QDebug>
@@ -18,6 +20,7 @@ InterceptorManager::InterceptorManager(WebPage *parent): QNetworkAccessManager(p
 
     webServerHost = "http://127.0.0.1";
     webServerPort = Core::instance()->settings()->value("web-server/port", 9999).toInt();
+    m_browserPlugin = dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
 }
 
 QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkRequest &request, QIODevice *outgoingData)
@@ -31,7 +34,8 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
 
         QString urlString = url.url().trimmed();
 
-        QString rootDir = page->webView()->browser->browserRootDir();
+        // TODO: Need to get url, not from browser but from webview
+        QString rootDir = m_browserPlugin->browserRootDir();
 
         if(urlString.startsWith("file://") && (!(urlString.startsWith("file://" + rootDir)) || urlString.contains(".php")))
         {

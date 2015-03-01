@@ -11,9 +11,11 @@
 
 #include <QtWebKitWidgets/QWebView>
 #include <QtWebKitWidgets/QWebFrame>
+#include <QQuickItem>
 
 namespace yasem
 {
+class GuiPlugin;
 
 class WEBKITBROWSERSHARED_EXPORT WebkitBrowser: public QObject, public BrowserPlugin, public Plugin
 {
@@ -24,20 +26,24 @@ class WEBKITBROWSERSHARED_EXPORT WebkitBrowser: public QObject, public BrowserPl
     Q_CLASSINFO("author", "Maxim Vasilchuk")
     Q_CLASSINFO("description", "WebkitBrowser plugin for YASEM")
 public:
-    WebkitBrowser();
+    WebkitBrowser(QObject * parent = 0);
 
     virtual PLUGIN_ERROR_CODES initialize();
     virtual PLUGIN_ERROR_CODES deinitialize();
 
     virtual void setParentWidget(QWidget *parent);
     virtual QWidget* getParentWidget();
-    virtual bool load(const QUrl &url);
+
+    bool load(const QUrl &url);
+    bool load(const QString &url);
+
     virtual void scale(qreal scale);
     virtual qreal scale();
 
     virtual QWidget *widget();
 
-    virtual void rect(const QRect &rect);
+    Q_INVOKABLE void rect(const QRect &rect);
+    Q_INVOKABLE void rect(int x, int y, int width, int height);
     virtual QRect rect();
     void resize(QResizeEvent* = 0);
     virtual void stb(StbPlugin* stbPlugin) ;
@@ -47,11 +53,11 @@ public:
     void show();
     void hide();
 
-    //virtual void setTransparentColor(QPalette palette);
-
-
+signals:
+    void initialized();
 
 protected:
+    GuiPlugin* guiPlugin;
     QRect browserRect;
     float browserScale;
     StbPlugin* stbPlugin;
@@ -110,6 +116,7 @@ public slots:
     // BrowserPlugin interface
 public:
     AbstractWebPage *getFirstPage();
+    void createNewPage();
 };
 
 }

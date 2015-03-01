@@ -3,7 +3,6 @@
 
 #include "networkinterceptorentry.h"
 
-
 #include <QObject>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
@@ -11,7 +10,7 @@
 
 namespace yasem {
 class WebPage;
-
+class BrowserPlugin;
 class InterceptorManager : public QNetworkAccessManager
 {
     Q_OBJECT
@@ -26,6 +25,7 @@ public:
 protected:
    QList<NetworkInterceptorEntry*> entryList;
    WebPage* page;
+   BrowserPlugin* m_browserPlugin;
 
    QString webServerHost;
    int webServerPort;

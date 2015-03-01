@@ -76,8 +76,6 @@ void WebView::setupContextMenu()
         ((WebPage*)this->page())->showWebInspector();
     });
     m_contextMenu->addAction(m_openWebInspectorAction);
-
-
 }
 
 void WebView::showContextMenu(const QPoint &pos)
@@ -111,29 +109,6 @@ void WebView::keyReleaseEvent(QKeyEvent *event)
 {
     //emit debug(QString("WebView::keyReleaseEvent(%1)").arg(event->key()));
     QWebView::keyReleaseEvent(event);
-}
-
-bool WebView::event(QEvent *event)
-{
-    /*QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-    if(keyEvent != NULL && keyEvent->key() > 0)
-    {
-        emit log(QString("Got key event: %1").arg(keyEvent->key()));
-        return false;
-    }*/
-    /*if(event->type() == QEvent::KeyPress)
-    {
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        if(keyEvent != NULL)
-        {
-            //emit debug(QString("key event: %1:%2:%3").arg(keyEvent->key()).arg(keyEvent->nativeScanCode()).arg(keyEvent->nativeVirtualKey()));
-        }
-        else
-        {
-            //emit debug("NULL KEY EVENT!");
-        }
-    }*/
-    return QWebView::event(event);
 }
 
 void WebView::mouseMoveEvent(QMouseEvent *e)
@@ -214,6 +189,23 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
     return webView;
 }
 
+void WebView::setBrowser(WebkitBrowser *browser)
+{
+    this->browser = browser;
+}
+
+void WebView::setDefaultBrowser()
+{
+    setBrowser(static_cast<WebkitBrowser*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
+    Q_ASSERT(browser);
+}
+
+void WebView::qmlInit()
+{
+    DEBUG() << "webview qml init";
+    setDefaultBrowser();
+}
+
 
 void WebView::onLoadStarted()
 {
@@ -224,23 +216,24 @@ void WebView::onLoadStarted()
 void WebView::onLoadProgress(int progress)
 {
     DEBUG() << "onLoadProgress(" << progress << ")";
+
     if(progress > 10 && !triggered)
     {
-        Q_ASSERT(page());
-        Q_ASSERT(browser);
-        Q_ASSERT(browser->stb());
-
         /* Fix for Samsung API objects
          * Some objects may not have type attribute, so QWebView cannot load this objects and it is required
          * to add this attribute manually.
-         * The other fix is for object that are not visible;
+         * The other fix is for objects that are not visible;
         */
 
-        DEBUG() << "Applying fix for <object> tags";
-        page()->mainFrame()->evaluateJavaScript(webObjectsFix);
-        DEBUG() << "Applying other fixes";
-        browser->stb()->applyFixes();
-        triggered = true;
+
+        if(page() != NULL && browser->stb() != NULL)
+        {
+            DEBUG() << "Applying fix for <object> tags";
+            page()->mainFrame()->evaluateJavaScript(webObjectsFix);
+            DEBUG() << "Applying other fixes";
+            browser->stb()->applyFixes();
+            triggered = true;
+        }
     }
 }
 
