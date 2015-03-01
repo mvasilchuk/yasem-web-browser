@@ -265,11 +265,14 @@ bool WebPage::receiveKeyCode(RC_KEY keyCode)
 {
     STUB() << Core::instance()->getKeycodeHashes().key(keyCode) << keyCode; //int)keyCode;
 
-    BrowserKeyEvent* keyEvent = parent->browser->getKeyEventValues()[keyCode];
+    WebkitBrowser* browser = parent->browser;
+    Q_ASSERT(browser);
+
+    BrowserKeyEvent* keyEvent = browser->getKeyEventValues()[keyCode];
 
     if(keyEvent == NULL)
     {
-        qDebug() << "Key code not registered:" <<  QString("0x").append(QString::number(keyCode, 16)) <<  parent->browser->getKeyEventValues();
+        qDebug() << "Key code not registered:" <<  QString("0x").append(QString::number(keyCode, 16)) <<  browser->getKeyEventValues();
         return false;
     }
     else

@@ -8,6 +8,7 @@
 #include <QLinearGradient>
 #include <QMenu>
 #include <QAction>
+#include <QQuickItem>
 
 namespace yasem
 {
@@ -22,6 +23,10 @@ public:
     WebkitBrowser* browser;
 
 public slots:
+
+    Q_INVOKABLE void setBrowser(WebkitBrowser* browser);
+    Q_INVOKABLE void setDefaultBrowser();
+    Q_INVOKABLE void qmlInit();
 
     void onLoadStarted();
     void onLoadProgress(int progress);
@@ -43,7 +48,6 @@ protected:
     void setupContextMenu();
     virtual void keyPressEvent(QKeyEvent*);
     virtual void keyReleaseEvent(QKeyEvent*);
-    virtual bool event(QEvent *event);
 
     void loadFixes();
     QString loadFix(const QString &name);

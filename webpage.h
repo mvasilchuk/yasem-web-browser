@@ -16,7 +16,7 @@
 namespace yasem
 {
 
-class WebPage : public QWebPage, public AbstractWebPage
+class WebPage : public QWebPage, public virtual AbstractWebPage
 {
     Q_OBJECT
 public:
@@ -34,7 +34,7 @@ public:
     WebView* webView();
 public:
     InterceptorManager* interceptor;
-public slots:
+public slots:    
     void close();
     virtual bool event(QEvent*);
 

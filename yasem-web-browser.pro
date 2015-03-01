@@ -6,7 +6,7 @@
 
 VERSION = 0.1.0
 
-QT       += core gui widgets webkit webkitwidgets
+QT       += core gui widgets webkit webkitwidgets qml quick
 
 CONFIG += c++11
 
@@ -23,7 +23,8 @@ SOURCES += webkitbrowser.cpp \
         webpluginfactoryimpl.cpp \
     interceptormanager.cpp \
     networkreply.cpp \
-    browserkeyevent.cpp
+    browserkeyevent.cpp \
+    webviewqml.cpp
 
 HEADERS += webkitbrowser.h\
         webkitbrowser_global.h \
@@ -35,7 +36,8 @@ HEADERS += webkitbrowser.h\
     networkinterceptorentry.h \
     networkreply.h \
     browserkeyevent.h \
-    cmd_line.h
+    cmd_line.h \
+    webviewqml.h
 
 unix:!symbian {
     maemo5 {
