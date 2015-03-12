@@ -2,13 +2,14 @@
 #define WEBPLUGINFACTORYIMPL_H
 
 #include "webpluginfactory.h"
-#include "webpage.h"
 
 #include <QObject>
 #include <QList>
 
 namespace yasem
 {
+class WebPage;
+class StbPluginObject;
 
 class WebPluginFactoryImpl : public WebPluginFactory
 {
@@ -16,7 +17,7 @@ class WebPluginFactoryImpl : public WebPluginFactory
 public:
     WebPluginFactoryImpl(WebPage *parent = 0);
 public slots:
-    virtual bool addPlugin(StbPlugin *plugin);
+    virtual bool addPlugin(StbPluginObject *plugin);
     virtual QObject *create(const QString &mimeType,
                        const QUrl &url,
                        const QStringList &argumentNames,

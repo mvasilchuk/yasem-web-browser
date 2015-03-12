@@ -6,7 +6,7 @@
 
 VERSION = 0.1.0
 
-QT       += core gui widgets webkit webkitwidgets qml quick
+QT       += core gui widgets webkit webkitwidgets
 
 CONFIG += c++11
 
@@ -15,18 +15,23 @@ TEMPLATE = lib
 
 DEFINES += WEBKITBROWSER_LIBRARY
 
-INCLUDEPATH += ../../yasem-core
+INCLUDEPATH += ../../yasem-core/
+DEPENDPATH += ../../yasem-core/
 
-SOURCES += webkitbrowser.cpp \
+SOURCES += \
         webpage.cpp \
         webview.cpp \
         webpluginfactoryimpl.cpp \
     interceptormanager.cpp \
     networkreply.cpp \
     browserkeyevent.cpp \
-    webviewqml.cpp
+    ../../yasem-core/plugin.cpp \
+    ../../yasem-core/stbpluginobject.cpp \
+    webkitbrowserplugin.cpp \
+    webkitpluginobject.cpp
 
-HEADERS += webkitbrowser.h\
+
+HEADERS +=\
         webkitbrowser_global.h \
         webpage.h \
         webview.h \
@@ -37,7 +42,12 @@ HEADERS += webkitbrowser.h\
     networkreply.h \
     browserkeyevent.h \
     cmd_line.h \
-    webviewqml.h
+    ../../yasem-core/abstractpluginobject.h \
+    ../../yasem-core/plugin.h \
+    ../../yasem-core/stbpluginobject.h \
+    ../../yasem-core/browserpluginobject.h \
+    webkitbrowserplugin.h \
+    webkitpluginobject.h
 
 unix:!symbian {
     maemo5 {
@@ -62,4 +72,10 @@ DESTDIR = $$DEFAULT_PLUGIN_DIR
 
 RESOURCES += \
     resources.qrc
+
+contains(DEFINES, USE_QML_WIDGETS) {
+    CONFIG += qml quick
+    SOURCES += webviewqml.cpp
+    HEADERS += webviewqml.h
+}
 

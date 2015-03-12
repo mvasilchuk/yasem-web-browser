@@ -1,30 +1,31 @@
 #ifndef WEBVIEW_H
 #define WEBVIEW_H
 
-#include "guiplugin.h"
-
 #include <QObject>
 #include <QWebView>
 #include <QLinearGradient>
 #include <QMenu>
 #include <QAction>
-#include <QQuickItem>
+
+class QPainter;
 
 namespace yasem
 {
-class WebkitBrowser;
+class WebkitPluginObject;
+class GuiPluginObject;
+
 class WebView : public QWebView
 {
     Q_OBJECT
 public:
-    explicit WebView(QWidget *parent = 0, WebkitBrowser* browser = 0);
+    explicit WebView(QWidget *parent = 0, WebkitPluginObject* browser_object = 0);
     QWebView* createWindow(QWebPage::WebWindowType type);
-    GuiPlugin* gui;
-    WebkitBrowser* browser;
+    GuiPluginObject* gui;
+    WebkitPluginObject* m_browser_object;
 
 public slots:
 
-    Q_INVOKABLE void setBrowser(WebkitBrowser* browser);
+    Q_INVOKABLE void setBrowser(WebkitPluginObject* browser_object);
     Q_INVOKABLE void setDefaultBrowser();
     Q_INVOKABLE void qmlInit();
 
@@ -42,6 +43,11 @@ public slots:
     void readSettings();
 
     void showContextMenu(const QPoint &pos);
+    void resizeView(const QRect& containerRect);
+    void setViewportSize(QSize newSize);
+    QSize getViewportSize();
+    qreal getScale();
+    QRect getRect();
 
 protected:
 
@@ -66,6 +72,10 @@ protected:
     QMenu* m_contextMenu;
     QAction* m_backToPreviousPageAction;
     QAction* m_openWebInspectorAction;
+
+    QRect m_viewRect;
+    QSize m_viewportSize;
+    qreal m_pageScale;
 
 signals:
     void mousePositionChanged(int position);

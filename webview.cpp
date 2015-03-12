@@ -1,6 +1,8 @@
 #include "webview.h"
-#include "webkitbrowser.h"
+#include "webkitpluginobject.h"
 #include "profilemanager.h"
+#include "guipluginobject.h"
+#include "stbpluginobject.h"
 
 #include "pluginmanager.h"
 #include "webpage.h"
@@ -12,16 +14,16 @@
 #include <QPaintEngine>
 #include <QPainter>
 #include <QBackingStore>
-#include <QGraphicsOpacityEffect>
+//#include <QGraphicsOpacityEffect>
 
 using namespace yasem;
 
-WebView::WebView(QWidget *parent, WebkitBrowser* browser) :
-    QWebView(parent)
+WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
+    QWebView(parent),
+    m_browser_object(browser)
 {
     setObjectName("WebView");
-    this->browser = browser;
-    gui = dynamic_cast<GuiPlugin*>(PluginManager::instance()->getByRole(ROLE_GUI));
+    gui = dynamic_cast<GuiPluginObject*>(PluginManager::instance()->getByRole(ROLE_GUI));
 
     rendering_started = false;
     m_is_context_menu_valid = false;
@@ -91,6 +93,63 @@ void WebView::showContextMenu(const QPoint &pos)
     m_contextMenu->exec(mapToGlobal(pos));
 }
 
+void WebView::resizeView(const QRect &containerRect)
+{
+    DEBUG() << "WebView::resizeView" << containerRect;
+    float w_ratio = (float)m_viewportSize.width() / containerRect.width();
+    float h_ratio = (float)m_viewportSize.height() / containerRect.height();
+
+    int width;
+    int height;
+
+    if(w_ratio > h_ratio)
+    {
+        width = containerRect.width();
+        height = (int)((float)m_viewportSize.height() / w_ratio);
+    }
+    else
+    {
+        height = containerRect.height();
+        width = (int)((float)m_viewportSize.width() / h_ratio);
+    }
+
+    int left =  (int)(((float)containerRect.width() - width) / 2);
+    int top = (int)(((float)containerRect.height() - height) / 2);
+
+    m_viewRect.setLeft(left);
+    m_viewRect.setTop(top);
+    m_viewRect.setWidth(width);
+    m_viewRect.setHeight(height);
+
+    m_pageScale = (qreal)m_viewRect.width() / m_viewportSize.width();
+
+    //QRect actualRect(0, 0, m_viewRect.width(), m_viewRect.height());
+    setZoomFactor(m_pageScale);
+    setGeometry(m_viewRect);
+    //page()->setActualVisibleContentRect(m_viewRect);
+}
+
+void WebView::setViewportSize(QSize newSize)
+{
+    DEBUG() << "WebView::setViewportSize";
+    m_viewportSize = newSize;
+}
+
+QSize WebView::getViewportSize()
+{
+    return m_viewportSize;
+}
+
+qreal WebView::getScale()
+{
+    return m_pageScale;
+}
+
+QRect WebView::getRect()
+{
+    return m_viewRect;
+}
+
 void WebView::readSettings()
 {
     QSettings* settings = Core::instance()->settings();
@@ -113,7 +172,7 @@ void WebView::keyReleaseEvent(QKeyEvent *event)
 
 void WebView::mouseMoveEvent(QMouseEvent *e)
 {
-    //qDebug() << e;
+    //DEBUG() << e;
     int position = MOUSE_POSITION::MIDDLE;
 
     int y_pos = e->pos().y();
@@ -156,7 +215,7 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 {
     STUB();
 
-    WebView *webView = new WebView(NULL, browser);
+    WebView *webView = new WebView(NULL, m_browser_object);
     webView->setObjectName("Popup web view");
     WebPage *webPage = new WebPage(webView);
     webPage->setObjectName("Popup web page");
@@ -167,21 +226,20 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
     webView->show();
     webView->setFocus();
 
-    browser->addWebView(webView);
-    browser->setWebView(webView);
+    m_browser_object->addWebView(webView);
+    m_browser_object->setWebView(webView);
 
     if(type == QWebPage::WebModalDialog)
         webView->setWindowModality(Qt::ApplicationModal);
 
 
     connect(webPage, &WebPage::windowCloseRequested, [=]() {
-        browser->removeWebView(webView);
+        m_browser_object->removeWebView(webView);
         webPage->view()->close();
 
-        WebView* last = static_cast<WebView*>(browser->getWebViewList().last());
-        //Q_ASSERT(last);
-        browser->setWebView(last);
-        browser->resize();
+        WebView* last = static_cast<WebView*>(m_browser_object->getWebViewList().last());
+        m_browser_object->setWebView(last);
+        m_browser_object->resize();
 
     });
 
@@ -189,15 +247,14 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
     return webView;
 }
 
-void WebView::setBrowser(WebkitBrowser *browser)
+void WebView::setBrowser(WebkitPluginObject *browser)
 {
-    this->browser = browser;
+    this->m_browser_object = browser;
 }
 
 void WebView::setDefaultBrowser()
 {
-    setBrowser(static_cast<WebkitBrowser*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
-    Q_ASSERT(browser);
+    setBrowser(dynamic_cast<WebkitPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
 }
 
 void WebView::qmlInit()
@@ -226,21 +283,21 @@ void WebView::onLoadProgress(int progress)
         */
 
 
-        if(page() != NULL && browser->stb() != NULL)
+        if(page() != NULL && m_browser_object->stb() != NULL)
         {
             DEBUG() << "Applying fix for <object> tags";
             page()->mainFrame()->evaluateJavaScript(webObjectsFix);
             DEBUG() << "Applying other fixes";
-            browser->stb()->applyFixes();
+            m_browser_object->stb()->applyFixes();
             triggered = true;
         }
     }
 }
 
+
 void WebView::onLoadFinished(bool finished)
 {
     DEBUG() << "onLoadFinished(" << finished << ")";
-    browser->resize();
 }
 
 void WebView::onTitleChanged(const QString &title)
@@ -284,6 +341,7 @@ void WebView::onUrlChanged(const QUrl &url)
     #endif
 
     triggered = false;
+    m_browser_object->resize();
 
     //emit invalidateWebView();
 }

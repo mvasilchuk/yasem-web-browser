@@ -1,14 +1,14 @@
 #ifndef WEBPLUGINFACTORY_H
 #define WEBPLUGINFACTORY_H
 
-#include "stbplugin.h"
-
 #include <QObject>
 #include <QList>
 #include <QWebPluginFactory>
 
 namespace yasem
 {
+class StbPluginObject;
+
 class WebPluginFactory : public QWebPluginFactory
 {
     Q_OBJECT
@@ -16,7 +16,6 @@ public:
     static WebPluginFactory* setInstance(WebPluginFactory* inst = 0)
     {
         static WebPluginFactory* instance = inst;// Guaranteed to be destroyed.
-        Q_ASSERT(instance != NULL);
         return instance;
     }
 
@@ -25,14 +24,14 @@ public:
        return setInstance();
     }
 
-    QList<StbPlugin*> getPluginList() {
+    QList<StbPluginObject*> getPluginList() {
         return pluginList;
     }
 
-    virtual bool addPlugin(StbPlugin *plugin) = 0;
+    virtual bool addPlugin(StbPluginObject *plugin) = 0;
 
 protected:
-    QList<StbPlugin*> pluginList;
+    QList<StbPluginObject*> pluginList;
     WebPluginFactory() {}
 private:
 

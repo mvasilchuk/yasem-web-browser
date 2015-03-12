@@ -1,11 +1,17 @@
 #include "webpage.h"
-#include "stbplugin.h"
+#include "stbpluginobject.h"
 #include "webpluginfactoryimpl.h"
 #include "pluginmanager.h"
 #include "profilemanager.h"
-#include "webkitbrowser.h"
+#include "guipluginobject.h"
+#include "interceptormanager.h"
+#include "webview.h"
+#include "browserkeyevent.h"
+#include "webkitpluginobject.h"
+
 
 #include "cmd_line.h"
+#include "stbprofile.h"
 
 #include <QWebInspector>
 #include <QWebFrame>
@@ -52,11 +58,11 @@ WebPage::WebPage(WebView *parent) :
     settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
 
-    webInspector.setPage(this);
-    webInspector.setGeometry(QRect(0, 0, 1000, 800));
+    m_web_inspector.setPage(this);
+    m_web_inspector.setGeometry(QRect(0, 0, 1000, 800));
 
     if(QCoreApplication::arguments().contains(CMD_LINE_DEVELOPER_TOOLS))
-        webInspector.show();
+        showWebInspector();
 
     setForwardUnsupportedContent(true);
     connect(this, &WebPage::unsupportedContent, []( QNetworkReply * reply ){
@@ -80,9 +86,9 @@ void WebPage::attachJsStbApi()
     STUB();
 
     recreateObjects();
-    if(stbPlugin)
+    if(m_stb_plugin)
     {
-        QHash<QString, QObject*> list = stbPlugin->getStbApiList();
+        QHash<QString, QObject*> list = m_stb_plugin->getStbApiList();
         QHashIterator<QString, QObject*> iterator(list);
         //if(list.size() == 0)
         //    ERROR("STB Object is empty or  not initialized!!!");
@@ -258,15 +264,16 @@ bool WebPage::event(QEvent *event)
 
     }
 
-    return result ? false: QWebPage::event(event);
+    event->setAccepted(result);
+
+    return result || QWebPage::event(event);
 }
 
 bool WebPage::receiveKeyCode(RC_KEY keyCode)
 {
     STUB() << Core::instance()->getKeycodeHashes().key(keyCode) << keyCode; //int)keyCode;
 
-    WebkitBrowser* browser = parent->browser;
-    Q_ASSERT(browser);
+    WebkitPluginObject* browser = parent->m_browser_object;
 
     BrowserKeyEvent* keyEvent = browser->getKeyEventValues()[keyCode];
 
@@ -291,16 +298,16 @@ void WebPage::evalJs(const QString &js)
     mainFrame()->evaluateJavaScript(js);
 }
 
-bool WebPage::stb(StbPlugin *plugin)
+bool WebPage::stb(StbPluginObject *plugin)
 {
     STUB();
-    this->stbPlugin = plugin;
+    this->m_stb_plugin = plugin;
     return true;
 }
 
-StbPlugin *WebPage::stb()
+StbPluginObject *WebPage::stb()
 {
-    return this->stbPlugin;
+    return this->m_stb_plugin;
 }
 
 void WebPage::setUserAgent(const QString &userAgent)
@@ -311,7 +318,7 @@ void WebPage::setUserAgent(const QString &userAgent)
 
 QUrl WebPage::handleUrl(QUrl url)
 {
-    StbPlugin* stbPlugin = stb();
+    StbPluginObject* stbPlugin = stb();
     if(stbPlugin != NULL)
     {
         return stbPlugin->handleUrl(url);
@@ -328,10 +335,9 @@ void WebPage::recreateObjects()
 
     if(profile)
     {
-        Plugin* obj = profile->getProfilePlugin();
-        StbPlugin* stbPlugin = dynamic_cast<StbPlugin*>(obj);
+        StbPluginObject* stbPlugin = profile->getProfilePlugin();
         stb(stbPlugin);
-        stbPlugin->init(this);
+        stbPlugin->initObject(this);
     }
     else
         qWarning() << "Profile not found!";
@@ -346,7 +352,7 @@ void WebPage::resetPage()
 
     if(profile)
     {
-        StbPlugin* stbPlugin = profile->getProfilePlugin();
+        StbPluginObject* stbPlugin = profile->getProfilePlugin();
         if(stbPlugin)
         {
             pluginFactory->addPlugin(stbPlugin);
@@ -364,7 +370,7 @@ void WebPage::resetPage()
 
 void WebPage::showWebInspector()
 {
-    webInspector.show();
+    m_web_inspector.show();
 }
 
 QString WebPage::userAgentForUrl(const QUrl & url) const
@@ -379,4 +385,27 @@ QString WebPage::userAgentForUrl(const QUrl & url) const
 void yasem::WebPage::close()
 {
     this->parent->close();
+}
+
+
+void yasem::WebPage::setVieportSize(QSize new_size)
+{
+    webView()->setViewportSize(new_size);
+}
+
+QSize yasem::WebPage::getVieportSize()
+{
+    return webView()->getViewportSize();
+}
+
+
+qreal yasem::WebPage::scale()
+{
+    return webView()->getScale();
+}
+
+
+QRect yasem::WebPage::getPageRect()
+{
+    return webView()->getRect();
 }

@@ -1,6 +1,7 @@
 #include "webpluginfactoryimpl.h"
 #include "macros.h"
 #include "plugin.h"
+#include "stbpluginobject.h"
 
 #include <QDebug>
 #include <QWidget>
@@ -14,7 +15,7 @@ WebPluginFactoryImpl::WebPluginFactoryImpl(WebPage *parent)
     this->page = parent;
 }
 
-bool WebPluginFactoryImpl::addPlugin(StbPlugin *plugin)
+bool WebPluginFactoryImpl::addPlugin(StbPluginObject *plugin)
 {
     STUB();
     pluginList.append(plugin);
@@ -50,9 +51,7 @@ QObject *WebPluginFactoryImpl::create(const QString &mimeType, const QUrl &url, 
 
     QWidget* webObject = getWebObjectByMimeType(mimeType, classid);
 
-    qDebug() << "webObject: " << webObject;
-
-    //Q_ASSERT(webObject != NULL);
+    qDebug() << "webObject: " << webObject;;
 
     if (webObject == NULL)
     {
@@ -70,7 +69,7 @@ QList<QWebPluginFactory::Plugin> WebPluginFactoryImpl::plugins() const
 
     QList<QWebPluginFactory::Plugin> list;
 
-    foreach(StbPlugin* plugin, pluginList)
+    foreach(StbPluginObject* plugin, pluginList)
     {
         QWebPluginFactory::Plugin wPlugin;
         wPlugin.name = plugin->webName;
@@ -116,7 +115,7 @@ QWidget* WebPluginFactoryImpl::getWebObjectByMimeType(const QString &mimeType, c
     //STATIC_STUB();
     //qDebug() << "getWebObjectByMimeType:" << mimeType;
 
-    foreach(StbPlugin* plugin, pluginList)
+    foreach(StbPluginObject* plugin, pluginList)
     {
         foreach(WebObjectInfo info, plugin->getWebObjects())
         {
@@ -128,7 +127,6 @@ QWidget* WebPluginFactoryImpl::getWebObjectByMimeType(const QString &mimeType, c
                     webObject = info.widgetFactory();
                 else
                     webObject = static_cast<QWidget*>(info.webObject);
-                Q_ASSERT(webObject);
                 return webObject;
             }
         }

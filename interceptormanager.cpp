@@ -2,9 +2,9 @@
 #include "macros.h"
 #include "webpage.h"
 #include "networkreply.h"
-#include "webkitbrowser.h"
+#include "webkitbrowserplugin.h"
 #include "core.h"
-#include "browserplugin.h"
+#include "browserpluginobject.h"
 #include "pluginmanager.h"
 
 #include <QtNetwork/QNetworkRequest>
@@ -20,7 +20,7 @@ InterceptorManager::InterceptorManager(WebPage *parent): QNetworkAccessManager(p
 
     webServerHost = "http://127.0.0.1";
     webServerPort = Core::instance()->settings()->value("web-server/port", 9999).toInt();
-    m_browserPlugin = dynamic_cast<BrowserPlugin*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
+    m_browserPlugin = dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
 }
 
 QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkRequest &request, QIODevice *outgoingData)
