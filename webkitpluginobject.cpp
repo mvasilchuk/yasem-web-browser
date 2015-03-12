@@ -22,8 +22,8 @@
 
 using namespace yasem;
 
-WebkitPluginObject::WebkitPluginObject(Plugin* plugin, QObject* parent):
-    BrowserPluginObject(plugin, parent),
+WebkitPluginObject::WebkitPluginObject(Plugin* plugin):
+    BrowserPluginObject(plugin),
     m_stb_plugin(NULL)
 {
     guiPlugin = NULL;

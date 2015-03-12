@@ -5,47 +5,40 @@
 #-------------------------------------------------
 
 VERSION = 0.1.0
-
-QT       += core gui widgets webkit webkitwidgets
-
-CONFIG += c++11
-
 TARGET = yasem-web-browser
 TEMPLATE = lib
 
+include($${top_srcdir}/common.pri)
+
+QT       += core gui widgets webkit webkitwidgets
+
 DEFINES += WEBKITBROWSER_LIBRARY
 
-INCLUDEPATH += ../../yasem-core/
-DEPENDPATH += ../../yasem-core/
-
 SOURCES += \
-        webpage.cpp \
-        webview.cpp \
-        webpluginfactoryimpl.cpp \
+    webpage.cpp \
+    webview.cpp \
+    webpluginfactoryimpl.cpp \
     interceptormanager.cpp \
     networkreply.cpp \
     browserkeyevent.cpp \
-    ../../yasem-core/plugin.cpp \
-    ../../yasem-core/stbpluginobject.cpp \
+    $${CORE_ROOT_DIR}/stbpluginobject.cpp \
     webkitbrowserplugin.cpp \
     webkitpluginobject.cpp
 
 
 HEADERS +=\
-        webkitbrowser_global.h \
-        webpage.h \
-        webview.h \
-        webpluginfactory.h \
-        webpluginfactoryimpl.h \
+    webkitbrowser_global.h \
+    webpage.h \
+    webview.h \
+    webpluginfactory.h \
+    webpluginfactoryimpl.h \
     interceptormanager.h \
     networkinterceptorentry.h \
     networkreply.h \
     browserkeyevent.h \
     cmd_line.h \
-    ../../yasem-core/abstractpluginobject.h \
-    ../../yasem-core/plugin.h \
-    ../../yasem-core/stbpluginobject.h \
-    ../../yasem-core/browserpluginobject.h \
+    $${CORE_ROOT_DIR}/stbpluginobject.h \
+    $${CORE_ROOT_DIR}/browserpluginobject.h \
     webkitbrowserplugin.h \
     webkitpluginobject.h
 
@@ -67,9 +60,6 @@ OTHER_FILES += \
     LICENSE \
     README.md
 
-include(../../common.pri)
-DESTDIR = $$DEFAULT_PLUGIN_DIR
-
 RESOURCES += \
     resources.qrc
 
@@ -78,4 +68,3 @@ contains(DEFINES, USE_QML_WIDGETS) {
     SOURCES += webviewqml.cpp
     HEADERS += webviewqml.h
 }
-

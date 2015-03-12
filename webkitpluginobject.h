@@ -18,7 +18,7 @@ class WebkitPluginObject: public BrowserPluginObject
 {
     Q_OBJECT
 public:
-    WebkitPluginObject(Plugin* plugin, QObject* parent = 0);
+    WebkitPluginObject(Plugin* plugin);
     virtual ~WebkitPluginObject();
 
     // AbstractPluginObject interface
