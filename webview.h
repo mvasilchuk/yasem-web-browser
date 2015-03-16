@@ -79,6 +79,12 @@ protected:
 
 signals:
     void mousePositionChanged(int position);
+
+    // QWidget interface
+protected:
+    void paintEvent(QPaintEvent *);
+
+
 };
 
 }

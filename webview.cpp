@@ -14,6 +14,8 @@
 #include <QPaintEngine>
 #include <QPainter>
 #include <QBackingStore>
+#include <QApplication>
+#include <QBitmap>
 //#include <QGraphicsOpacityEffect>
 
 using namespace yasem;
@@ -48,9 +50,13 @@ WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
     readSettings();
 
     setStyleSheet("background: transparent");
+    //setAttribute(Qt::WA_NoSystemBackground);
+    //setAttribute(Qt::WA_TranslucentBackground);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(showContextMenu(const QPoint&)));
+
+    this->setAttribute(Qt::WA_OpaquePaintEvent, false);
 }
 
 void WebView::setupContextMenu()
@@ -345,3 +351,116 @@ void WebView::onUrlChanged(const QUrl &url)
 
     //emit invalidateWebView();
 }
+
+/**
+ * @brief yasem::WebView::paintEvent
+ * @param event
+ *
+ * This code was partially copy/pasted from Qt's qtwebkit/Source/WebKit/qt/WidgetApi/qwebview.cpp
+ */
+void yasem::WebView::paintEvent(QPaintEvent *event)
+{
+
+    if (!page())
+        return;
+#ifdef QWEBKIT_TIME_RENDERING
+    QTime time;
+    time.start();
+#endif
+
+    QWebFrame *frame = page()->mainFrame();
+    QPainter painter(this);
+
+
+    //painter.setCompositionMode(QPainter::CompositionMode_Source);
+
+    //painter.fillRect(event->rect(), QColor(0, 0, 255, 128));
+    //painter.setCompositionMode(QPainter::CompositionMode_Xor);
+
+    //QImage image(size(), QImage::Format_ARGB32_Premultiplied);
+    QImage image(size(), QImage::Format_ARGB32_Premultiplied);
+    QPainter imagePainter(&image);
+    imagePainter.setRenderHints(renderHints());
+    frame->render(&imagePainter, event->region());
+    imagePainter.end();
+
+    QImage mask2 = image.createMaskFromColor(qRgba(0xE0, 0xFF, 0xFF, 0xFF), Qt::MaskInColor);
+
+    QImage mask(size(), QImage::Format_ARGB32_Premultiplied);
+    //mask.fill(qRgba(0xE0, 0xFF, 0xFF, 0xFF));
+    mask.fill(Qt::black);
+
+
+    //painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
+    //painter.fillRect(image.rect(), QColor(0xE0, 0xFF, 0xFF, 0x88));
+
+   // painter.end();
+
+    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+   //painter.drawImage(QPoint(event->rect().left(), event->rect().top()), image, event->rect());
+    painter.drawImage(QPoint(event->rect().left(), event->rect().top()), mask2, event->rect());
+    painter.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+    painter.fillRect(image.rect(), QColor(0xE0, 0xFF, 0xFF, 0x00));
+    painter.setCompositionMode(QPainter::CompositionMode_DestinationAtop);
+    painter.drawImage(QPoint(event->rect().left(), event->rect().top()), image, event->rect());
+
+
+    /*painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+
+        // Outter Rect
+        painter.fillRect(QRect(0,0,100,100), QBrush(Qt::green));
+
+        // Inner Rect
+        painter.fillRect(QRect(20,20,40,40), QBrush(Qt::transparent));*/
+
+    //
+
+    //painter.drawImage(QPoint(event->rect().left(), event->rect().top()), mask2, event->rect());
+
+    //painter.setCompositionMode(QPainter::CompositionMode_Xor);
+    //painter.fillRect(image.rect(), Qt::black);
+
+    //painter.setCompositionMode(QPainter::CompositionMode_Xor);
+
+
+    ////
+
+    //painter.drawImage(QPoint(event->rect().left(), event->rect().top()), mask, event->rect());
+    //
+   // painter.drawImage(QPoint(event->rect().left(), event->rect().top()), mask2, event->rect());
+    //
+
+    //painter.setCompositionMode(QPainter::CompositionMode_Difference);
+
+    //mask2.save("/tmp/temp_mask2.png");
+
+    //painter.setCompositionMode(QPainter::CompositionMode_DestinationOver);
+    //painter.fillRect(event->rect(), Qt::transparent);
+
+    //image.save("/tmp/temp_image.png");
+    //mask.save("/tmp/temp_mask1.png");
+
+
+    //pixmap.save("/tmp/temp_pixmap.png");
+
+
+    /*QPixmap temp(size());
+    temp.fill(Qt::transparent);
+
+    QPainter p(&temp);
+    p.setCompositionMode(QPainter::CompositionMode_Source);
+    p.drawImage(QPoint(event->rect().left(), event->rect().top()), image, event->rect());
+    p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+    //p.fillRect(temp.rect(), QColor(0x00, 0x00, 0x00, 0x20));
+    p.fillRect(temp.rect(), QColor(0xE0, 0xFF, 0xFF, 0x20));
+    p.end();
+    painter.drawPixmap(QPoint(event->rect().left(), event->rect().top()), temp, event->rect());*/
+
+
+#ifdef    QWEBKIT_TIME_RENDERING
+    int elapsed = time.elapsed();
+    qDebug() << "paint event on " << ev->region() << ", took to render =  " << elapsed;
+#endif
+}
+
+
