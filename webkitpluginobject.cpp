@@ -56,28 +56,6 @@ QWidget *yasem::WebkitPluginObject::getParentWidget()
      return static_cast<QWidget*>(this->parent());
 }
 
-bool yasem::WebkitPluginObject::load(const QUrl &url)
-{
-    DEBUG() << "load:" << url;
-    this->indexUrl = url;
-
-    if(indexUrl.toString().startsWith("file://"))
-    {
-        QFile file(indexUrl.toString().replace("file://", ""));
-        QFileInfo info(file);
-        this->rootDir = info.absoluteDir().path();
-    }
-    else
-    {
-        this->rootDir = indexUrl.url(QUrl::RemoveFilename);
-    }
-
-    ((WebPage*)activeWebView->page())->resetPage();
-
-    activeWebView->load(url);
-    return true;
-}
-
 void WebkitPluginObject::scale(qreal scale)
 {
     this->browserScale = scale;
@@ -86,11 +64,6 @@ void WebkitPluginObject::scale(qreal scale)
 qreal WebkitPluginObject::scale()
 {
     return this->browserScale;
-}
-
-bool WebkitPluginObject::load(const QString &url)
-{
-    return load(QUrl(url));
 }
 
 QWidget *WebkitPluginObject::widget()

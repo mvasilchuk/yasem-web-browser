@@ -17,6 +17,7 @@
 #include <QWebFrame>
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QFileInfo>
 
 using namespace yasem;
 
@@ -408,4 +409,20 @@ qreal yasem::WebPage::scale()
 QRect yasem::WebPage::getPageRect()
 {
     return webView()->getRect();
+}
+
+
+bool yasem::WebPage::load(const QUrl &url)
+{
+    DEBUG() << "load:" << url;
+    /*if(url.toString().startsWith("file://"))
+    {
+        QFile file(url.toString().replace("file://", ""));
+        QFileInfo info(file);
+        this->rootDir = info.absoluteDir().path();
+    }*/
+
+    resetPage();
+    webView()->load(url);
+    return true;
 }
