@@ -29,9 +29,6 @@ public:
     virtual void setParentWidget(QWidget *parent);
     virtual QWidget* getParentWidget();
 
-    bool load(const QUrl &url);
-    bool load(const QString &url);
-
     virtual void scale(qreal scale);
     virtual qreal scale();
 
@@ -56,7 +53,6 @@ protected:
     QRect browserRect;
     float browserScale;
     StbPluginObject* m_stb_plugin;
-    QUrl indexUrl;
     QString rootDir;
     QHash<RC_KEY, BrowserKeyEvent*> keyEventValues;
     WebView* activeWebView;

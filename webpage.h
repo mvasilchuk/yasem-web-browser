@@ -33,7 +33,8 @@ public:
     WebView* webView();
 public:
     InterceptorManager* interceptor;
-public slots:    
+public slots:
+    bool load(const QUrl &url);
     void close();
     virtual bool event(QEvent*);
 
@@ -76,6 +77,7 @@ public:
     // AbstractWebPage interface
 public:
     QRect getPageRect();
+
 };
 
 }
