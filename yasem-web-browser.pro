@@ -22,6 +22,7 @@ SOURCES += \
     networkreply.cpp \
     browserkeyevent.cpp \
     $${CORE_ROOT_DIR}/stbpluginobject.cpp \
+    $${CORE_ROOT_DIR}/mediaplayerpluginobject.cpp \
     webkitbrowserplugin.cpp \
     webkitpluginobject.cpp
 
@@ -39,6 +40,7 @@ HEADERS +=\
     cmd_line.h \
     $${CORE_ROOT_DIR}/stbpluginobject.h \
     $${CORE_ROOT_DIR}/browserpluginobject.h \
+    $${CORE_ROOT_DIR}/mediaplayerpluginobject.h \
     webkitbrowserplugin.h \
     webkitpluginobject.h
 

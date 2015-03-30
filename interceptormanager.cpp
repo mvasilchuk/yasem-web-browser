@@ -15,8 +15,8 @@ using namespace yasem;
 InterceptorManager::InterceptorManager(WebPage *parent): QNetworkAccessManager(parent)
 {
     //logger = (AbstractLoggerPlugin*)PluginManager::getInstance()->getByRole("logger");
-    STUB();
-    connect(this, &InterceptorManager::finished, this, &InterceptorManager::replyFinished);
+    //STUB();
+    //connect(this, &InterceptorManager::finished, this, &InterceptorManager::replyFinished);
 
     webServerHost = "http://127.0.0.1";
     webServerPort = Core::instance()->settings()->value("web-server/port", 9999).toInt();
@@ -48,26 +48,40 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
         url = request.url().toString();
 
     //DEBUG() << "Loading URL:" << request.url() << "->" << url;
-    QNetworkRequest req(url);
+    QNetworkRequest req = request;
     req.setHeader(QNetworkRequest::UserAgentHeader, page->userAgentForUrl(QUrl()));
-    req.setRawHeader("Accept", "Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-
-    //TODO: Remove or fix patch for those who doesn't send valid Content-Type header
-    //************** PATCH *********************************
-    if((op == PostOperation) && !req.hasRawHeader("Content-Type"))
-    {
-        req.setRawHeader("Content-Type", "application/json");
-    }
-    //******************************************************
 
     QNetworkReply* real = QNetworkAccessManager::createRequest(op, req, outgoingData);
     real->ignoreSslErrors();
 
-    connect(real, &QNetworkReply::metaDataChanged, [=]() {
-        //WARN() << "metadata" << real->url() << real->errorString();
+    connect(real, &QNetworkReply::encrypted, [=]() {
+        WARN() << "encrypted" << real->url();
     });
 
-    connect(real, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(onError(QNetworkReply::NetworkError)));
+    connect(real, &QNetworkReply::sslErrors, [=](const QList<QSslError> &errors) {
+        WARN() << "sslErrors" << real->url();
+    });
+
+    connect(real, &QNetworkReply::uploadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
+        //WARN() << "uploadProgress" << real->url() << bytesSent << bytesTotal;
+    });
+
+    connect(real, &QNetworkReply::downloadProgress, [=](qint64 bytesReceived, qint64 bytesTotal) {
+        //WARN() << "downloadProgress" << real->url() << bytesReceived << bytesTotal;
+    });
+
+    connect(real, &QNetworkReply::metaDataChanged, [=]() {
+        //WARN() << "metadata" << real->url();
+    });
+
+    connect(real, &QNetworkReply::finished, [=]() {
+        //WARN() << "finished" << real->url() << real->errorString();
+    });
+
+    connect(real, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error), [=](QNetworkReply::NetworkError err) {
+        ERROR() << "err" << real->url() << err << real->errorString();
+    });
+
     return real;
 }
 
@@ -81,21 +95,3 @@ void InterceptorManager::setPage(WebPage *page)
 {
     this->page = page;
 }
-
-void InterceptorManager::onError(QNetworkReply::NetworkError err)
-{
-    ERROR() << "err" << err;
-}
-
-
-void InterceptorManager::replyFinished(QNetworkReply *reply)
-{
-    //DEBUG() << "URL" << reply->url();
-    //DEBUG() << reply->readAll();
-    //reply->reset();
-}
-
-void InterceptorManager::onMetadataChanged(NetworkReply *reply)
-{
-}
-

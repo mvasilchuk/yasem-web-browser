@@ -48,6 +48,20 @@ public slots:
     bool receiveKeyCode(RC_KEY keyCode);
     void evalJs(const QString &js);
 
+    QColor getChromaKey()  const;
+    void setChromaKey(QColor color);
+
+    QColor getChromaMask()  const;
+    void setChromaMask(QColor color);
+
+    float getOpacity()  const;
+    void setOpacity(float opacity) ;
+
+    bool isChromaKeyEnabled()  const;
+    void setChromaKeyEnabled(bool enabled);
+
+    void reset();
+
 protected slots:
     void attachJsStbApi();
 
@@ -56,6 +70,11 @@ protected:
     QString customUserAgent;
     WebPluginFactory* pluginFactory;
     QWebInspector m_web_inspector;
+
+    QColor m_chromakey;
+    QColor m_chromamask;
+    float m_opacity; // 0.0 - 1.0
+    bool m_chromakey_enabled;
 
 public:
      bool isChildWindow();
@@ -67,7 +86,7 @@ public:
 
     // AbstractWebPage interface
 public:
-    void setVieportSize(QSize new_size);
+    void setPageViewportSize(QSize new_size);
     QSize getVieportSize();
 
     // AbstractWebPage interface

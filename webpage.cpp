@@ -9,7 +9,6 @@
 #include "browserkeyevent.h"
 #include "webkitpluginobject.h"
 
-
 #include "cmd_line.h"
 #include "stbprofile.h"
 
@@ -22,7 +21,11 @@
 using namespace yasem;
 
 WebPage::WebPage(WebView *parent) :
-    QWebPage(parent)
+    QWebPage(parent),
+    m_chromakey(QColor(0, 0, 0)),
+    m_chromamask(QColor(0xFF, 0xFF, 0xFF)),
+    m_opacity(1.0),
+    m_chromakey_enabled(true)
 {
     this->parent = parent;
     this->setObjectName("WebPage");
@@ -45,6 +48,8 @@ WebPage::WebPage(WebView *parent) :
     settings()->setAttribute(QWebSettings::SpatialNavigationEnabled, true);
     settings()->setAttribute(QWebSettings::LinksIncludedInFocusChain, true);
     settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
+    settings()->setAttribute(QWebSettings::AcceleratedCompositingEnabled, true);
+    settings()->setAttribute(QWebSettings::Accelerated2dCanvasEnabled, true);
     settings()->enablePersistentStorage();
 
     //settings()->setAttribute(QWebSettings::LinksIncludedInFocusChain, true);
@@ -243,7 +248,12 @@ bool WebPage::event(QEvent *event)
 
             default:
             {
-                qWarning() << "No keycode found: %1" <<  QString("0x").append(QString::number(keyEvent->key(), 16));
+                if(!keyEvent->text().isEmpty())
+                {
+                    //result = receiveKeyCode(RC_KEY_FAST_FORWARD);
+                }
+                else
+                    qWarning() << "No keycode found: %1" <<  QString("0x").append(QString::number(keyEvent->key(), 16));
             }
         }
     }
@@ -297,6 +307,55 @@ bool WebPage::receiveKeyCode(RC_KEY keyCode)
 void WebPage::evalJs(const QString &js)
 {
     mainFrame()->evaluateJavaScript(js);
+}
+
+QColor WebPage::getChromaKey() const
+{
+    return m_chromakey;
+}
+
+void WebPage::setChromaKey(QColor color)
+{
+    m_chromakey = color;
+}
+
+QColor WebPage::getChromaMask() const
+{
+    return m_chromamask;
+}
+
+void WebPage::setChromaMask(QColor color)
+{
+    m_chromamask = color;
+}
+
+void WebPage::setOpacity(float opacity)
+{
+    DEBUG() << "================= opacity" << opacity;
+    m_opacity = opacity;
+}
+
+float WebPage::getOpacity()  const
+{
+    return m_opacity;
+}
+
+bool WebPage::isChromaKeyEnabled() const
+{
+    return m_chromakey_enabled;
+}
+
+void WebPage::setChromaKeyEnabled(bool enabled)
+{
+    m_chromakey_enabled = enabled;
+}
+
+void WebPage::reset()
+{
+    m_chromakey_enabled = true;
+    m_chromakey = QColor(0, 0, 0);
+    m_chromamask = QColor(0xFF, 0xFF, 0xFF);
+    m_opacity = 1.0;
 }
 
 bool WebPage::stb(StbPluginObject *plugin)
@@ -389,7 +448,7 @@ void yasem::WebPage::close()
 }
 
 
-void yasem::WebPage::setVieportSize(QSize new_size)
+void yasem::WebPage::setPageViewportSize(QSize new_size)
 {
     webView()->setViewportSize(new_size);
 }

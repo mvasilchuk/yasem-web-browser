@@ -41,7 +41,6 @@ public:
     void stb(StbPluginObject* m_stb_plugin) ;
     StbPluginObject* stb();
 
-    virtual void raise();
     void show();
     void hide();
 
@@ -88,13 +87,6 @@ public:
 protected slots:
 
     void moveEvent(QMoveEvent *event);
-
-
-    // Plugin interface
-
-public slots:
-    void setOpacity(qint32 alpha);
-    qint32 getOpacity();
 
     // BrowserPlugin interface
 public:

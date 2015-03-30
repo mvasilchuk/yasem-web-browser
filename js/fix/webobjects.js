@@ -6,9 +6,10 @@
         var objects = document.getElementsByTagName('object');
         console.log('Objects found: ' + objects.length);
 
-        for(var index=0; index < objects.length; index++) {
+        for(var index = 0; index < objects.length; index++) {
                 var obj = objects[index];
                 console.log(obj + ', ' + obj.getAttribute('classid') + ", id: " + obj.getAttribute('id'));
+
                 if(!obj.type)
                 {
                     obj.setAttribute('type', 'application/x-qt-plugin');
@@ -19,7 +20,12 @@
                     obj.removeAttribute('class');
                     obj.setAttribute('width', '0');
                     obj.setAttribute('height', '0');
-                    //obj.style.display = 'none';
+                }
+
+                if(obj.style.visibility === 'hidden')
+                {
+                    console.warn('Object is hidden. Trying to hide it using float:left');
+                    obj.style.float = 'left';
                 }
 
                 if(obj.getAttribute('width') == "")
@@ -31,7 +37,7 @@
         }
 
 
-        for(var index=0; index < objects.length; index++) {
+        for(var index = 0; index < objects.length; index++) {
             var obj = objects[index];
             if(obj.getAttribute('type') != 'application/x-qt-plugin') continue;
             try

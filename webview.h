@@ -6,6 +6,7 @@
 #include <QLinearGradient>
 #include <QMenu>
 #include <QAction>
+#include <QPixmap>
 
 class QPainter;
 
@@ -13,6 +14,7 @@ namespace yasem
 {
 class WebkitPluginObject;
 class GuiPluginObject;
+class MediaPlayerPluginObject;
 
 class WebView : public QWebView
 {
@@ -77,6 +79,12 @@ protected:
     QSize m_viewportSize;
     qreal m_pageScale;
 
+    QPixmap m_render_pixmap;
+    QPixmap m_video_frame;
+
+protected slots:
+    void onPlayerRendered();
+
 signals:
     void mousePositionChanged(int position);
 
@@ -84,7 +92,19 @@ signals:
 protected:
     void paintEvent(QPaintEvent *);
 
+    bool m_allow_repaint;
+    bool m_allow_transparency;
+    MediaPlayerPluginObject* m_player;
+    bool m_skip_full_render;
 
+
+
+    // QWidget interface
+protected:
+    void resizeEvent(QResizeEvent *);
+
+public slots:
+    void fullUpdate();
 };
 
 }

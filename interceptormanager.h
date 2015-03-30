@@ -30,12 +30,6 @@ protected:
 
    QString webServerHost;
    int webServerPort;
-
-public slots:
-
-   void onError(QNetworkReply::NetworkError err);
-   void replyFinished(QNetworkReply*);
-   void onMetadataChanged(NetworkReply* reply);
 };
 
 }

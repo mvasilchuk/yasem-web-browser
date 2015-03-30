@@ -6,7 +6,6 @@
 #include "stbpluginobject.h"
 #include "webpage.h"
 #include "browserkeyevent.h"
-#include "webviewqml.h"
 #include "guipluginobject.h"
 #include "webview.h"
 
@@ -91,11 +90,6 @@ StbPluginObject *WebkitPluginObject::stb()
     return this->m_stb_plugin;
 }
 
-void WebkitPluginObject::raise()
-{
-    activeWebView->raise();
-}
-
 void WebkitPluginObject::show()
 {
     activeWebView->show();
@@ -165,7 +159,7 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
 
     foreach(QWidget* child, webViewList)
     {
-        WebView* vChild = qobject_cast<WebView*>(child);
+        WebView* vChild = dynamic_cast<WebView*>(child);
         if(vChild != NULL)
         {
             vChild->resizeView(guiPlugin->widgetRect());
@@ -250,42 +244,6 @@ void WebkitPluginObject::setupMousePositionHandler(const QObject *receiver, cons
     connect(activeWebView, SIGNAL(mousePositionChanged(int)), receiver, method, Qt::DirectConnection);
 }
 
-
-void WebkitPluginObject::setOpacity(qint32 alpha)
-{
-    qDebug() << "setOpacity" << alpha;
-    foreach(QWidget* child, webViewList)
-    {
-        WebView* vChild = qobject_cast<WebView*>(child);
-        if(vChild != NULL)
-        {
-            //vChild->setStyleSheet("background: transparent");
-            //QGraphicsOpacityEffect * effect = new QGraphicsOpacityEffect(vChild);
-            //effect->setOpacity((float)alpha / 255);
-            //effect->setOpacity(0.5);
-
-            //QLinearGradient alphaGradient(child->rect().topLeft(), child->rect().bottomLeft());
-            /*alphaGradient.setColorAt(0.12, Qt::transparent);
-            alphaGradient.setColorAt(0.20, Qt::black);
-            alphaGradient.setColorAt(0.8, Qt::black);
-            alphaGradient.setColorAt(0.9, Qt::transparent);
-
-            effect->setOpacityMask(QBrush(alphaGradient));*/
-            //effect->setOpacity((float)alpha / 255);
-            //effect->setOpacityMask(QBrush(QColor( 128, 128, 128, 128)));
-            //vChild->setGraphicsEffect(effect);
-        }
-
-        else qWarning() << "child warn:" << child;
-    }
-}
-
-qint32 WebkitPluginObject::getOpacity()
-{
-    return 100;
-}
-
-
 AbstractWebPage *WebkitPluginObject::getFirstPage()
 {
     return (WebPage*)activeWebView->page();
@@ -296,6 +254,9 @@ AbstractWebPage* WebkitPluginObject::createNewPage()
     activeWebView = new WebView(NULL, this);
     WebPage* page = new WebPage(activeWebView);
     page->setObjectName("Main web page");
+
+    connect(this, &WebkitPluginObject::topWidgetChanged, activeWebView, &WebView::fullUpdate);
+
     activeWebView->setPage(page);
     activeWebView->setViewportSize(QSize(1280, 720));
     webViewList.append(activeWebView);

@@ -3,6 +3,7 @@
 #include "profilemanager.h"
 #include "guipluginobject.h"
 #include "stbpluginobject.h"
+#include "mediaplayerpluginobject.h"
 
 #include "pluginmanager.h"
 #include "webpage.h"
@@ -22,10 +23,16 @@ using namespace yasem;
 
 WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
     QWebView(parent),
-    m_browser_object(browser)
+    m_browser_object(browser),
+    m_allow_repaint(true),
+    m_allow_transparency(true),
+    m_skip_full_render(false)
 {
     setObjectName("WebView");
     gui = dynamic_cast<GuiPluginObject*>(PluginManager::instance()->getByRole(ROLE_GUI));
+    m_player = dynamic_cast<MediaPlayerPluginObject*>(PluginManager::instance()->getByRole(ROLE_MEDIA));
+
+    connect(m_player, &MediaPlayerPluginObject::rendered, this, &WebView::onPlayerRendered);
 
     rendering_started = false;
     m_is_context_menu_valid = false;
@@ -49,14 +56,23 @@ WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
     setMouseTracking(true);
     readSettings();
 
-    setStyleSheet("background: transparent");
-    //setAttribute(Qt::WA_NoSystemBackground);
-    //setAttribute(Qt::WA_TranslucentBackground);
+    //setStyleSheet("QWebView { background: black }; ");
 
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(showContextMenu(const QPoint&)));
 
-    this->setAttribute(Qt::WA_OpaquePaintEvent, false);
+    setAttribute(Qt::WA_OpaquePaintEvent, true);
+    setAttribute(Qt::WA_NoSystemBackground, true);
+    setAutoFillBackground(false);
+
+    QPalette pal = palette();
+    pal.setBrush(QPalette::Base, Qt::transparent);
+    pal.setBrush(QPalette::Background, Qt::transparent);
+    setPalette(pal);
+
+    connect(m_player, &MediaPlayerPluginObject::started, this, &WebView::fullUpdate);
+    connect(m_player, &MediaPlayerPluginObject::stopped, this, &WebView::fullUpdate);
+    connect(m_player, &MediaPlayerPluginObject::paused, this, &WebView::fullUpdate);
 }
 
 void WebView::setupContextMenu()
@@ -217,6 +233,13 @@ QString WebView::loadFix(const QString &name)
     return res.readAll();
 }
 
+void WebView::onPlayerRendered()
+{
+    //DEBUG() << "video rendered";
+    m_skip_full_render = true;
+    repaint();
+}
+
 QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 {
     STUB();
@@ -231,6 +254,7 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
     webView->setPage(webPage);
     webView->show();
     webView->setFocus();
+    webView->setStyleSheet("background: white");
 
     m_browser_object->addWebView(webView);
     m_browser_object->setWebView(webView);
@@ -238,15 +262,11 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
     if(type == QWebPage::WebModalDialog)
         webView->setWindowModality(Qt::ApplicationModal);
 
-
-    connect(webPage, &WebPage::windowCloseRequested, [=]() {
+    connect(webPage, &QWidget::destroyed, [=](QObject* obj = 0) {
+        Q_UNUSED(obj)
         m_browser_object->removeWebView(webView);
-        webPage->view()->close();
-
         WebView* last = static_cast<WebView*>(m_browser_object->getWebViewList().last());
         m_browser_object->setWebView(last);
-        m_browser_object->resize();
-
     });
 
     //browser->resize();
@@ -352,115 +372,129 @@ void WebView::onUrlChanged(const QUrl &url)
     //emit invalidateWebView();
 }
 
+#define RECT_STR(rect) QString("[%1:%2 %3:%4]").arg(rect.x()).arg(rect.y()).arg(rect.width()).arg(rect.height())
+
 /**
  * @brief yasem::WebView::paintEvent
  * @param event
  *
  * This code was partially copy/pasted from Qt's qtwebkit/Source/WebKit/qt/WidgetApi/qwebview.cpp
+ *
+ * FIXME: This method consumes a lot of CPU. Need to be rewritten.
+ * TODO: Move this method into GUI plugin
  */
 void yasem::WebView::paintEvent(QPaintEvent *event)
 {
-
-    if (!page())
+    if (!page() || !m_allow_repaint)
         return;
-#ifdef QWEBKIT_TIME_RENDERING
-    QTime time;
-    time.start();
-#endif
+//#define QWEBKIT_TIME_RENDERING
 
-    QWebFrame *frame = page()->mainFrame();
+#ifdef QWEBKIT_TIME_RENDERING
+    QTime full_time;
+    full_time.start();
+#endif
+    //DEBUG() << "paint" << event->isAccepted() << event->spontaneous() << sender();
+
+    WebPage* w_page = dynamic_cast<WebPage*>(page());
+    qreal page_opacity = w_page->getOpacity();
+    qreal video_opacity = m_player->getOpacity();
+    QRect pixmap_rect = m_render_pixmap.rect();
     QPainter painter(this);
 
+    if(!m_skip_full_render)
+    {
+        QWebFrame *frame = page()->mainFrame();
 
-    //painter.setCompositionMode(QPainter::CompositionMode_Source);
+        QColor chroma_color = QColor::fromRgb(w_page->getChromaKey().rgb() & w_page->getChromaMask().rgb());
 
-    //painter.fillRect(event->rect(), QColor(0, 0, 255, 128));
-    //painter.setCompositionMode(QPainter::CompositionMode_Xor);
+        m_render_pixmap.fill(Qt::transparent);
 
-    //QImage image(size(), QImage::Format_ARGB32_Premultiplied);
-    QImage image(size(), QImage::Format_ARGB32_Premultiplied);
-    QPainter imagePainter(&image);
-    imagePainter.setRenderHints(renderHints());
-    frame->render(&imagePainter, event->region());
-    imagePainter.end();
+        QPainter pixmapPainter(&m_render_pixmap);
+        frame->render(&pixmapPainter);
+        pixmapPainter.end();
 
-    QImage mask2 = image.createMaskFromColor(qRgba(0xE0, 0xFF, 0xFF, 0xFF), Qt::MaskInColor);
+        if(w_page->isChromaKeyEnabled())
+        {
+            QBitmap mask = m_render_pixmap.createMaskFromColor(chroma_color, Qt::MaskInColor);
+            m_render_pixmap.setMask(mask);
+        }
+    }
 
-    QImage mask(size(), QImage::Format_ARGB32_Premultiplied);
-    //mask.fill(qRgba(0xE0, 0xFF, 0xFF, 0xFF));
-    mask.fill(Qt::black);
+    m_skip_full_render = false;
 
+#ifdef QWEBKIT_TIME_RENDERING
+    QTime player_render;
+    player_render.start();
+#endif
 
-    //painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-    //painter.fillRect(image.rect(), QColor(0xE0, 0xFF, 0xFF, 0x88));
+    m_video_frame = m_player->render();
+    QPoint video_pos = m_player->getWidgetPos();
+    QRect video_rect = m_video_frame.rect();
 
-   // painter.end();
+#ifdef QWEBKIT_TIME_RENDERING
+    int player_render_time = player_render.elapsed();
 
-    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-   //painter.drawImage(QPoint(event->rect().left(), event->rect().top()), image, event->rect());
-    painter.drawImage(QPoint(event->rect().left(), event->rect().top()), mask2, event->rect());
-    painter.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-    painter.fillRect(image.rect(), QColor(0xE0, 0xFF, 0xFF, 0x00));
-    painter.setCompositionMode(QPainter::CompositionMode_DestinationAtop);
-    painter.drawImage(QPoint(event->rect().left(), event->rect().top()), image, event->rect());
+#endif
 
+    // Video widget is moved to be under webview, so now we should reset its rect position
+    if(m_player->isFullscreen())
+    {
+        video_pos = QPoint(0, 0);
+    }
 
-    /*painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    m_skip_full_render = false;
 
-        // Outter Rect
-        painter.fillRect(QRect(0,0,100,100), QBrush(Qt::green));
+    if(m_browser_object->getTopWidget() == WebkitPluginObject::TOP_WIDGET_BROWSER)
+    {
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.setOpacity(video_opacity);
+        painter.drawPixmap(video_pos, m_video_frame, video_rect);
 
-        // Inner Rect
-        painter.fillRect(QRect(20,20,40,40), QBrush(Qt::transparent));*/
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        painter.setOpacity(page_opacity);
+        painter.drawPixmap(QPoint(0, 0), m_render_pixmap, pixmap_rect);
+    }
+    else
+    {
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.setOpacity(page_opacity);
+        painter.drawPixmap(QPoint(0, 0), m_render_pixmap, pixmap_rect);
 
-    //
-
-    //painter.drawImage(QPoint(event->rect().left(), event->rect().top()), mask2, event->rect());
-
-    //painter.setCompositionMode(QPainter::CompositionMode_Xor);
-    //painter.fillRect(image.rect(), Qt::black);
-
-    //painter.setCompositionMode(QPainter::CompositionMode_Xor);
-
-
-    ////
-
-    //painter.drawImage(QPoint(event->rect().left(), event->rect().top()), mask, event->rect());
-    //
-   // painter.drawImage(QPoint(event->rect().left(), event->rect().top()), mask2, event->rect());
-    //
-
-    //painter.setCompositionMode(QPainter::CompositionMode_Difference);
-
-    //mask2.save("/tmp/temp_mask2.png");
-
-    //painter.setCompositionMode(QPainter::CompositionMode_DestinationOver);
-    //painter.fillRect(event->rect(), Qt::transparent);
-
-    //image.save("/tmp/temp_image.png");
-    //mask.save("/tmp/temp_mask1.png");
-
-
-    //pixmap.save("/tmp/temp_pixmap.png");
-
-
-    /*QPixmap temp(size());
-    temp.fill(Qt::transparent);
-
-    QPainter p(&temp);
-    p.setCompositionMode(QPainter::CompositionMode_Source);
-    p.drawImage(QPoint(event->rect().left(), event->rect().top()), image, event->rect());
-    p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-    //p.fillRect(temp.rect(), QColor(0x00, 0x00, 0x00, 0x20));
-    p.fillRect(temp.rect(), QColor(0xE0, 0xFF, 0xFF, 0x20));
-    p.end();
-    painter.drawPixmap(QPoint(event->rect().left(), event->rect().top()), temp, event->rect());*/
-
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        painter.setOpacity(video_opacity);
+        painter.drawPixmap(video_pos, m_video_frame, video_rect);
+    }
 
 #ifdef    QWEBKIT_TIME_RENDERING
-    int elapsed = time.elapsed();
-    qDebug() << "paint event on " << ev->region() << ", took to render =  " << elapsed;
+    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    painter.drawText(QPoint(30, 30), QString("WebView: %1 %2 %3")
+                     .arg(RECT_STR(rect()))
+                     .arg(RECT_STR(event->region().boundingRect()))
+                     .arg(full_time.elapsed()));
+
+    int x = m_video_frame.rect().x();
+    int y = m_video_frame.rect().y();
+    int width = m_video_frame.rect().width();
+    int height = m_video_frame.rect().height();
+    painter.drawText(QPoint(30, 50), QString("Video rect: [%1:%2] [%3x%4], render time: %5").arg(x).arg(y).arg(width).arg(height).arg(player_render_time));
+
+    painter.drawText(QPoint(30, 70), QString("Top widget: %1")
+                     .arg(m_browser_object->getTopWidget() == WebkitPluginObject::TOP_WIDGET_BROWSER ? "browser" : "player" ));
+    //qDebug() << "paint event on " << event->region() << ", took to render =  " << elapsed;
 #endif
+
+    painter.end();
 }
 
 
+void yasem::WebView::resizeEvent(QResizeEvent *event)
+{
+    QWebView::resizeEvent(event);
+    m_render_pixmap = QPixmap(size());
+}
+
+void WebView::fullUpdate()
+{
+    m_skip_full_render = false;
+    repaint(rect());
+}

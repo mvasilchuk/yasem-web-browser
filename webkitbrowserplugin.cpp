@@ -6,7 +6,7 @@
 using namespace yasem;
 
 WebkitBrowser::WebkitBrowser(QObject * parent):
-    Plugin()
+    Plugin(parent)
 {
     DEBUG() << "registering QML type";
 
@@ -23,6 +23,7 @@ WebkitBrowser::~WebkitBrowser()
 void WebkitBrowser::register_dependencies()
 {
     add_dependency(ROLE_GUI);
+    add_dependency(ROLE_MEDIA);
 }
 
 void WebkitBrowser::register_roles()
