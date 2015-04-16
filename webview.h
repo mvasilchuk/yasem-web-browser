@@ -85,6 +85,7 @@ protected:
 protected slots:
     void onPlayerRendered();
 
+
 signals:
     void mousePositionChanged(int position);
 
@@ -105,6 +106,7 @@ protected:
 
 public slots:
     void fullUpdate();
+    void updateTopWidget();
 };
 
 }

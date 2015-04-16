@@ -21,6 +21,8 @@
 
 using namespace yasem;
 
+
+
 WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
     QWebView(parent),
     m_browser_object(browser),
@@ -55,13 +57,17 @@ WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
 
     setMouseTracking(true);
     readSettings();
-
-    //setStyleSheet("QWebView { background: black }; ");
+#ifndef USE_REAL_TRANSPARENCY
+    setStyleSheet("background: transparent");
+#endif // USE_REAL_TRANSPARENCY
 
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(showContextMenu(const QPoint&)));
 
     setAttribute(Qt::WA_OpaquePaintEvent, true);
+
+
+#ifdef USE_REAL_TRANSPARENCY
     setAttribute(Qt::WA_NoSystemBackground, true);
     setAutoFillBackground(false);
 
@@ -73,6 +79,7 @@ WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
     connect(m_player, &MediaPlayerPluginObject::started, this, &WebView::fullUpdate);
     connect(m_player, &MediaPlayerPluginObject::stopped, this, &WebView::fullUpdate);
     connect(m_player, &MediaPlayerPluginObject::paused, this, &WebView::fullUpdate);
+#endif //USE_REAL_TRANSPARENCY
 }
 
 void WebView::setupContextMenu()
@@ -385,6 +392,7 @@ void WebView::onUrlChanged(const QUrl &url)
  */
 void yasem::WebView::paintEvent(QPaintEvent *event)
 {
+#ifdef USE_REAL_TRANSPARENCY
     if (!page() || !m_allow_repaint)
         return;
 //#define QWEBKIT_TIME_RENDERING
@@ -484,6 +492,9 @@ void yasem::WebView::paintEvent(QPaintEvent *event)
 #endif
 
     painter.end();
+#else
+    QWebView::paintEvent(event);
+#endif //USE_REAL_TRANSPARENCY
 }
 
 
@@ -497,4 +508,27 @@ void WebView::fullUpdate()
 {
     m_skip_full_render = false;
     repaint(rect());
+}
+
+void WebView::updateTopWidget()
+{
+    switch(m_browser_object->getTopWidget())
+    {
+        case BrowserPluginObject::TOP_WIDGET_BROWSER:
+        {
+            DEBUG() << "raising browser";
+            raise();
+            break;
+        }
+        case BrowserPluginObject::TOP_WIDGET_PLAYER:
+        {
+            DEBUG() << "raising player";
+            m_player->widget()->raise();
+            break;
+        }
+        default: {
+            DEBUG() << "raising unknown";
+            break;
+        }
+    }
 }

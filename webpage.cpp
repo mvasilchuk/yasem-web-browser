@@ -485,3 +485,5 @@ bool yasem::WebPage::load(const QUrl &url)
     webView()->load(url);
     return true;
 }
+
+

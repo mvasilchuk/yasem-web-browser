@@ -169,7 +169,6 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
     }
 }
 
-
 void WebkitPluginObject::registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt, bool ctrl, bool shift)
 {
     DEBUG() << "registerKeyEvent {key:"
@@ -255,7 +254,11 @@ AbstractWebPage* WebkitPluginObject::createNewPage()
     WebPage* page = new WebPage(activeWebView);
     page->setObjectName("Main web page");
 
+#ifdef USE_REAL_TRANSPARENCY
     connect(this, &WebkitPluginObject::topWidgetChanged, activeWebView, &WebView::fullUpdate);
+#else
+    connect(this, &WebkitPluginObject::topWidgetChanged, activeWebView, &WebView::updateTopWidget);
+#endif //USE_REAL_TRANSPARENCY
 
     activeWebView->setPage(page);
     activeWebView->setViewportSize(QSize(1280, 720));
