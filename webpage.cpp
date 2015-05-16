@@ -17,6 +17,7 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QNetworkProxy>
 
 using namespace yasem;
 
@@ -36,6 +37,7 @@ WebPage::WebPage(WebView *parent) :
 
     interceptor = new InterceptorManager(this);
     interceptor->setPage(this);
+
     this->setNetworkAccessManager(interceptor);
 
     settings()->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls,true);
@@ -482,6 +484,10 @@ bool yasem::WebPage::load(const QUrl &url)
     }*/
 
     resetPage();
+    if(ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "false") == "true")
+        interceptor->setProxy(QNetworkProxy(QNetworkProxy::HttpProxy, "127.0.0.1", 8089));
+    else
+        interceptor->setProxy(QNetworkProxy());
     webView()->load(url);
     return true;
 }
