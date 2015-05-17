@@ -24,8 +24,8 @@ SOURCES += \
     $${CORE_ROOT_DIR}/stbpluginobject.cpp \
     $${CORE_ROOT_DIR}/mediaplayerpluginobject.cpp \
     webkitbrowserplugin.cpp \
-    webkitpluginobject.cpp
-
+    webkitpluginobject.cpp \
+    $${CORE_ROOT_DIR}/abstracthttpproxy.cpp
 
 HEADERS +=\
     webkitbrowser_global.h \
@@ -42,7 +42,8 @@ HEADERS +=\
     $${CORE_ROOT_DIR}/browserpluginobject.h \
     $${CORE_ROOT_DIR}/mediaplayerpluginobject.h \
     webkitbrowserplugin.h \
-    webkitpluginobject.h
+    webkitpluginobject.h \
+    $${CORE_ROOT_DIR}/abstracthttpproxy.h
 
 unix:!symbian {
     maemo5 {

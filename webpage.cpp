@@ -8,6 +8,7 @@
 #include "webview.h"
 #include "browserkeyevent.h"
 #include "webkitpluginobject.h"
+#include "abstracthttpproxy.h"
 
 #include "cmd_line.h"
 #include "stbprofile.h"
@@ -484,10 +485,31 @@ bool yasem::WebPage::load(const QUrl &url)
     }*/
 
     resetPage();
-    if(ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "false") == "true")
-        interceptor->setProxy(QNetworkProxy(QNetworkProxy::HttpProxy, "127.0.0.1", 8089));
+    int max_rps = ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
+    if(max_rps > 0)
+    {
+        AbstractHttpProxy* proxy = dynamic_cast<AbstractHttpProxy*>(PluginManager::instance()->getByRole(ROLE_HTTP_PROXY));
+        if(proxy != NULL)
+        {
+            if(proxy->isRunning())
+                proxy->stopServer();
+            proxy->setMaxRequestPerSecond(max_rps);
+            proxy->startServer();
+            interceptor->setProxy(QNetworkProxy(QNetworkProxy::HttpProxy, proxy->hostName(), proxy->port()));
+        }
+        else
+            WARN() << "Http proxy not found! Requests will not be limited!";
+
+    }
     else
+    {
+        AbstractHttpProxy* proxy = dynamic_cast<AbstractHttpProxy*>(PluginManager::instance()->getByRole(ROLE_HTTP_PROXY));
+        if(proxy != NULL)
+        {
+            proxy->stopServer();
+        }
         interceptor->setProxy(QNetworkProxy());
+    }
     webView()->load(url);
     return true;
 }
