@@ -64,7 +64,7 @@ WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(showContextMenu(const QPoint&)));
 
-    setAttribute(Qt::WA_OpaquePaintEvent, true);
+    setAttribute(Qt::WA_OpaquePaintEvent, false);
 
 
 #ifdef USE_REAL_TRANSPARENCY
@@ -395,7 +395,7 @@ void yasem::WebView::paintEvent(QPaintEvent *event)
 #ifdef USE_REAL_TRANSPARENCY
     if (!page() || !m_allow_repaint)
         return;
-//#define QWEBKIT_TIME_RENDERING
+#define QWEBKIT_TIME_RENDERING
 
 #ifdef QWEBKIT_TIME_RENDERING
     QTime full_time;
