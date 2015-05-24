@@ -64,9 +64,6 @@ WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(showContextMenu(const QPoint&)));
 
-    setAttribute(Qt::WA_OpaquePaintEvent, false);
-
-
 #ifdef USE_REAL_TRANSPARENCY
     setAttribute(Qt::WA_NoSystemBackground, true);
     setAutoFillBackground(false);

@@ -23,7 +23,7 @@ WebkitBrowser::~WebkitBrowser()
 void WebkitBrowser::register_dependencies()
 {
     add_dependency(ROLE_GUI);
-    add_dependency(ROLE_MEDIA);
+    add_dependency(PluginDependency(ROLE_MEDIA, true, true));
 }
 
 void WebkitBrowser::register_roles()
