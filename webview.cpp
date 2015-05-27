@@ -4,6 +4,7 @@
 #include "guipluginobject.h"
 #include "stbpluginobject.h"
 #include "mediaplayerpluginobject.h"
+#include "statistics.h"
 
 #include "pluginmanager.h"
 #include "webpage.h"
@@ -328,6 +329,7 @@ void WebView::onLoadProgress(int progress)
 void WebView::onLoadFinished(bool finished)
 {
     DEBUG() << "onLoadFinished(" << finished << ")";
+    Core::instance()->statistics()->print();
 }
 
 void WebView::onTitleChanged(const QString &title)

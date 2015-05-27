@@ -6,9 +6,12 @@
 #include "core.h"
 #include "browserpluginobject.h"
 #include "pluginmanager.h"
+#include "statistics.h"
+#include "networkstatistics.h"
 
 #include <QtNetwork/QNetworkRequest>
 #include <QDebug>
+#include <QElapsedTimer>
 
 using namespace yasem;
 
@@ -54,6 +57,15 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
     QNetworkReply* real = QNetworkAccessManager::createRequest(op, req, outgoingData);
     real->ignoreSslErrors();
 
+    bool marked_as_slow = false;
+    QElapsedTimer* elapsed_timer = new QElapsedTimer();
+    elapsed_timer->start();
+
+    NetworkStatistics* network_statistics = Core::instance()->statistics()->network();
+
+    network_statistics->incTotalCount();
+    network_statistics->incPendingConnection();
+
     connect(real, &QNetworkReply::encrypted, [=]() {
         WARN() << "encrypted" << real->url();
     });
@@ -62,12 +74,16 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
         WARN() << "sslErrors" << real->url();
     });
 
-    connect(real, &QNetworkReply::uploadProgress, [=](qint64 bytesSent, qint64 bytesTotal) {
+    connect(real, &QNetworkReply::uploadProgress, [=, &marked_as_slow](qint64 bytesSent, qint64 bytesTotal) {
         //WARN() << "uploadProgress" << real->url() << bytesSent << bytesTotal;
+        if(elapsed_timer->elapsed() > 1000 && !marked_as_slow)
+            network_statistics->incTooSlowConnections();
     });
 
-    connect(real, &QNetworkReply::downloadProgress, [=](qint64 bytesReceived, qint64 bytesTotal) {
+    connect(real, &QNetworkReply::downloadProgress, [=, &marked_as_slow](qint64 bytesReceived, qint64 bytesTotal) {
         //WARN() << "downloadProgress" << real->url() << bytesReceived << bytesTotal;
+        if(elapsed_timer->elapsed() > 1000 && !marked_as_slow)
+            network_statistics->incTooSlowConnections();
     });
 
     connect(real, &QNetworkReply::metaDataChanged, [=]() {
@@ -76,6 +92,14 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
 
     connect(real, &QNetworkReply::finished, [=]() {
         //WARN() << "finished" << real->url() << real->errorString();
+        if(real->error() == QNetworkReply::NoError)
+            network_statistics->intSuccessfulCount();
+        else
+            network_statistics->incFailedCount();
+
+        network_statistics->decPendingConnections();
+
+        delete elapsed_timer;
     });
 
     connect(real, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error), [=](QNetworkReply::NetworkError err) {
