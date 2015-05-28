@@ -26,8 +26,6 @@ public:
     GuiPluginObject* gui;
 
 public slots:
-    Q_INVOKABLE void qmlInit();
-
     void onLoadStarted();
     void onLoadProgress(int progress);
     void onLoadFinished(bool);
