@@ -8,6 +8,7 @@ using namespace yasem;
 
 QString BrowserKeyEvent::keyboardEventJs = "";
 QString BrowserKeyEvent::mouseEventJs = "";
+QString BrowserKeyEvent::m_pre_data = "";
 
 BrowserKeyEvent::BrowserKeyEvent(int keyCode, int which, bool alt, bool ctrl, bool shift)
 {
@@ -39,16 +40,7 @@ QString BrowserKeyEvent::toString()
     QStringList result;
     int type = CustomKeyEvent::TypeUnknown;
 
-    QString preData = "\
-var activeFrame =  window, elem = null; \
-for(var index = 0; index < frames.length; index++)\
-{\
-   var frame = frames[index];\
-   activeFrame = frame;\
-}\
-if(activeFrame.document.activeElement) elem = activeFrame.document.activeElement; \
-else elem = activeFrame.document.body;\
-elem.focus();";
+
 
     for(int index = 0; index < MAX_EVENTS; index++)
     {
@@ -109,7 +101,7 @@ elem.focus();";
 
     }
 
-    return preData + result.join(" && ") + ";";
+    return QString("(function(){").append(m_pre_data).append(result.join(" && ")).append("})();");
 }
 
 void BrowserKeyEvent::initJsCode()
@@ -119,6 +111,10 @@ void BrowserKeyEvent::initJsCode()
         QFile res(QString(":/webkitbrowser/js/keyboardevent.js"));
         res.open(QIODevice::ReadOnly|QIODevice::Text);
         BrowserKeyEvent::keyboardEventJs = res.readAll();
+
+        QFile pre_data(QString(":/webkitbrowser/js/js_pre_data.js"));
+        pre_data.open(QIODevice::ReadOnly|QIODevice::Text);
+        BrowserKeyEvent::m_pre_data = pre_data.readAll();
     }
 
     if(BrowserKeyEvent::mouseEventJs.isEmpty())

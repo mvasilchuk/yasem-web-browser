@@ -25,6 +25,7 @@ protected:
     void initJsCode();
     static QString keyboardEventJs;
     static QString mouseEventJs;
+    static QString m_pre_data;
 };
 
 

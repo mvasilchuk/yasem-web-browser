@@ -9,7 +9,6 @@
 #include "pluginmanager.h"
 #include "webpage.h"
 #include <QWebFrame>
-#include <QWebSecurityOrigin>
 
 #include <QKeyEvent>
 #include <QPalette>
@@ -24,9 +23,9 @@ using namespace yasem;
 
 
 
-WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
+WebView::WebView(QWidget *parent) :
     QWebView(parent),
-    m_browser_object(browser),
+    m_browser(dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER))),
     m_allow_repaint(true),
     m_allow_transparency(true),
     m_skip_full_render(false)
@@ -34,8 +33,6 @@ WebView::WebView(QWidget *parent, WebkitPluginObject* browser) :
     setObjectName("WebView");
     gui = dynamic_cast<GuiPluginObject*>(PluginManager::instance()->getByRole(ROLE_GUI));
     m_player = dynamic_cast<MediaPlayerPluginObject*>(PluginManager::instance()->getByRole(ROLE_MEDIA));
-
-    connect(m_player, &MediaPlayerPluginObject::rendered, this, &WebView::onPlayerRendered);
 
     rendering_started = false;
     m_is_context_menu_valid = false;
@@ -238,18 +235,11 @@ QString WebView::loadFix(const QString &name)
     return res.readAll();
 }
 
-void WebView::onPlayerRendered()
-{
-    //DEBUG() << "video rendered";
-    m_skip_full_render = true;
-    repaint();
-}
 
 QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 {
     STUB();
-
-    WebView *webView = new WebView(NULL, m_browser_object);
+    /*WebView *webView = new WebView(NULL, m_browser_object);
     webView->setObjectName("Popup web view");
     WebPage *webPage = new WebPage(webView);
     webPage->setObjectName("Popup web page");
@@ -274,24 +264,15 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
         m_browser_object->setWebView(last);
     });
 
-    //browser->resize();
+    //browser->resize();*/
+
+    WebView *webView = new WebView();
+    WebPage *newWeb = new WebPage(webView);
+    webView->setPage(newWeb);
+    webView->show();
+    //newWeb->showWebInspector();
+
     return webView;
-}
-
-void WebView::setBrowser(WebkitPluginObject *browser)
-{
-    this->m_browser_object = browser;
-}
-
-void WebView::setDefaultBrowser()
-{
-    setBrowser(dynamic_cast<WebkitPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER)));
-}
-
-void WebView::qmlInit()
-{
-    DEBUG() << "webview qml init";
-    setDefaultBrowser();
 }
 
 
@@ -303,6 +284,9 @@ void WebView::onLoadStarted()
 
 void WebView::onLoadProgress(int progress)
 {
+    show(); // Fix for child windows
+    setFocus();
+
     DEBUG() << "onLoadProgress(" << progress << ")";
 
     if(progress > 10 && !triggered)
@@ -313,13 +297,13 @@ void WebView::onLoadProgress(int progress)
          * The other fix is for objects that are not visible;
         */
 
-
-        if(page() != NULL && m_browser_object->stb() != NULL)
+        WebPage* _page = dynamic_cast<WebPage*>(page());
+        if(_page != NULL)
         {
             DEBUG() << "Applying fix for <object> tags";
-            page()->mainFrame()->evaluateJavaScript(webObjectsFix);
+            _page->mainFrame()->evaluateJavaScript(webObjectsFix);
             DEBUG() << "Applying other fixes";
-            m_browser_object->stb()->applyFixes();
+            _page->stb()->applyFixes();
             triggered = true;
         }
     }
@@ -362,18 +346,8 @@ void WebView::onUrlChanged(const QUrl &url)
 {
     DEBUG() << QString("onUrlChanged(%1)").arg(url.toString());
 
-    #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-        QWebSecurityOrigin origin(url);
-        origin.addAccessWhitelistEntry("http", "", QWebSecurityOrigin::AllowSubdomains);
-        origin.addAccessWhitelistEntry("qrc", "", QWebSecurityOrigin::AllowSubdomains);
-        origin.addAccessWhitelistEntry("http", "www.youtube.com", QWebSecurityOrigin::AllowSubdomains);
-        this->page()->mainFrame()->securityOrigin().allOrigins().append(origin);
-    #else
-        WARN(QString("Cross-origin resource sharing (CORS) is only available since Qt 5.2. CORS will be disabled!"));
-    #endif
-
     triggered = false;
-    m_browser_object->resize();
+    m_browser->resize();
 
     //emit invalidateWebView();
 }
@@ -511,7 +485,9 @@ void WebView::fullUpdate()
 
 void WebView::updateTopWidget()
 {
-    switch(m_browser_object->getTopWidget())
+    BrowserPluginObject* browser = dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
+    Q_ASSERT(browser);
+    switch(browser->getTopWidget())
     {
         case BrowserPluginObject::TOP_WIDGET_BROWSER:
         {

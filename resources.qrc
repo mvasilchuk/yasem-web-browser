@@ -4,6 +4,7 @@
         <file>js/fix/XMLHttpRequest.js</file>
         <file>js/keyboardevent.js</file>
         <file>js/mouseevent.js</file>
+        <file>js/js_pre_data.js</file>
     </qresource>
     <qresource prefix="/">
         <file>qmlwebbrowser.qml</file>

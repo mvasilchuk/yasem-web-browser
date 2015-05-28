@@ -19,11 +19,13 @@
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QNetworkProxy>
+#include <QWebSecurityOrigin>
 
 using namespace yasem;
 
 WebPage::WebPage(WebView *parent) :
     QWebPage(parent),
+    m_browser(dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER))),
     m_chromakey(QColor(0, 0, 0)),
     m_chromamask(QColor(0xFF, 0xFF, 0xFF)),
     m_opacity(1.0),
@@ -287,7 +289,7 @@ bool WebPage::receiveKeyCode(RC_KEY keyCode)
 {
     STUB() << Core::instance()->getKeycodeHashes().key(keyCode) << keyCode; //int)keyCode;
 
-    WebkitPluginObject* browser = parent->m_browser_object;
+    WebkitPluginObject* browser = dynamic_cast<WebkitPluginObject*>(m_browser);
 
     BrowserKeyEvent* keyEvent = browser->getKeyEventValues()[keyCode];
 
@@ -484,6 +486,16 @@ bool yasem::WebPage::load(const QUrl &url)
         this->rootDir = info.absoluteDir().path();
     }*/
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+    QWebSecurityOrigin origin(url);
+    origin.addAccessWhitelistEntry("http", "", QWebSecurityOrigin::AllowSubdomains);
+    origin.addAccessWhitelistEntry("qrc", "", QWebSecurityOrigin::AllowSubdomains);
+    origin.addAccessWhitelistEntry("http", "www.youtube.com", QWebSecurityOrigin::AllowSubdomains);
+    mainFrame()->securityOrigin().allOrigins().append(origin);
+#else
+    WARN(QString("Cross-origin resource sharing (CORS) is only available since Qt 5.2. CORS will be disabled!"));
+#endif
+
     resetPage();
     int max_rps = ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
     if(max_rps > 0)
@@ -515,3 +527,23 @@ bool yasem::WebPage::load(const QUrl &url)
 }
 
 
+
+
+QWebPage *yasem::WebPage::createWindow(WebWindowType type)
+{
+    STUB();
+    WebPage* page = dynamic_cast<WebPage*>(m_browser->createNewPage(webView()));
+    page->setObjectName("Child window");
+    return page;
+}
+
+
+
+bool yasem::WebPage::openWindow(const QString &url, const QString &params, const QString &name)
+{
+    evalJs(QString("setTimeout(function(){window.open('%1', '%2', '%3');}, 1)")
+                    .arg(url)
+                    .arg(name)
+                    .arg(params));
+    return true;
+}

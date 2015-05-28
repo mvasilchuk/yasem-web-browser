@@ -9,7 +9,6 @@
 #include "guipluginobject.h"
 #include "webview.h"
 
-#include <QWebSecurityOrigin>
 #include <QFile>
 #include <QDir>
 #include <QPalette>
@@ -18,6 +17,7 @@
 #include <QMoveEvent>
 #include <QGraphicsOpacityEffect>
 #include <QLinearGradient>
+#include <QWebSecurityOrigin>
 
 using namespace yasem;
 
@@ -67,7 +67,7 @@ qreal WebkitPluginObject::scale()
 
 QWidget *WebkitPluginObject::widget()
 {
-    return activeWebView;
+    return getWebView();
 }
 
 void WebkitPluginObject::rect(const QRect &rect)
@@ -245,28 +245,36 @@ void WebkitPluginObject::setupMousePositionHandler(const QObject *receiver, cons
 
 AbstractWebPage *WebkitPluginObject::getFirstPage()
 {
-    return (WebPage*)activeWebView->page();
+    return dynamic_cast<AbstractWebPage*>(activeWebView->page());
 }
 
-AbstractWebPage* WebkitPluginObject::createNewPage()
+AbstractWebPage* WebkitPluginObject::createNewPage(QWidget* parent)
 {
-    activeWebView = new WebView(NULL, this);
-    WebPage* page = new WebPage(activeWebView);
-    page->setObjectName("Main web page");
+    WebView* webView = new WebView(parent);
+    WebPage* page = new WebPage(webView);
 
+    if(dynamic_cast<WebView*>(parent) == NULL) // If it's not a child view
+    {
+        page->setObjectName("Main web page");
+        setWebView(webView);
 #ifdef USE_REAL_TRANSPARENCY
-    connect(this, &WebkitPluginObject::topWidgetChanged, activeWebView, &WebView::fullUpdate);
+    connect(this, &WebkitPluginObject::topWidgetChanged, webView, &WebView::fullUpdate);
 #else
-    connect(this, &WebkitPluginObject::topWidgetChanged, activeWebView, &WebView::updateTopWidget);
+    connect(this, &WebkitPluginObject::topWidgetChanged, webView, &WebView::updateTopWidget);
 #endif //USE_REAL_TRANSPARENCY
+    }
+    else
+    {
+        page->setObjectName("Child web page");
+    }
 
-    activeWebView->setPage(page);
-    activeWebView->setViewportSize(QSize(1280, 720));
-    webViewList.append(activeWebView);
-    qDebug() << "wtf child:" << webViewList;
-
+    webView->setPage(page);
+    webView->setViewportSize(QSize(1280, 720));
+    webView->show();
+    webView->raise();
     fullscreen(false);
 
+    addWebView(webView);
     return page;
 }
 

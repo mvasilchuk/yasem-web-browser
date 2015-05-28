@@ -15,20 +15,17 @@ namespace yasem
 class WebkitPluginObject;
 class GuiPluginObject;
 class MediaPlayerPluginObject;
+class BrowserPluginObject;
 
 class WebView : public QWebView
 {
     Q_OBJECT
 public:
-    explicit WebView(QWidget *parent = 0, WebkitPluginObject* browser_object = 0);
-    QWebView* createWindow(QWebPage::WebWindowType type);
+    explicit WebView(QWidget *parent = 0);
+    virtual QWebView* createWindow(QWebPage::WebWindowType type);
     GuiPluginObject* gui;
-    WebkitPluginObject* m_browser_object;
 
 public slots:
-
-    Q_INVOKABLE void setBrowser(WebkitPluginObject* browser_object);
-    Q_INVOKABLE void setDefaultBrowser();
     Q_INVOKABLE void qmlInit();
 
     void onLoadStarted();
@@ -71,6 +68,8 @@ protected:
 
     int mouseBorderThreshold;
 
+    BrowserPluginObject* m_browser;
+
     QMenu* m_contextMenu;
     QAction* m_backToPreviousPageAction;
     QAction* m_openWebInspectorAction;
@@ -81,10 +80,6 @@ protected:
 
     QPixmap m_render_pixmap;
     QPixmap m_video_frame;
-
-protected slots:
-    void onPlayerRendered();
-
 
 signals:
     void mousePositionChanged(int position);
@@ -97,8 +92,6 @@ protected:
     bool m_allow_transparency;
     MediaPlayerPluginObject* m_player;
     bool m_skip_full_render;
-
-
 
     // QWidget interface
 protected:

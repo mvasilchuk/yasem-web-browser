@@ -15,14 +15,12 @@ class StbPluginObject;
 class WebView;
 class WebPluginFactory;
 class InterceptorManager;
-
+class BrowserPluginObject;
 class WebPage : public QWebPage, public virtual AbstractWebPage
 {
     Q_OBJECT
 public:
     explicit WebPage(WebView *parent = 0);
-    WebView* parent;
-    StbPluginObject* m_stb_plugin;
 
     void  javaScriptAlert ( QWebFrame * frame, const QString & msg );
     bool  javaScriptConfirm ( QWebFrame * frame, const QString & msg );
@@ -61,12 +59,16 @@ public slots:
     void setChromaKeyEnabled(bool enabled);
 
     void reset();
+    bool openWindow(const QString &url, const QString &params, const QString &name);
 
 
 protected slots:
     void attachJsStbApi();
 
 protected:
+    WebView* parent;
+    StbPluginObject* m_stb_plugin;
+    BrowserPluginObject* m_browser;
     QString defaultUserAgent;
     QString customUserAgent;
     WebPluginFactory* pluginFactory;
@@ -98,7 +100,11 @@ public:
 public:
     QRect getPageRect();
 
-};
+
+    // QWebPage interface
+protected:
+    virtual QWebPage *createWindow(WebWindowType type);
+    };
 
 }
 
