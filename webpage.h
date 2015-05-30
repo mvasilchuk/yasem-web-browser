@@ -104,7 +104,11 @@ public:
     // QWebPage interface
 protected:
     virtual QWebPage *createWindow(WebWindowType type);
-    };
+
+    // AbstractWebPage interface
+public slots:
+    virtual void execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol);
+};
 
 }
 

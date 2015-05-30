@@ -547,3 +547,12 @@ bool yasem::WebPage::openWindow(const QString &url, const QString &params, const
                     .arg(params));
     return true;
 }
+
+
+void yasem::WebPage::execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol)
+{
+    QEvent::Type type = QEvent::KeyPress;
+    QKeyEvent* event = new QKeyEvent(type, code, mods, symbol);
+
+    qApp->postEvent(this, event);
+}

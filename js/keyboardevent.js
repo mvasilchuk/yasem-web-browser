@@ -1,6 +1,5 @@
 (function(keyCode, which, alt, ctrl, shift, name)
 {
-    console.log('element', elem);
     if(elem == undefined) return;
 
     var event = document.createEvent('Events');
