@@ -91,7 +91,7 @@ protected slots:
     // BrowserPlugin interface
 public:
     AbstractWebPage *getFirstPage();
-    AbstractWebPage* createNewPage(QWidget* parent);
+    AbstractWebPage* createNewPage(bool child = false);
 
     // BrowserPlugin interface
 public:

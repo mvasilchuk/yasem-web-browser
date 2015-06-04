@@ -248,12 +248,12 @@ AbstractWebPage *WebkitPluginObject::getFirstPage()
     return dynamic_cast<AbstractWebPage*>(activeWebView->page());
 }
 
-AbstractWebPage* WebkitPluginObject::createNewPage(QWidget* parent)
+AbstractWebPage* WebkitPluginObject::createNewPage(bool child)
 {
-    WebView* webView = new WebView(parent);
+    WebView* webView = new WebView(getParentWidget());
     WebPage* page = new WebPage(webView);
 
-    if(dynamic_cast<WebView*>(parent) == NULL) // If it's not a child view
+    if(!child) // If it's not a child view
     {
         page->setObjectName("Main web page");
         setWebView(webView);
@@ -267,6 +267,8 @@ AbstractWebPage* WebkitPluginObject::createNewPage(QWidget* parent)
     {
         page->setObjectName("Child web page");
     }
+
+    connect(page, &WebPage::closed, [=](){ resize(); });
 
     webView->setPage(page);
     webView->setViewportSize(QSize(1280, 720));

@@ -108,6 +108,13 @@ protected:
     // AbstractWebPage interface
 public slots:
     virtual void execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol);
+
+    // AbstractWebPage interface
+public slots:
+    virtual QWidget *widget();
+
+signals:
+    void closed();
 };
 
 }

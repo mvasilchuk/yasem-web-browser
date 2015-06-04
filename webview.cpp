@@ -119,7 +119,7 @@ void WebView::showContextMenu(const QPoint &pos)
 
 void WebView::resizeView(const QRect &containerRect)
 {
-    DEBUG() << "WebView::resizeView" << containerRect;
+    DEBUG() << "WebView::resizeView" << objectName() << containerRect;
     float w_ratio = (float)m_viewportSize.width() / containerRect.width();
     float h_ratio = (float)m_viewportSize.height() / containerRect.height();
 

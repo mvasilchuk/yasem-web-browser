@@ -450,6 +450,7 @@ QString WebPage::userAgentForUrl(const QUrl & url) const
 void yasem::WebPage::close()
 {
     this->parent->close();
+    emit closed();
 }
 
 
@@ -532,14 +533,14 @@ bool yasem::WebPage::load(const QUrl &url)
 QWebPage *yasem::WebPage::createWindow(WebWindowType type)
 {
     STUB();
-    WebPage* page = dynamic_cast<WebPage*>(m_browser->createNewPage(webView()));
+    WebPage* page = dynamic_cast<WebPage*>(m_browser->createNewPage(true));
     page->setObjectName("Child window");
     return page;
 }
 
 
 
-bool yasem::WebPage::openWindow(const QString &url, const QString &params, const QString &name)
+bool yasem::WebPage::openWindow(const QString &url, const QString &params = "", const QString &name = "")
 {
     evalJs(QString("setTimeout(function(){window.open('%1', '%2', '%3');}, 1)")
                     .arg(url)
@@ -555,4 +556,10 @@ void yasem::WebPage::execKeyEvent(const QString &action, int code, Qt::KeyboardM
     QKeyEvent* event = new QKeyEvent(type, code, mods, symbol);
 
     qApp->postEvent(this, event);
+}
+
+
+QWidget *yasem::WebPage::widget()
+{
+    return webView();
 }
