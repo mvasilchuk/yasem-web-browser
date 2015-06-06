@@ -76,7 +76,6 @@ protected:
     QSize m_viewportSize;
     qreal m_pageScale;
 
-    QPixmap m_render_pixmap;
     QPixmap m_video_frame;
 
 signals:

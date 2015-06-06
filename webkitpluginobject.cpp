@@ -268,8 +268,6 @@ AbstractWebPage* WebkitPluginObject::createNewPage(bool child)
         page->setObjectName("Child web page");
     }
 
-    connect(page, &WebPage::closed, [=](){ resize(); });
-
     webView->setPage(page);
     webView->setViewportSize(QSize(1280, 720));
     webView->show();

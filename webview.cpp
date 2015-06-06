@@ -147,10 +147,8 @@ void WebView::resizeView(const QRect &containerRect)
 
     m_pageScale = (qreal)m_viewRect.width() / m_viewportSize.width();
 
-    //QRect actualRect(0, 0, m_viewRect.width(), m_viewRect.height());
     setZoomFactor(m_pageScale);
     setGeometry(m_viewRect);
-    //page()->setActualVisibleContentRect(m_viewRect);
 }
 
 void WebView::setViewportSize(QSize newSize)
@@ -239,39 +237,10 @@ QString WebView::loadFix(const QString &name)
 QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 {
     STUB();
-    /*WebView *webView = new WebView(NULL, m_browser_object);
-    webView->setObjectName("Popup web view");
-    WebPage *webPage = new WebPage(webView);
-    webPage->setObjectName("Popup web page");
-
-    //webPage->stb(qobject_cast<WebPage*>(this->page())->stb());
-    webView->setAttribute(Qt::WA_DeleteOnClose, true);
-    webView->setPage(webPage);
-    webView->show();
-    webView->setFocus();
-    webView->setStyleSheet("background: white");
-
-    m_browser_object->addWebView(webView);
-    m_browser_object->setWebView(webView);
-
-    if(type == QWebPage::WebModalDialog)
-        webView->setWindowModality(Qt::ApplicationModal);
-
-    connect(webPage, &QWidget::destroyed, [=](QObject* obj = 0) {
-        Q_UNUSED(obj)
-        m_browser_object->removeWebView(webView);
-        WebView* last = static_cast<WebView*>(m_browser_object->getWebViewList().last());
-        m_browser_object->setWebView(last);
-    });
-
-    //browser->resize();*/
-
     WebView *webView = new WebView();
     WebPage *newWeb = new WebPage(webView);
     webView->setPage(newWeb);
     webView->show();
-    //newWeb->showWebInspector();
-
     return webView;
 }
 
@@ -348,8 +317,7 @@ void WebView::onUrlChanged(const QUrl &url)
 
     triggered = false;
     m_browser->resize();
-
-    //emit invalidateWebView();
+    raise();
 }
 
 #define RECT_STR(rect) QString("[%1:%2 %3:%4]").arg(rect.x()).arg(rect.y()).arg(rect.width()).arg(rect.height())
@@ -473,8 +441,8 @@ void yasem::WebView::paintEvent(QPaintEvent *event)
 
 void yasem::WebView::resizeEvent(QResizeEvent *event)
 {
+    move(m_viewRect.left(), m_viewRect.top());
     QWebView::resizeEvent(event);
-    m_render_pixmap = QPixmap(size());
 }
 
 void WebView::fullUpdate()

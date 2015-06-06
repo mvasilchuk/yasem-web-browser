@@ -535,6 +535,7 @@ QWebPage *yasem::WebPage::createWindow(WebWindowType type)
     STUB();
     WebPage* page = dynamic_cast<WebPage*>(m_browser->createNewPage(true));
     page->setObjectName("Child window");
+    page->parent->setObjectName("Child Web View");
     return page;
 }
 
