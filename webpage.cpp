@@ -530,7 +530,7 @@ bool yasem::WebPage::load(const QUrl &url)
     int max_rps = ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
     if(max_rps > 0)
     {
-        AbstractHttpProxy* proxy = dynamic_cast<AbstractHttpProxy*>(PluginManager::instance()->getByRole(ROLE_HTTP_PROXY));
+        AbstractHttpProxy* proxy = __get_plugin<AbstractHttpProxy*>(ROLE_HTTP_PROXY);
         if(proxy != NULL)
         {
             if(proxy->isRunning())

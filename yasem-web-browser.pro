@@ -43,7 +43,8 @@ HEADERS +=\
     $${CORE_ROOT_DIR}/mediaplayerpluginobject.h \
     webkitbrowserplugin.h \
     webkitpluginobject.h \
-    $${CORE_ROOT_DIR}/abstracthttpproxy.h
+    $${CORE_ROOT_DIR}/abstracthttpproxy.h \
+    $${CORE_ROOT_DIR}/guipluginobject.h
 
 unix:!symbian {
     maemo5 {
