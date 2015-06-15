@@ -209,14 +209,9 @@ bool WebPage::event(QEvent *event)
             case Qt::Key_Return:
             case Qt::Key_Enter:     result = receiveKeyCode(RC_KEY_OK);        break;
 
-            case Qt::Key_Home:      result = receiveKeyCode(RC_KEY_BACK);      break;
+            case Qt::Key_Home:
+            case Qt::Key_Back:      result = receiveKeyCode(RC_KEY_BACK);      break;
             case Qt::Key_Escape:    result = receiveKeyCode(RC_KEY_EXIT);      break;
-            case Qt::Key_Backspace: {
-                if(!hasShift)
-                {
-                    result = receiveKeyCode(RC_KEY_BACK);  break;
-                }
-            }
 
             case Qt::Key_F1:        result = receiveKeyCode(RC_KEY_RED);       break;
             case Qt::Key_F2:        result = receiveKeyCode(RC_KEY_GREEN);     break;
@@ -239,45 +234,25 @@ bool WebPage::event(QEvent *event)
             case Qt::Key_8:         result = receiveKeyCode(RC_KEY_NUMBER_8);  break;
             case Qt::Key_9:         result = receiveKeyCode(RC_KEY_NUMBER_9);  break;
 
-            case Qt::Key_F11:
-            {
-                if(hasCtrl)
-                {
-                    result = true;
-                    parent->gui->setFullscreen(!parent->gui->getFullscreen());
-                    break;
-                }
-                else
-                    result = receiveKeyCode(RC_KEY_MENU);  break;
-            }
+            case Qt::Key_Menu:      result = receiveKeyCode(RC_KEY_MENU);      break;
 
-            case Qt::Key_VolumeDown:
-            case Qt::Key_Minus:
-                result = receiveKeyCode(RC_KEY_VOLUME_DOWN);  break;
-            case Qt::Key_VolumeUp:
-            case Qt::Key_Plus:
-                result = receiveKeyCode(RC_KEY_VOLUME_UP);    break;
-            case Qt::Key_VolumeMute:
-            case Qt::Key_QuoteLeft:
-                result = receiveKeyCode(RC_KEY_MUTE);        break;
+            case Qt::Key_VolumeDown:    result = receiveKeyCode(RC_KEY_VOLUME_DOWN);    break;
+            case Qt::Key_VolumeUp:      result = receiveKeyCode(RC_KEY_VOLUME_UP);      break;
+            case Qt::Key_VolumeMute:    result = receiveKeyCode(RC_KEY_MUTE);           break;
 
-            case Qt::Key_MediaTogglePlayPause:
-            case Qt::Key_R:
-                result = receiveKeyCode(RC_KEY_PLAY_PAUSE);    break;
+            case Qt::Key_MediaTogglePlayPause:      result = receiveKeyCode(RC_KEY_PLAY_PAUSE);    break;
             case Qt::Key_MediaPlay:                 result = receiveKeyCode(RC_KEY_PLAY);          break;
             case Qt::Key_MediaPause:                result = receiveKeyCode(RC_KEY_PAUSE);         break;
-            case Qt::Key_MediaStop:
-            case Qt::Key_S:
-                result = receiveKeyCode(RC_KEY_STOP);          break;
-            case Qt::Key_MediaPrevious:
-            case Qt::Key_B:
-                result = receiveKeyCode(RC_KEY_REWIND);        break;
-            case Qt::Key_MediaNext:
-            case Qt::Key_F:
-                result = receiveKeyCode(RC_KEY_FAST_FORWARD);  break;
+            case Qt::Key_MediaStop:     result = receiveKeyCode(RC_KEY_STOP);          break;
+            case Qt::Key_MediaPrevious: result = receiveKeyCode(RC_KEY_REWIND);        break;
+            case Qt::Key_MediaNext:     result = receiveKeyCode(RC_KEY_FAST_FORWARD);  break;
+            case Qt::Key_Info:          result = receiveKeyCode(RC_KEY_INFO);  break;
 
-            case Qt::Key_Y:
-                result = receiveKeyCode(RC_KEY_INFO);  break;
+            case Qt::Key_F11:
+            {
+                    parent->gui->setFullscreen(!parent->gui->getFullscreen());
+                    break;
+            }
 
 
             default:
