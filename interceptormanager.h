@@ -11,6 +11,7 @@ class WebPage;
 class BrowserPluginObject;
 class NetworkInterceptorEntry;
 class NetworkReply;
+class YasemSettings;
 
 class InterceptorManager : public QNetworkAccessManager
 {
@@ -22,13 +23,25 @@ public:
    bool addInterceptorEntry(NetworkInterceptorEntry *entry);
    void setPage(WebPage* page);
 
+public slots:
+   void initNetworkStatisticGathering();
 protected:
    QList<NetworkInterceptorEntry*> entryList;
    WebPage* page;
    BrowserPluginObject* m_browserPlugin;
+   YasemSettings* m_settings;
+   bool m_statistics_enabled;
+   int m_slow_request_timeout;
 
    QString webServerHost;
    int webServerPort;
+
+signals:
+   void request_started();
+   void request_finished();
+   void request_succeeded();
+   void request_failed();
+   void slow_request_detected();
 };
 
 }
