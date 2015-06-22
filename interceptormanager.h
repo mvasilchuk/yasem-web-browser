@@ -17,7 +17,6 @@ class InterceptorManager : public QNetworkAccessManager
     Q_OBJECT
 public:
    InterceptorManager(WebPage *parent = 0);
-   typedef QPair<QByteArray, QByteArray> RawHeaderPair;
 
    QNetworkReply *createRequest(Operation op, const QNetworkRequest &request, QIODevice *outgoingData);
    bool addInterceptorEntry(NetworkInterceptorEntry *entry);

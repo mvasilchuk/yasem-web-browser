@@ -9,6 +9,7 @@ WebkitBrowser::WebkitBrowser(QObject * parent):
     Plugin(parent)
 {
     DEBUG() << "registering QML type";
+    setMultithreading(false);
 
 #ifdef USE_QML_WIDGETS
     qmlRegisterType<WebViewQml>("com.mvas.yasem.WebViewQml", 1, 0, "WebViewQml");
