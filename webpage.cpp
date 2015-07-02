@@ -9,6 +9,7 @@
 #include "browserkeyevent.h"
 #include "webkitpluginobject.h"
 #include "abstracthttpproxy.h"
+#include "macros.h"
 
 #include "cmd_line.h"
 #include "stbprofile.h"

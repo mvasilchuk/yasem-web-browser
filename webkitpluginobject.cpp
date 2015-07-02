@@ -8,6 +8,7 @@
 #include "browserkeyevent.h"
 #include "guipluginobject.h"
 #include "webview.h"
+#include "macros.h"
 
 #include <QFile>
 #include <QDir>
