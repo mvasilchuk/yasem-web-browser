@@ -70,6 +70,7 @@ public:
     virtual QString browserRootDir();
     void setUserAgent(const QString &userAgent);
     void addFont(const QString &fileName);
+    void registerKeyEvent(RC_KEY rc_key, int keyCode);
     void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt = false, bool ctrl = false, bool shift = false);
     void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false) ;
     void clearKeyEvents();

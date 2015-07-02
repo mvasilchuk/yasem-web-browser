@@ -130,6 +130,7 @@ void WebkitPluginObject::addFont(const QString &fileName)
     QFontDatabase::addApplicationFontFromData(fontFile.readAll());
 }
 
+
 void WebkitPluginObject::stb(StbPluginObject *stbPlugin)
 {
     this->m_stb_plugin = stbPlugin;
@@ -167,6 +168,11 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
 
         else qWarning() << "child warn:" << child;
     }
+}
+
+void WebkitPluginObject::registerKeyEvent(RC_KEY rc_key, int keyCode)
+{
+    registerKeyEvent(rc_key, keyCode, keyCode);
 }
 
 void WebkitPluginObject::registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt, bool ctrl, bool shift)
