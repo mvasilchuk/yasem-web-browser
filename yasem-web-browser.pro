@@ -21,11 +21,8 @@ SOURCES += \
     interceptormanager.cpp \
     networkreply.cpp \
     browserkeyevent.cpp \
-    $${CORE_ROOT_DIR}/stbpluginobject.cpp \
-    $${CORE_ROOT_DIR}/mediaplayerpluginobject.cpp \
     webkitbrowserplugin.cpp \
-    webkitpluginobject.cpp \
-    $${CORE_ROOT_DIR}/abstracthttpproxy.cpp
+    webkitpluginobject.cpp
 
 HEADERS +=\
     webkitbrowser_global.h \
@@ -38,13 +35,8 @@ HEADERS +=\
     networkreply.h \
     browserkeyevent.h \
     cmd_line.h \
-    $${CORE_ROOT_DIR}/stbpluginobject.h \
-    $${CORE_ROOT_DIR}/browserpluginobject.h \
-    $${CORE_ROOT_DIR}/mediaplayerpluginobject.h \
     webkitbrowserplugin.h \
-    webkitpluginobject.h \
-    $${CORE_ROOT_DIR}/abstracthttpproxy.h \
-    $${CORE_ROOT_DIR}/guipluginobject.h
+    webkitpluginobject.h
 
 unix:!symbian {
     maemo5 {

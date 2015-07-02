@@ -17,7 +17,9 @@ class WEBKITBROWSERSHARED_EXPORT WebkitBrowser: public Plugin
     Q_INTERFACES(yasem::Plugin)
 
     Q_CLASSINFO("author", "Maxim Vasilchuk")
-    Q_CLASSINFO("description", "WebkitBrowser plugin for YASEM")
+    Q_CLASSINFO("description", "Webkit browser")
+    Q_CLASSINFO("version", MODULE_VERSION)
+    Q_CLASSINFO("revision", GIT_VERSION)
 public:
     explicit WebkitBrowser(QObject * parent = 0);
     virtual ~WebkitBrowser();
