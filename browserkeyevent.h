@@ -8,7 +8,7 @@
 namespace yasem
 {
 
-class BrowserKeyEvent : public QObject, public CustomKeyEvent
+class BrowserKeyEvent : public QObject, public SDK::CustomKeyEvent
 {
     Q_OBJECT
 

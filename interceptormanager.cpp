@@ -19,13 +19,13 @@ using namespace yasem;
 
 InterceptorManager::InterceptorManager(WebPage *parent):
     QNetworkAccessManager(parent),
-    m_settings(Core::instance()->yasem_settings())
+    m_settings(SDK::Core::instance()->yasem_settings())
 {
     webServerHost = "http://127.0.0.1";
-    webServerPort = Core::instance()->settings()->value("web-server/port", 9999).toInt();
-    m_browserPlugin = dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
+    webServerPort = SDK::Core::instance()->settings()->value("web-server/port", 9999).toInt();
+    m_browserPlugin = __get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER);
 
-    ConfigContainer* network_statistics = dynamic_cast<ConfigContainer*>(m_settings->findItem(QStringList() << SETTINGS_GROUP_OTHER << NETWORK_STATISTICS));
+    SDK::ConfigContainer* network_statistics = SDK::__get_config_item<SDK::ConfigContainer*>(QStringList() << SETTINGS_GROUP_OTHER << NETWORK_STATISTICS);
     m_statistics_enabled = network_statistics->findItemByKey(NETWORK_STATISTICS_ENABLED)->value().toBool();
     m_slow_request_timeout = network_statistics->findItemByKey(NETWORK_STATISTICS_SLOW_REQ_TIMEOUT)->value().toInt();
 
@@ -35,13 +35,13 @@ InterceptorManager::InterceptorManager(WebPage *parent):
 
 void InterceptorManager::initNetworkStatisticGathering()
 {
-    NetworkStatistics* network_statistics = Core::instance()->statistics()->network();
-    connect(this, &InterceptorManager::request_started,         network_statistics, &NetworkStatistics::incTotalCount);
-    connect(this, &InterceptorManager::request_succeeded,       network_statistics, &NetworkStatistics::intSuccessfulCount);
-    connect(this, &InterceptorManager::request_started,         network_statistics, &NetworkStatistics::incPendingConnection);
-    connect(this, &InterceptorManager::request_finished,        network_statistics, &NetworkStatistics::decPendingConnections);
-    connect(this, &InterceptorManager::request_failed,          network_statistics, &NetworkStatistics::incFailedCount);
-    connect(this, &InterceptorManager::slow_request_detected,   network_statistics, &NetworkStatistics::incTooSlowConnections);
+    SDK::NetworkStatistics* network_statistics = SDK::Core::instance()->statistics()->network();
+    connect(this, &InterceptorManager::request_started,         network_statistics, &SDK::NetworkStatistics::incTotalCount);
+    connect(this, &InterceptorManager::request_succeeded,       network_statistics, &SDK::NetworkStatistics::intSuccessfulCount);
+    connect(this, &InterceptorManager::request_started,         network_statistics, &SDK::NetworkStatistics::incPendingConnection);
+    connect(this, &InterceptorManager::request_finished,        network_statistics, &SDK::NetworkStatistics::decPendingConnections);
+    connect(this, &InterceptorManager::request_failed,          network_statistics, &SDK::NetworkStatistics::incFailedCount);
+    connect(this, &InterceptorManager::slow_request_detected,   network_statistics, &SDK::NetworkStatistics::incTooSlowConnections);
 }
 
 QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkRequest &request, QIODevice *outgoingData)

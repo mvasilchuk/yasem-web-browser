@@ -15,7 +15,7 @@ WebPluginFactoryImpl::WebPluginFactoryImpl(WebPage *parent)
     this->page = parent;
 }
 
-bool WebPluginFactoryImpl::addPlugin(StbPluginObject *plugin)
+bool WebPluginFactoryImpl::addPlugin(SDK::StbPluginObject *plugin)
 {
     STUB();
     pluginList.append(plugin);
@@ -69,14 +69,14 @@ QList<QWebPluginFactory::Plugin> WebPluginFactoryImpl::plugins() const
 
     QList<QWebPluginFactory::Plugin> list;
 
-    foreach(StbPluginObject* plugin, pluginList)
+    foreach(SDK::StbPluginObject* plugin, pluginList)
     {
         QWebPluginFactory::Plugin wPlugin;
         wPlugin.name = plugin->webName;
         wPlugin.description = plugin->description;
         wPlugin.mimeTypes = QList<MimeType>();
 
-        foreach(WebObjectInfo info, plugin->getWebObjects())
+        foreach(SDK::WebObjectInfo info, plugin->getWebObjects())
         {
             QWebPluginFactory::MimeType mimeType;
             mimeType.name = info.mimeType;
@@ -115,9 +115,9 @@ QWidget* WebPluginFactoryImpl::getWebObjectByMimeType(const QString &mimeType, c
     //STATIC_STUB();
     //qDebug() << "getWebObjectByMimeType:" << mimeType;
 
-    foreach(StbPluginObject* pluginObject, pluginList)
+    foreach(SDK::StbPluginObject* pluginObject, pluginList)
     {
-        foreach(WebObjectInfo info, pluginObject->getWebObjects())
+        foreach(SDK::WebObjectInfo info, pluginObject->getWebObjects())
         {
             if(info.mimeType.compare(mimeType, Qt::CaseInsensitive) == 0 &&  info.classid == classid)
             {

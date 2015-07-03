@@ -26,7 +26,7 @@ using namespace yasem;
 
 WebPage::WebPage(WebView *parent) :
     QWebPage(parent),
-    m_browser(dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER))),
+    m_browser(__get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER)),
     m_chromakey(QColor(0, 0, 0)),
     m_chromamask(QColor(0xFF, 0xFF, 0xFF)),
     m_opacity(1.0),
@@ -127,7 +127,7 @@ void WebPage::triggerAction(QWebPage::WebAction action, bool checked)
 {
     if(action == QWebPage::Back)
     {
-        ProfileManager::instance()->backToPreviousProfile();
+        SDK::ProfileManager::instance()->backToPreviousProfile();
     }
     else
         QWebPage::triggerAction(action, checked);
@@ -186,68 +186,68 @@ bool WebPage::event(QEvent *event)
         {
             case Qt::Key_Left:      {
                 if(hasShift)
-                    result = receiveKeyCode(RC_KEY_REWIND);
+                    result = receiveKeyCode(SDK::RC_KEY_REWIND);
                 else
-                    result = receiveKeyCode(RC_KEY_LEFT);
+                    result = receiveKeyCode(SDK::RC_KEY_LEFT);
                 break;
             }
             case Qt::Key_Right:     {
                 if(hasShift)
-                    result = receiveKeyCode(RC_KEY_FAST_FORWARD);
+                    result = receiveKeyCode(SDK::RC_KEY_FAST_FORWARD);
                 else
-                    result = receiveKeyCode(RC_KEY_RIGHT);
+                    result = receiveKeyCode(SDK::RC_KEY_RIGHT);
                 break;
             }
             case Qt::Key_Up:        {
-                    result = receiveKeyCode(RC_KEY_UP);
+                    result = receiveKeyCode(SDK::RC_KEY_UP);
                 break;
             }
             case Qt::Key_Down:      {
-                result = receiveKeyCode(RC_KEY_DOWN);
+                result = receiveKeyCode(SDK::RC_KEY_DOWN);
                 break;
             }
 
             case Qt::Key_Return:
-            case Qt::Key_Enter:     result = receiveKeyCode(RC_KEY_OK);        break;
+            case Qt::Key_Enter:     result = receiveKeyCode(SDK::RC_KEY_OK);        break;
 
             case Qt::Key_Home:
-            case Qt::Key_Back:      result = receiveKeyCode(RC_KEY_BACK);      break;
-            case Qt::Key_Escape:    result = receiveKeyCode(RC_KEY_EXIT);      break;
+            case Qt::Key_Back:      result = receiveKeyCode(SDK::RC_KEY_BACK);      break;
+            case Qt::Key_Escape:    result = receiveKeyCode(SDK::RC_KEY_EXIT);      break;
 
-            case Qt::Key_F1:        result = receiveKeyCode(RC_KEY_RED);       break;
-            case Qt::Key_F2:        result = receiveKeyCode(RC_KEY_GREEN);     break;
-            case Qt::Key_F3:        result = receiveKeyCode(RC_KEY_YELLOW);    break;
-            case Qt::Key_F4:        result = receiveKeyCode(RC_KEY_BLUE);      break;
+            case Qt::Key_F1:        result = receiveKeyCode(SDK::RC_KEY_RED);       break;
+            case Qt::Key_F2:        result = receiveKeyCode(SDK::RC_KEY_GREEN);     break;
+            case Qt::Key_F3:        result = receiveKeyCode(SDK::RC_KEY_YELLOW);    break;
+            case Qt::Key_F4:        result = receiveKeyCode(SDK::RC_KEY_BLUE);      break;
 
-            case Qt::Key_Tab:       result = receiveKeyCode(RC_KEY_MENU);      break;
-            case Qt::Key_PageUp:    result = receiveKeyCode(RC_KEY_PAGE_UP);   break;
-            case Qt::Key_PageDown:  result = receiveKeyCode(RC_KEY_PAGE_DOWN); break;
-            case Qt::Key_Control:   result = receiveKeyCode(RC_KEY_INFO);      break;
+            case Qt::Key_Tab:       result = receiveKeyCode(SDK::RC_KEY_MENU);      break;
+            case Qt::Key_PageUp:    result = receiveKeyCode(SDK::RC_KEY_PAGE_UP);   break;
+            case Qt::Key_PageDown:  result = receiveKeyCode(SDK::RC_KEY_PAGE_DOWN); break;
+            case Qt::Key_Control:   result = receiveKeyCode(SDK::RC_KEY_INFO);      break;
 
-            case Qt::Key_0:         result = receiveKeyCode(RC_KEY_NUMBER_0);  break;
-            case Qt::Key_1:         result = receiveKeyCode(RC_KEY_NUMBER_1);  break;
-            case Qt::Key_2:         result = receiveKeyCode(RC_KEY_NUMBER_2);  break;
-            case Qt::Key_3:         result = receiveKeyCode(RC_KEY_NUMBER_3);  break;
-            case Qt::Key_4:         result = receiveKeyCode(RC_KEY_NUMBER_4);  break;
-            case Qt::Key_5:         result = receiveKeyCode(RC_KEY_NUMBER_5);  break;
-            case Qt::Key_6:         result = receiveKeyCode(RC_KEY_NUMBER_6);  break;
-            case Qt::Key_7:         result = receiveKeyCode(RC_KEY_NUMBER_7);  break;
-            case Qt::Key_8:         result = receiveKeyCode(RC_KEY_NUMBER_8);  break;
-            case Qt::Key_9:         result = receiveKeyCode(RC_KEY_NUMBER_9);  break;
+            case Qt::Key_0:         result = receiveKeyCode(SDK::RC_KEY_NUMBER_0);  break;
+            case Qt::Key_1:         result = receiveKeyCode(SDK::RC_KEY_NUMBER_1);  break;
+            case Qt::Key_2:         result = receiveKeyCode(SDK::RC_KEY_NUMBER_2);  break;
+            case Qt::Key_3:         result = receiveKeyCode(SDK::RC_KEY_NUMBER_3);  break;
+            case Qt::Key_4:         result = receiveKeyCode(SDK::RC_KEY_NUMBER_4);  break;
+            case Qt::Key_5:         result = receiveKeyCode(SDK::RC_KEY_NUMBER_5);  break;
+            case Qt::Key_6:         result = receiveKeyCode(SDK::RC_KEY_NUMBER_6);  break;
+            case Qt::Key_7:         result = receiveKeyCode(SDK::RC_KEY_NUMBER_7);  break;
+            case Qt::Key_8:         result = receiveKeyCode(SDK::RC_KEY_NUMBER_8);  break;
+            case Qt::Key_9:         result = receiveKeyCode(SDK::RC_KEY_NUMBER_9);  break;
 
-            case Qt::Key_Menu:      result = receiveKeyCode(RC_KEY_MENU);      break;
+            case Qt::Key_Menu:      result = receiveKeyCode(SDK::RC_KEY_MENU);      break;
 
-            case Qt::Key_VolumeDown:    result = receiveKeyCode(RC_KEY_VOLUME_DOWN);    break;
-            case Qt::Key_VolumeUp:      result = receiveKeyCode(RC_KEY_VOLUME_UP);      break;
-            case Qt::Key_VolumeMute:    result = receiveKeyCode(RC_KEY_MUTE);           break;
+            case Qt::Key_VolumeDown:    result = receiveKeyCode(SDK::RC_KEY_VOLUME_DOWN);    break;
+            case Qt::Key_VolumeUp:      result = receiveKeyCode(SDK::RC_KEY_VOLUME_UP);      break;
+            case Qt::Key_VolumeMute:    result = receiveKeyCode(SDK::RC_KEY_MUTE);           break;
 
-            case Qt::Key_MediaTogglePlayPause:      result = receiveKeyCode(RC_KEY_PLAY_PAUSE);    break;
-            case Qt::Key_MediaPlay:                 result = receiveKeyCode(RC_KEY_PLAY);          break;
-            case Qt::Key_MediaPause:                result = receiveKeyCode(RC_KEY_PAUSE);         break;
-            case Qt::Key_MediaStop:     result = receiveKeyCode(RC_KEY_STOP);          break;
-            case Qt::Key_MediaPrevious: result = receiveKeyCode(RC_KEY_REWIND);        break;
-            case Qt::Key_MediaNext:     result = receiveKeyCode(RC_KEY_FAST_FORWARD);  break;
-            case Qt::Key_Info:          result = receiveKeyCode(RC_KEY_INFO);  break;
+            case Qt::Key_MediaTogglePlayPause:      result = receiveKeyCode(SDK::RC_KEY_PLAY_PAUSE);    break;
+            case Qt::Key_MediaPlay:                 result = receiveKeyCode(SDK::RC_KEY_PLAY);          break;
+            case Qt::Key_MediaPause:                result = receiveKeyCode(SDK::RC_KEY_PAUSE);         break;
+            case Qt::Key_MediaStop:     result = receiveKeyCode(SDK::RC_KEY_STOP);          break;
+            case Qt::Key_MediaPrevious: result = receiveKeyCode(SDK::RC_KEY_REWIND);        break;
+            case Qt::Key_MediaNext:     result = receiveKeyCode(SDK::RC_KEY_FAST_FORWARD);  break;
+            case Qt::Key_Info:          result = receiveKeyCode(SDK::RC_KEY_INFO);  break;
 
             case Qt::Key_F11:
             {
@@ -290,9 +290,9 @@ bool WebPage::event(QEvent *event)
     return result || QWebPage::event(event);
 }
 
-bool WebPage::receiveKeyCode(RC_KEY keyCode)
+bool WebPage::receiveKeyCode(SDK::RC_KEY keyCode)
 {
-    STUB() << Core::instance()->getKeycodeHashes().key(keyCode) << keyCode; //int)keyCode;
+    STUB() << SDK::Core::instance()->getKeycodeHashes().key(keyCode) << keyCode; //int)keyCode;
 
     WebkitPluginObject* browser = dynamic_cast<WebkitPluginObject*>(m_browser);
 
@@ -368,14 +368,14 @@ void WebPage::reset()
     m_opacity = 1.0;
 }
 
-bool WebPage::stb(StbPluginObject *plugin)
+bool WebPage::stb(SDK::StbPluginObject *plugin)
 {
     STUB();
     this->m_stb_plugin = plugin;
     return true;
 }
 
-StbPluginObject *WebPage::stb()
+SDK::StbPluginObject *WebPage::stb()
 {
     return this->m_stb_plugin;
 }
@@ -388,7 +388,7 @@ void WebPage::setUserAgent(const QString &userAgent)
 
 QUrl WebPage::handleUrl(QUrl url)
 {
-    StbPluginObject* stbPlugin = stb();
+    SDK::StbPluginObject* stbPlugin = stb();
     if(stbPlugin != NULL)
     {
         return stbPlugin->handleUrl(url);
@@ -401,11 +401,11 @@ void WebPage::recreateObjects()
 {
     STUB();
 
-    Profile* profile = ProfileManager::instance()->getActiveProfile();
+    SDK::Profile* profile = SDK::ProfileManager::instance()->getActiveProfile();
 
     if(profile)
     {
-        StbPluginObject* stbPlugin = profile->getProfilePlugin();
+        SDK::StbPluginObject* stbPlugin = profile->getProfilePlugin();
         stb(stbPlugin);
         stbPlugin->initObject(this);
     }
@@ -418,11 +418,11 @@ void WebPage::resetPage()
 {
     STUB();
     pluginFactory->getPluginList().clear();
-    Profile* profile =  ProfileManager::instance()->getActiveProfile();
+    SDK::Profile* profile =  SDK::ProfileManager::instance()->getActiveProfile();
 
     if(profile)
     {
-        StbPluginObject* stbPlugin = profile->getProfilePlugin();
+        SDK::StbPluginObject* stbPlugin = profile->getProfilePlugin();
         if(stbPlugin)
         {
             pluginFactory->addPlugin(stbPlugin);
@@ -452,37 +452,37 @@ QString WebPage::userAgentForUrl(const QUrl & url) const
     return ua;
 }
 
-void yasem::WebPage::close()
+void WebPage::close()
 {
     this->parent->close();
     emit closed();
 }
 
 
-void yasem::WebPage::setPageViewportSize(QSize new_size)
+void WebPage::setPageViewportSize(QSize new_size)
 {
     webView()->setViewportSize(new_size);
 }
 
-QSize yasem::WebPage::getVieportSize()
+QSize WebPage::getVieportSize()
 {
     return webView()->getViewportSize();
 }
 
 
-qreal yasem::WebPage::scale()
+qreal WebPage::scale()
 {
     return webView()->getScale();
 }
 
 
-QRect yasem::WebPage::getPageRect()
+QRect WebPage::getPageRect()
 {
     return webView()->getRect();
 }
 
 
-bool yasem::WebPage::load(const QUrl &url)
+bool WebPage::load(const QUrl &url)
 {
     DEBUG() << "load:" << url;
     /*if(url.toString().startsWith("file://"))
@@ -503,10 +503,10 @@ bool yasem::WebPage::load(const QUrl &url)
 #endif
 
     resetPage();
-    int max_rps = ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
+    int max_rps = SDK::ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
     if(max_rps > 0)
     {
-        AbstractHttpProxy* proxy = __get_plugin<AbstractHttpProxy*>(ROLE_HTTP_PROXY);
+        SDK::AbstractHttpProxy* proxy = __get_plugin<SDK::AbstractHttpProxy*>(SDK::ROLE_HTTP_PROXY);
         if(proxy != NULL)
         {
             if(proxy->isRunning())
@@ -521,7 +521,7 @@ bool yasem::WebPage::load(const QUrl &url)
     }
     else
     {
-        AbstractHttpProxy* proxy = dynamic_cast<AbstractHttpProxy*>(PluginManager::instance()->getByRole(ROLE_HTTP_PROXY));
+        SDK::AbstractHttpProxy* proxy = __get_plugin<SDK::AbstractHttpProxy*>(SDK::ROLE_HTTP_PROXY);
         if(proxy != NULL)
         {
             proxy->stopServer();
@@ -535,7 +535,7 @@ bool yasem::WebPage::load(const QUrl &url)
 
 
 
-QWebPage *yasem::WebPage::createWindow(WebWindowType type)
+QWebPage *WebPage::createWindow(WebWindowType type)
 {
     STUB();
     WebPage* page = dynamic_cast<WebPage*>(m_browser->createNewPage(true));
@@ -546,7 +546,7 @@ QWebPage *yasem::WebPage::createWindow(WebWindowType type)
 
 
 
-bool yasem::WebPage::openWindow(const QString &url, const QString &params = "", const QString &name = "")
+bool WebPage::openWindow(const QString &url, const QString &params = "", const QString &name = "")
 {
     evalJs(QString("setTimeout(function(){window.open('%1', '%2', '%3');}, 1)")
                     .arg(url)
@@ -556,7 +556,7 @@ bool yasem::WebPage::openWindow(const QString &url, const QString &params = "", 
 }
 
 
-void yasem::WebPage::execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol)
+void WebPage::execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol)
 {
     QEvent::Type type = QEvent::KeyPress;
     QKeyEvent* event = new QKeyEvent(type, code, mods, symbol);
@@ -565,7 +565,7 @@ void yasem::WebPage::execKeyEvent(const QString &action, int code, Qt::KeyboardM
 }
 
 
-QWidget *yasem::WebPage::widget()
+QWidget *WebPage::widget()
 {
     return webView();
 }

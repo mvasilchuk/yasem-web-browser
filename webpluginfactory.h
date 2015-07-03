@@ -7,7 +7,9 @@
 
 namespace yasem
 {
+namespace SDK {
 class StbPluginObject;
+}
 
 class WebPluginFactory : public QWebPluginFactory
 {
@@ -24,14 +26,14 @@ public:
        return setInstance();
     }
 
-    QList<StbPluginObject*> getPluginList() {
+    QList<SDK::StbPluginObject*> getPluginList() {
         return pluginList;
     }
 
-    virtual bool addPlugin(StbPluginObject *plugin) = 0;
+    virtual bool addPlugin(SDK::StbPluginObject *plugin) = 0;
 
 protected:
-    QList<StbPluginObject*> pluginList;
+    QList<SDK::StbPluginObject*> pluginList;
     WebPluginFactory() {}
 private:
 

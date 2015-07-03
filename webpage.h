@@ -10,13 +10,16 @@
 
 namespace yasem
 {
-
-class StbPluginObject;
 class WebView;
 class WebPluginFactory;
 class InterceptorManager;
+
+namespace SDK {
+class StbPluginObject;
 class BrowserPluginObject;
-class WebPage : public QWebPage, public virtual AbstractWebPage
+}
+
+class WebPage : public QWebPage, public virtual SDK::AbstractWebPage
 {
     Q_OBJECT
 public:
@@ -36,14 +39,14 @@ public slots:
     void close();
     virtual bool event(QEvent*);
 
-    bool stb(StbPluginObject* plugin);
-    StbPluginObject* stb();
+    bool stb(SDK::StbPluginObject* plugin);
+    SDK::StbPluginObject* stb();
     QUrl handleUrl(QUrl url);
     void recreateObjects();
     void resetPage();
     void showWebInspector();
 
-    bool receiveKeyCode(RC_KEY keyCode);
+    bool receiveKeyCode(SDK::RC_KEY keyCode);
     void evalJs(const QString &js);
 
     QColor getChromaKey()  const;
@@ -67,8 +70,8 @@ protected slots:
 
 protected:
     WebView* parent;
-    StbPluginObject* m_stb_plugin;
-    BrowserPluginObject* m_browser;
+    SDK::StbPluginObject* m_stb_plugin;
+    SDK::BrowserPluginObject* m_browser;
     QString defaultUserAgent;
     QString customUserAgent;
     WebPluginFactory* pluginFactory;

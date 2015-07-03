@@ -7,11 +7,15 @@
 #include <QList>
 
 namespace yasem {
-class WebPage;
+
+namespace SDK {
 class BrowserPluginObject;
+class YasemSettings;
+}
+
+class WebPage;
 class NetworkInterceptorEntry;
 class NetworkReply;
-class YasemSettings;
 
 class InterceptorManager : public QNetworkAccessManager
 {
@@ -28,8 +32,8 @@ public slots:
 protected:
    QList<NetworkInterceptorEntry*> entryList;
    WebPage* page;
-   BrowserPluginObject* m_browserPlugin;
-   YasemSettings* m_settings;
+   SDK::BrowserPluginObject* m_browserPlugin;
+   SDK::YasemSettings* m_settings;
    bool m_statistics_enabled;
    int m_slow_request_timeout;
 

@@ -9,22 +9,26 @@
 
 namespace yasem
 {
-class GuiPluginObject;
-class StbPluginObject;
+
 class WebView;
 class BrowserKeyEvent;
 
-class WebkitPluginObject: public BrowserPluginObject
+namespace SDK {
+class GuiPluginObject;
+class StbPluginObject;
+}
+
+class WebkitPluginObject: public SDK::BrowserPluginObject
 {
     Q_OBJECT
 public:
-    WebkitPluginObject(Plugin* plugin);
+    WebkitPluginObject(SDK::Plugin* plugin);
     virtual ~WebkitPluginObject();
 
     // AbstractPluginObject interface
 public:
-    PluginObjectResult init();
-    PluginObjectResult deinit();
+    SDK::PluginObjectResult init();
+    SDK::PluginObjectResult deinit();
 
     virtual void setParentWidget(QWidget *parent);
     virtual QWidget* getParentWidget();
@@ -38,8 +42,8 @@ public:
     Q_INVOKABLE void rect(int x, int y, int width, int height);
     virtual QRect rect();
     void resize(QResizeEvent* = 0);
-    void stb(StbPluginObject* m_stb_plugin) ;
-    StbPluginObject* stb();
+    void stb(SDK::StbPluginObject* m_stb_plugin) ;
+    SDK::StbPluginObject* stb();
 
     void show();
     void hide();
@@ -48,12 +52,12 @@ public:
 
     //virtual void setTransparentColor(QPalette palette);
 protected:
-    GuiPluginObject* guiPlugin;
+    SDK::GuiPluginObject* guiPlugin;
     QRect browserRect;
     float browserScale;
-    StbPluginObject* m_stb_plugin;
+    SDK::StbPluginObject* m_stb_plugin;
     QString rootDir;
-    QHash<RC_KEY, BrowserKeyEvent*> keyEventValues;
+    QHash<SDK::RC_KEY, BrowserKeyEvent*> keyEventValues;
     WebView* activeWebView;
     QList<WebView*> webViewList;
     bool isFullscreen;
@@ -61,7 +65,7 @@ protected:
 
 
 public:
-    QHash<RC_KEY, BrowserKeyEvent*> getKeyEventValues();
+    QHash<SDK::RC_KEY, BrowserKeyEvent*> getKeyEventValues();
 
 
     // BrowserPlugin interface
@@ -70,9 +74,9 @@ public:
     virtual QString browserRootDir();
     void setUserAgent(const QString &userAgent);
     void addFont(const QString &fileName);
-    void registerKeyEvent(RC_KEY rc_key, int keyCode);
-    void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt = false, bool ctrl = false, bool shift = false);
-    void registerKeyEvent(RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false) ;
+    void registerKeyEvent(SDK::RC_KEY rc_key, int keyCode);
+    void registerKeyEvent(SDK::RC_KEY rc_key, int keyCode, int which, bool alt = false, bool ctrl = false, bool shift = false);
+    void registerKeyEvent(SDK::RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false) ;
     void clearKeyEvents();
     WebView *getWebView();
     void setWebView(WebView* view);
@@ -91,12 +95,12 @@ protected slots:
 
     // BrowserPlugin interface
 public:
-    AbstractWebPage *getFirstPage();
-    AbstractWebPage* createNewPage(bool child = false);
+    SDK::AbstractWebPage *getFirstPage();
+    SDK::AbstractWebPage* createNewPage(bool child = false);
 
     // BrowserPlugin interface
 public:
-    AbstractWebPage *getActiveWebPage();
+    SDK::AbstractWebPage *getActiveWebPage();
 };
 }
 

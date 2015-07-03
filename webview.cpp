@@ -25,14 +25,14 @@ using namespace yasem;
 
 WebView::WebView(QWidget *parent) :
     QWebView(parent),
-    m_browser(dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER))),
+    m_browser(__get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER)),
     m_allow_repaint(true),
     m_allow_transparency(true),
     m_skip_full_render(false)
 {
     setObjectName("WebView");
-    gui = dynamic_cast<GuiPluginObject*>(PluginManager::instance()->getByRole(ROLE_GUI));
-    m_player = dynamic_cast<MediaPlayerPluginObject*>(PluginManager::instance()->getByRole(ROLE_MEDIA));
+    gui = __get_plugin<SDK::GuiPluginObject*>(SDK::ROLE_GUI);
+    m_player = __get_plugin<SDK::MediaPlayerPluginObject*>(SDK::ROLE_MEDIA);
 
     rendering_started = false;
     m_is_context_menu_valid = false;
@@ -92,7 +92,7 @@ void WebView::setupContextMenu()
 
     m_backToPreviousPageAction = new QAction(tr("Back"), m_contextMenu);
     connect(m_backToPreviousPageAction, &QAction::triggered, []() {
-        ProfileManager::instance()->backToPreviousProfile();
+        SDK::ProfileManager::instance()->backToPreviousProfile();
     });
     m_contextMenu->addAction(m_backToPreviousPageAction);
 
@@ -109,7 +109,7 @@ void WebView::showContextMenu(const QPoint &pos)
     if(!m_is_context_menu_valid)
         setupContextMenu();
 
-    if(ProfileManager::instance()->canGoBack())
+    if(SDK::ProfileManager::instance()->canGoBack())
         m_backToPreviousPageAction->setVisible(true);
     else
         m_backToPreviousPageAction->setVisible(false);
@@ -174,7 +174,7 @@ QRect WebView::getRect()
 
 void WebView::readSettings()
 {
-    QSettings* settings = Core::instance()->settings();
+    QSettings* settings = SDK::Core::instance()->settings();
     settings->beginGroup("WebBrowser");
     mouseBorderThreshold = settings->value("mouse_border_threshold", 50).toInt();
     settings->endGroup();
@@ -195,7 +195,7 @@ void WebView::keyReleaseEvent(QKeyEvent *event)
 void WebView::mouseMoveEvent(QMouseEvent *e)
 {
     //DEBUG() << e;
-    int position = MOUSE_POSITION::MIDDLE;
+    int position = SDK::MOUSE_POSITION::MIDDLE;
 
     int y_pos = e->pos().y();
     int x_pos = e->pos().x();
@@ -203,14 +203,14 @@ void WebView::mouseMoveEvent(QMouseEvent *e)
     int width = this->width();
 
     if(y_pos < (mouseBorderThreshold))
-        position |= MOUSE_POSITION::TOP;
+        position |= SDK::MOUSE_POSITION::TOP;
     else if(y_pos > height - mouseBorderThreshold)
-        position |= MOUSE_POSITION::BOTTOM;
+        position |= SDK::MOUSE_POSITION::BOTTOM;
 
     if(x_pos < mouseBorderThreshold)
-        position |= MOUSE_POSITION::LEFT;
+        position |= SDK::MOUSE_POSITION::LEFT;
     else if(x_pos > width - mouseBorderThreshold)
-        position |= MOUSE_POSITION::RIGHT;
+        position |= SDK::MOUSE_POSITION::RIGHT;
 
     emit mousePositionChanged(position);
 
@@ -282,7 +282,7 @@ void WebView::onLoadProgress(int progress)
 void WebView::onLoadFinished(bool finished)
 {
     DEBUG() << "onLoadFinished(" << finished << ")";
-    Core::instance()->statistics()->print();
+    SDK::Core::instance()->statistics()->print();
 }
 
 void WebView::onTitleChanged(const QString &title)
@@ -453,17 +453,17 @@ void WebView::fullUpdate()
 
 void WebView::updateTopWidget()
 {
-    BrowserPluginObject* browser = dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
+    SDK::BrowserPluginObject* browser = __get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER);
     Q_ASSERT(browser);
     switch(browser->getTopWidget())
     {
-        case BrowserPluginObject::TOP_WIDGET_BROWSER:
+        case SDK::BrowserPluginObject::TOP_WIDGET_BROWSER:
         {
             DEBUG() << "raising browser";
             raise();
             break;
         }
-        case BrowserPluginObject::TOP_WIDGET_PLAYER:
+        case SDK::BrowserPluginObject::TOP_WIDGET_PLAYER:
         {
             DEBUG() << "raising player";
             m_player->widget()->raise();

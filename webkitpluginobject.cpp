@@ -22,8 +22,8 @@
 
 using namespace yasem;
 
-WebkitPluginObject::WebkitPluginObject(Plugin* plugin):
-    BrowserPluginObject(plugin),
+WebkitPluginObject::WebkitPluginObject(SDK::Plugin* plugin):
+    SDK::BrowserPluginObject(plugin),
     m_stb_plugin(NULL)
 {
     guiPlugin = NULL;
@@ -36,14 +36,14 @@ WebkitPluginObject::~WebkitPluginObject()
 
 
 
-PluginObjectResult yasem::WebkitPluginObject::init()
+SDK::PluginObjectResult yasem::WebkitPluginObject::init()
 {
-    return PLUGIN_OBJECT_RESULT_OK;
+    return SDK::PLUGIN_OBJECT_RESULT_OK;
 }
 
-PluginObjectResult yasem::WebkitPluginObject::deinit()
+SDK::PluginObjectResult yasem::WebkitPluginObject::deinit()
 {
-    return PLUGIN_OBJECT_RESULT_OK;
+    return SDK::PLUGIN_OBJECT_RESULT_OK;
 }
 
 void yasem::WebkitPluginObject::setParentWidget(QWidget *parent)
@@ -86,7 +86,7 @@ QRect WebkitPluginObject::rect()
     return this->browserRect;
 }
 
-StbPluginObject *WebkitPluginObject::stb()
+SDK::StbPluginObject *WebkitPluginObject::stb()
 {
     return this->m_stb_plugin;
 }
@@ -101,7 +101,7 @@ void WebkitPluginObject::hide()
     activeWebView->hide();
 }
 
-QHash<RC_KEY, BrowserKeyEvent *> WebkitPluginObject::getKeyEventValues()
+QHash<SDK::RC_KEY, BrowserKeyEvent *> WebkitPluginObject::getKeyEventValues()
 {
     return keyEventValues;
 }
@@ -132,7 +132,7 @@ void WebkitPluginObject::addFont(const QString &fileName)
 }
 
 
-void WebkitPluginObject::stb(StbPluginObject *stbPlugin)
+void WebkitPluginObject::stb(SDK::StbPluginObject *stbPlugin)
 {
     this->m_stb_plugin = stbPlugin;
     foreach(QObject* child, webViewList)
@@ -155,7 +155,7 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
 {
     Q_UNUSED(event)
     if(!guiPlugin) {
-        guiPlugin = dynamic_cast<GuiPluginObject*>(PluginManager::instance()->getByRole(ROLE_GUI));
+        guiPlugin = __get_plugin<SDK::GuiPluginObject*>(SDK::ROLE_GUI);
         if(!guiPlugin) return;
     }
 
@@ -171,15 +171,15 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
     }
 }
 
-void WebkitPluginObject::registerKeyEvent(RC_KEY rc_key, int keyCode)
+void WebkitPluginObject::registerKeyEvent(SDK::RC_KEY rc_key, int keyCode)
 {
     registerKeyEvent(rc_key, keyCode, keyCode);
 }
 
-void WebkitPluginObject::registerKeyEvent(RC_KEY rc_key, int keyCode, int which, bool alt, bool ctrl, bool shift)
+void WebkitPluginObject::registerKeyEvent(SDK::RC_KEY rc_key, int keyCode, int which, bool alt, bool ctrl, bool shift)
 {
     DEBUG() << "registerKeyEvent {key:"
-            << Core::instance()->getKeycodeHashes().key(rc_key)
+            << SDK::Core::instance()->getKeycodeHashes().key(rc_key)
             << ", code:"
             << keyCode
             << ", which:"
@@ -191,7 +191,7 @@ void WebkitPluginObject::registerKeyEvent(RC_KEY rc_key, int keyCode, int which,
     keyEventValues[rc_key] = new BrowserKeyEvent(keyCode, which, alt, ctrl, shift);
 }
 
-void WebkitPluginObject::registerKeyEvent(RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt, bool ctrl, bool shift)
+void WebkitPluginObject::registerKeyEvent(SDK::RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt, bool ctrl, bool shift)
 {
 
     keyEventValues[rc_key] = new BrowserKeyEvent(keyCode, which, keyCode2, which2, alt, ctrl, shift);
@@ -201,9 +201,6 @@ void WebkitPluginObject::clearKeyEvents()
 {
     keyEventValues.clear();
 }
-
-
-
 
 WebView *WebkitPluginObject::getWebView()
 {
@@ -250,12 +247,12 @@ void WebkitPluginObject::setupMousePositionHandler(const QObject *receiver, cons
     connect(activeWebView, SIGNAL(mousePositionChanged(int)), receiver, method, Qt::DirectConnection);
 }
 
-AbstractWebPage *WebkitPluginObject::getFirstPage()
+SDK::AbstractWebPage *WebkitPluginObject::getFirstPage()
 {
-    return dynamic_cast<AbstractWebPage*>(activeWebView->page());
+    return dynamic_cast<SDK::AbstractWebPage*>(activeWebView->page());
 }
 
-AbstractWebPage* WebkitPluginObject::createNewPage(bool child)
+SDK::AbstractWebPage* WebkitPluginObject::createNewPage(bool child)
 {
     WebView* webView = new WebView(getParentWidget());
     WebPage* page = new WebPage(webView);
@@ -293,9 +290,7 @@ void WebkitBrowser::componentComplete()
 }*/
 
 
-
-
-AbstractWebPage *WebkitPluginObject::getActiveWebPage()
+SDK::AbstractWebPage *WebkitPluginObject::getActiveWebPage()
 {
-    return dynamic_cast<AbstractWebPage*>(activeWebView->page());
+    return dynamic_cast<SDK::AbstractWebPage*>(activeWebView->page());
 }
