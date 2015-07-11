@@ -5,6 +5,7 @@
 #include "stbpluginobject.h"
 #include "mediaplayerpluginobject.h"
 #include "statistics.h"
+#include "networkstatistics.h"
 
 #include "pluginmanager.h"
 #include "webpage.h"
@@ -282,7 +283,7 @@ void WebView::onLoadProgress(int progress)
 void WebView::onLoadFinished(bool finished)
 {
     DEBUG() << "onLoadFinished(" << finished << ")";
-    SDK::Core::instance()->statistics()->print();
+    SDK::Core::instance()->statistics()->network()->print();
 }
 
 void WebView::onTitleChanged(const QString &title)
