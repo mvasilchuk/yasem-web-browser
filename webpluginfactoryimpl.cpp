@@ -9,7 +9,7 @@
 
 using namespace yasem;
 
-WebPluginFactoryImpl::WebPluginFactoryImpl(WebPage *parent)
+WebPluginFactoryImpl::WebPluginFactoryImpl(QtWebPage *parent)
 {
     Q_UNUSED(parent)
     this->page = parent;

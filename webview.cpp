@@ -1,14 +1,14 @@
 #include "webview.h"
 #include "webkitpluginobject.h"
 #include "profilemanager.h"
-#include "guipluginobject.h"
+#include "gui.h"
 #include "stbpluginobject.h"
-#include "mediaplayerpluginobject.h"
+#include "mediaplayer.h"
 #include "statistics.h"
 #include "networkstatistics.h"
 
 #include "pluginmanager.h"
-#include "webpage.h"
+#include "qtwebpage.h"
 #include <QWebFrame>
 
 #include <QKeyEvent>
@@ -26,14 +26,14 @@ using namespace yasem;
 
 WebView::WebView(QWidget *parent) :
     QWebView(parent),
-    m_browser(__get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER)),
+    m_browser(__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER)),
     m_allow_repaint(true),
     m_allow_transparency(true),
     m_skip_full_render(false)
 {
     setObjectName("WebView");
-    gui = __get_plugin<SDK::GuiPluginObject*>(SDK::ROLE_GUI);
-    m_player = __get_plugin<SDK::MediaPlayerPluginObject*>(SDK::ROLE_MEDIA);
+    gui = __get_plugin<SDK::GUI*>(SDK::ROLE_GUI);
+    m_player = __get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA);
 
     rendering_started = false;
     m_is_context_menu_valid = false;
@@ -100,7 +100,7 @@ void WebView::setupContextMenu()
 
     m_openWebInspectorAction = new QAction(tr("Open Developer Tools"), m_contextMenu);
     connect(m_openWebInspectorAction, &QAction::triggered, [=]() {
-        ((WebPage*)this->page())->showWebInspector();
+        ((QtWebPage*)this->page())->showWebInspector();
     });
     m_contextMenu->addAction(m_openWebInspectorAction);
 }
@@ -239,7 +239,7 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 {
     STUB();
     WebView *webView = new WebView();
-    WebPage *newWeb = new WebPage(webView);
+    QtWebPage *newWeb = new QtWebPage(webView);
     webView->setPage(newWeb);
     webView->show();
     return webView;
@@ -267,7 +267,7 @@ void WebView::onLoadProgress(int progress)
          * The other fix is for objects that are not visible;
         */
 
-        WebPage* _page = dynamic_cast<WebPage*>(page());
+        QtWebPage* _page = dynamic_cast<QtWebPage*>(page());
         if(_page != NULL)
         {
             DEBUG() << "Applying fix for <object> tags";
@@ -454,17 +454,17 @@ void WebView::fullUpdate()
 
 void WebView::updateTopWidget()
 {
-    SDK::BrowserPluginObject* browser = __get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER);
+    SDK::Browser* browser = __get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
     Q_ASSERT(browser);
     switch(browser->getTopWidget())
     {
-        case SDK::BrowserPluginObject::TOP_WIDGET_BROWSER:
+        case SDK::Browser::TOP_WIDGET_BROWSER:
         {
             DEBUG() << "raising browser";
             raise();
             break;
         }
-        case SDK::BrowserPluginObject::TOP_WIDGET_PLAYER:
+        case SDK::Browser::TOP_WIDGET_PLAYER:
         {
             DEBUG() << "raising player";
             m_player->widget()->raise();

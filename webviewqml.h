@@ -10,7 +10,7 @@ namespace yasem {
 
 class BrowserPluginObject;
 class WebView;
-class WebPage;
+class QtWebPage;
 
 class WebViewQml : public QQuickPaintedItem
 {
@@ -22,7 +22,7 @@ public:
 protected:
     BrowserPluginObject* browser;
     WebView* webView;
-    WebPage* page;
+    QtWebPage* page;
 
 public:
     void paint(QPainter *painter);

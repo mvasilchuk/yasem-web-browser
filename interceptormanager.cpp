@@ -1,14 +1,14 @@
 #include "interceptormanager.h"
 #include "macros.h"
-#include "webpage.h"
+#include "qtwebpage.h"
 #include "networkreply.h"
 #include "webkitbrowserplugin.h"
 #include "core.h"
-#include "browserpluginobject.h"
+#include "browser.h"
 #include "pluginmanager.h"
 #include "statistics.h"
 #include "networkstatistics.h"
-#include "yasemsettings.h"
+#include "config.h"
 #include "configuration_items.h"
 
 #include <QtNetwork/QNetworkRequest>
@@ -17,13 +17,13 @@
 
 using namespace yasem;
 
-InterceptorManager::InterceptorManager(WebPage *parent):
+InterceptorManager::InterceptorManager(QtWebPage *parent):
     QNetworkAccessManager(parent),
     m_settings(SDK::Core::instance()->yasem_settings())
 {
     webServerHost = "http://127.0.0.1";
     webServerPort = SDK::Core::instance()->settings()->value("web-server/port", 9999).toInt();
-    m_browserPlugin = __get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER);
+    m_browserPlugin = __get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
 
     SDK::ConfigContainer* network_statistics = SDK::__get_config_item<SDK::ConfigContainer*>(QStringList() << SETTINGS_GROUP_OTHER << NETWORK_STATISTICS);
     m_statistics_enabled = network_statistics->findItemByKey(NETWORK_STATISTICS_ENABLED)->value().toBool();
@@ -130,7 +130,7 @@ bool InterceptorManager::addInterceptorEntry(NetworkInterceptorEntry* entry)
      return true;
 }
 
-void InterceptorManager::setPage(WebPage *page)
+void InterceptorManager::setPage(QtWebPage *page)
 {
     this->page = page;
 }

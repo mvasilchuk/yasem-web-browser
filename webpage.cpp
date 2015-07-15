@@ -1,9 +1,9 @@
-#include "webpage.h"
+#include "qtwebpage.h"
 #include "stbpluginobject.h"
 #include "webpluginfactoryimpl.h"
 #include "pluginmanager.h"
 #include "profilemanager.h"
-#include "guipluginobject.h"
+#include "gui.h"
 #include "interceptormanager.h"
 #include "webview.h"
 #include "browserkeyevent.h"
@@ -24,9 +24,9 @@
 
 using namespace yasem;
 
-WebPage::WebPage(WebView *parent) :
+QtWebPage::QtWebPage(WebView *parent) :
     QWebPage(parent),
-    m_browser(__get_plugin<SDK::BrowserPluginObject*>(SDK::ROLE_BROWSER)),
+    m_browser(__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER)),
     m_chromakey(QColor(0, 0, 0)),
     m_chromamask(QColor(0xFF, 0xFF, 0xFF)),
     m_opacity(1.0),
@@ -65,7 +65,7 @@ WebPage::WebPage(WebView *parent) :
 
     pluginFactory = WebPluginFactory::setInstance(new WebPluginFactoryImpl());
 
-    connect(this->mainFrame(), &QWebFrame::javaScriptWindowObjectCleared, this, &WebPage::attachJsStbApi);
+    connect(this->mainFrame(), &QWebFrame::javaScriptWindowObjectCleared, this, &QtWebPage::attachJsStbApi);
 
     settings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
@@ -77,23 +77,23 @@ WebPage::WebPage(WebView *parent) :
         showWebInspector();
 
     setForwardUnsupportedContent(true);
-    connect(this, &WebPage::unsupportedContent, []( QNetworkReply * reply ){
+    connect(this, &QtWebPage::unsupportedContent, []( QNetworkReply * reply ){
         qDebug() << "FIXME: Unsupported content" << reply;
         delete reply;
     });
 }
 
-WebView *WebPage::webView()
+WebView *QtWebPage::webView()
 {
     return parent;
 }
 
-bool WebPage::isChildWindow()
+bool QtWebPage::isChildWindow()
 {
     return this->objectName() == "Popup web page";
 }
 
-void WebPage::attachJsStbApi()
+void QtWebPage::attachJsStbApi()
 {
     STUB();
 
@@ -123,7 +123,7 @@ void WebPage::attachJsStbApi()
     DEBUG() << "JS API attached";
 }
 
-void WebPage::triggerAction(QWebPage::WebAction action, bool checked)
+void QtWebPage::triggerAction(QWebPage::WebAction action, bool checked)
 {
     if(action == QWebPage::Back)
     {
@@ -133,13 +133,13 @@ void WebPage::triggerAction(QWebPage::WebAction action, bool checked)
         QWebPage::triggerAction(action, checked);
 }
 
-void WebPage::javaScriptAlert ( QWebFrame * frame, const QString & msg )
+void QtWebPage::javaScriptAlert ( QWebFrame * frame, const QString & msg )
 {
     Q_UNUSED(frame);
     LOG() << "[JS ALERT]:" << msg;
 }
 
-bool WebPage::javaScriptConfirm ( QWebFrame * frame, const QString & msg )
+bool QtWebPage::javaScriptConfirm ( QWebFrame * frame, const QString & msg )
 {
     Q_UNUSED(frame);
     LOG() << "[JS CONFIRM]:" << msg;
@@ -152,19 +152,19 @@ bool WebPage::javaScriptConfirm ( QWebFrame * frame, const QString & msg )
     return reply == QMessageBox::Yes;
 }
 
-void WebPage::javaScriptConsoleMessage ( const QString & message, int lineNumber, const QString & sourceID )
+void QtWebPage::javaScriptConsoleMessage ( const QString & message, int lineNumber, const QString & sourceID )
 {
     LOG() << qPrintable(QString("[JS MESSAGE] (%1: %2): %3").arg(sourceID).arg(lineNumber).arg(message));
 }
 
-bool WebPage::javaScriptPrompt ( QWebFrame * frame, const QString & msg, const QString & defaultValue, QString * result )
+bool QtWebPage::javaScriptPrompt ( QWebFrame * frame, const QString & msg, const QString & defaultValue, QString * result )
 {
     Q_UNUSED(frame);
     LOG() << QString("WebPage::javaScriptPrompt(%1, %2, %3)").arg(msg).arg(defaultValue).arg(*result);
     return false;
 }
 
-bool WebPage::event(QEvent *event)
+bool QtWebPage::event(QEvent *event)
 {
     bool result = false;
     if(event->type() == QEvent::KeyPress)
@@ -290,7 +290,7 @@ bool WebPage::event(QEvent *event)
     return result || QWebPage::event(event);
 }
 
-bool WebPage::receiveKeyCode(SDK::RC_KEY keyCode)
+bool QtWebPage::receiveKeyCode(SDK::RC_KEY keyCode)
 {
     STUB() << SDK::Core::instance()->getKeycodeHashes().key(keyCode) << keyCode; //int)keyCode;
 
@@ -314,53 +314,53 @@ bool WebPage::receiveKeyCode(SDK::RC_KEY keyCode)
 
 
 
-void WebPage::evalJs(const QString &js)
+void QtWebPage::evalJs(const QString &js)
 {
     mainFrame()->evaluateJavaScript(js);
 }
 
-QColor WebPage::getChromaKey() const
+QColor QtWebPage::getChromaKey() const
 {
     return m_chromakey;
 }
 
-void WebPage::setChromaKey(QColor color)
+void QtWebPage::setChromaKey(QColor color)
 {
     m_chromakey = color;
 }
 
-QColor WebPage::getChromaMask() const
+QColor QtWebPage::getChromaMask() const
 {
     return m_chromamask;
 }
 
-void WebPage::setChromaMask(QColor color)
+void QtWebPage::setChromaMask(QColor color)
 {
     m_chromamask = color;
 }
 
-void WebPage::setOpacity(float opacity)
+void QtWebPage::setOpacity(float opacity)
 {
     DEBUG() << "================= opacity" << opacity;
     m_opacity = opacity;
 }
 
-float WebPage::getOpacity()  const
+float QtWebPage::getOpacity()  const
 {
     return m_opacity;
 }
 
-bool WebPage::isChromaKeyEnabled() const
+bool QtWebPage::isChromaKeyEnabled() const
 {
     return m_chromakey_enabled;
 }
 
-void WebPage::setChromaKeyEnabled(bool enabled)
+void QtWebPage::setChromaKeyEnabled(bool enabled)
 {
     m_chromakey_enabled = enabled;
 }
 
-void WebPage::reset()
+void QtWebPage::reset()
 {
     m_chromakey_enabled = true;
     m_chromakey = QColor(0, 0, 0);
@@ -368,25 +368,25 @@ void WebPage::reset()
     m_opacity = 1.0;
 }
 
-bool WebPage::stb(SDK::StbPluginObject *plugin)
+bool QtWebPage::stb(SDK::StbPluginObject *plugin)
 {
     STUB();
     this->m_stb_plugin = plugin;
     return true;
 }
 
-SDK::StbPluginObject *WebPage::stb()
+SDK::StbPluginObject *QtWebPage::stb()
 {
     return this->m_stb_plugin;
 }
 
-void WebPage::setUserAgent(const QString &userAgent)
+void QtWebPage::setUserAgent(const QString &userAgent)
 {
     STUB() << userAgent;
     customUserAgent = userAgent;
 }
 
-QUrl WebPage::handleUrl(QUrl url)
+QUrl QtWebPage::handleUrl(QUrl url)
 {
     SDK::StbPluginObject* stbPlugin = stb();
     if(stbPlugin != NULL)
@@ -397,7 +397,7 @@ QUrl WebPage::handleUrl(QUrl url)
     return url;
 }
 
-void WebPage::recreateObjects()
+void QtWebPage::recreateObjects()
 {
     STUB();
 
@@ -414,7 +414,7 @@ void WebPage::recreateObjects()
 
 }
 
-void WebPage::resetPage()
+void QtWebPage::resetPage()
 {
     STUB();
     pluginFactory->getPluginList().clear();
@@ -438,12 +438,12 @@ void WebPage::resetPage()
     }
 }
 
-void WebPage::showWebInspector()
+void QtWebPage::showWebInspector()
 {
     m_web_inspector.show();
 }
 
-QString WebPage::userAgentForUrl(const QUrl & url) const
+QString QtWebPage::userAgentForUrl(const QUrl & url) const
 {
     Q_UNUSED(url);
     QString ua = customUserAgent != "" ? customUserAgent : defaultUserAgent;
@@ -452,37 +452,37 @@ QString WebPage::userAgentForUrl(const QUrl & url) const
     return ua;
 }
 
-void WebPage::close()
+void QtWebPage::close()
 {
     this->parent->close();
     emit closed();
 }
 
 
-void WebPage::setPageViewportSize(QSize new_size)
+void QtWebPage::setPageViewportSize(QSize new_size)
 {
     webView()->setViewportSize(new_size);
 }
 
-QSize WebPage::getVieportSize()
+QSize QtWebPage::getVieportSize()
 {
     return webView()->getViewportSize();
 }
 
 
-qreal WebPage::scale()
+qreal QtWebPage::scale()
 {
     return webView()->getScale();
 }
 
 
-QRect WebPage::getPageRect()
+QRect QtWebPage::getPageRect()
 {
     return webView()->getRect();
 }
 
 
-bool WebPage::load(const QUrl &url)
+bool QtWebPage::load(const QUrl &url)
 {
     DEBUG() << "load:" << url;
     /*if(url.toString().startsWith("file://"))
@@ -506,7 +506,7 @@ bool WebPage::load(const QUrl &url)
     int max_rps = SDK::ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
     if(max_rps > 0)
     {
-        SDK::AbstractHttpProxy* proxy = __get_plugin<SDK::AbstractHttpProxy*>(SDK::ROLE_HTTP_PROXY);
+        SDK::HttpProxy* proxy = __get_plugin<SDK::HttpProxy*>(SDK::ROLE_HTTP_PROXY);
         if(proxy != NULL)
         {
             if(proxy->isRunning())
@@ -521,7 +521,7 @@ bool WebPage::load(const QUrl &url)
     }
     else
     {
-        SDK::AbstractHttpProxy* proxy = __get_plugin<SDK::AbstractHttpProxy*>(SDK::ROLE_HTTP_PROXY);
+        SDK::HttpProxy* proxy = __get_plugin<SDK::HttpProxy*>(SDK::ROLE_HTTP_PROXY);
         if(proxy != NULL)
         {
             proxy->stopServer();
@@ -535,10 +535,10 @@ bool WebPage::load(const QUrl &url)
 
 
 
-QWebPage *WebPage::createWindow(WebWindowType type)
+QWebPage *QtWebPage::createWindow(WebWindowType type)
 {
     STUB();
-    WebPage* page = dynamic_cast<WebPage*>(m_browser->createNewPage(true));
+    QtWebPage* page = dynamic_cast<QtWebPage*>(m_browser->createNewPage(true));
     page->setObjectName("Child window");
     page->parent->setObjectName("Child Web View");
     return page;
@@ -546,7 +546,7 @@ QWebPage *WebPage::createWindow(WebWindowType type)
 
 
 
-bool WebPage::openWindow(const QString &url, const QString &params = "", const QString &name = "")
+bool QtWebPage::openWindow(const QString &url, const QString &params = "", const QString &name = "")
 {
     evalJs(QString("setTimeout(function(){window.open('%1', '%2', '%3');}, 1)")
                     .arg(url)
@@ -556,7 +556,7 @@ bool WebPage::openWindow(const QString &url, const QString &params = "", const Q
 }
 
 
-void WebPage::execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol)
+void QtWebPage::execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol)
 {
     QEvent::Type type = QEvent::KeyPress;
     QKeyEvent* event = new QKeyEvent(type, code, mods, symbol);
@@ -565,7 +565,7 @@ void WebPage::execKeyEvent(const QString &action, int code, Qt::KeyboardModifier
 }
 
 
-QWidget *WebPage::widget()
+QWidget *QtWebPage::widget()
 {
     return webView();
 }

@@ -4,9 +4,9 @@
 #include "webpluginfactoryimpl.h"
 #include "pluginmanager.h"
 #include "stbpluginobject.h"
-#include "webpage.h"
+#include "qtwebpage.h"
 #include "browserkeyevent.h"
-#include "guipluginobject.h"
+#include "gui.h"
 #include "webview.h"
 #include "macros.h"
 
@@ -23,7 +23,7 @@
 using namespace yasem;
 
 WebkitPluginObject::WebkitPluginObject(SDK::Plugin* plugin):
-    SDK::BrowserPluginObject(plugin),
+    SDK::Browser(plugin),
     m_stb_plugin(NULL)
 {
     guiPlugin = NULL;
@@ -118,7 +118,7 @@ QString WebkitPluginObject::browserRootDir()
 
 void WebkitPluginObject::setUserAgent(const QString &userAgent)
 {
-    WebPage* p = (WebPage*)activeWebView->page();
+    QtWebPage* p = (QtWebPage*)activeWebView->page();
 
     qDebug() << "Using User Agent" << userAgent;
 
@@ -140,7 +140,7 @@ void WebkitPluginObject::stb(SDK::StbPluginObject *stbPlugin)
         WebView* childView = qobject_cast<WebView*>(child);
         if(childView != NULL)
         {
-            ((WebPage*)childView->page())->stb(stbPlugin);
+            ((QtWebPage*)childView->page())->stb(stbPlugin);
         }
     }
 }
@@ -155,7 +155,7 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
 {
     Q_UNUSED(event)
     if(!guiPlugin) {
-        guiPlugin = __get_plugin<SDK::GuiPluginObject*>(SDK::ROLE_GUI);
+        guiPlugin = __get_plugin<SDK::GUI*>(SDK::ROLE_GUI);
         if(!guiPlugin) return;
     }
 
@@ -247,15 +247,15 @@ void WebkitPluginObject::setupMousePositionHandler(const QObject *receiver, cons
     connect(activeWebView, SIGNAL(mousePositionChanged(int)), receiver, method, Qt::DirectConnection);
 }
 
-SDK::AbstractWebPage *WebkitPluginObject::getFirstPage()
+SDK::WebPage *WebkitPluginObject::getFirstPage()
 {
-    return dynamic_cast<SDK::AbstractWebPage*>(activeWebView->page());
+    return dynamic_cast<SDK::WebPage*>(activeWebView->page());
 }
 
-SDK::AbstractWebPage* WebkitPluginObject::createNewPage(bool child)
+SDK::WebPage* WebkitPluginObject::createNewPage(bool child)
 {
     WebView* webView = new WebView(getParentWidget());
-    WebPage* page = new WebPage(webView);
+    QtWebPage* page = new QtWebPage(webView);
 
     if(!child) // If it's not a child view
     {
@@ -290,7 +290,7 @@ void WebkitBrowser::componentComplete()
 }*/
 
 
-SDK::AbstractWebPage *WebkitPluginObject::getActiveWebPage()
+SDK::WebPage *WebkitPluginObject::getActiveWebPage()
 {
-    return dynamic_cast<SDK::AbstractWebPage*>(activeWebView->page());
+    return dynamic_cast<SDK::WebPage*>(activeWebView->page());
 }

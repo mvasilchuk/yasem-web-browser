@@ -26,7 +26,6 @@ SOURCES += \
 
 HEADERS +=\
     webkitbrowser_global.h \
-    webpage.h \
     webview.h \
     webpluginfactory.h \
     webpluginfactoryimpl.h \
@@ -36,7 +35,8 @@ HEADERS +=\
     browserkeyevent.h \
     cmd_line.h \
     webkitbrowserplugin.h \
-    webkitpluginobject.h
+    webkitpluginobject.h \
+    qtwebpage.h
 
 unix:!symbian {
     maemo5 {

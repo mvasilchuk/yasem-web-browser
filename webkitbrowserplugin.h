@@ -2,7 +2,7 @@
 #define WEBKITBROWSER_H
 
 #include "plugin.h"
-#include "browserpluginobject.h"
+#include "browser.h"
 
 #include "webkitbrowser_global.h"
 

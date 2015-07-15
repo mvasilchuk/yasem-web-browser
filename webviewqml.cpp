@@ -1,8 +1,8 @@
 #include "webviewqml.h"
 #include "webview.h"
 #include "pluginmanager.h"
-#include "browserpluginobject.h"
-#include "webpage.h"
+#include "browser.h"
+#include "qtwebpage.h"
 
 #include <QPoint>
 #include <QApplication>
@@ -15,7 +15,7 @@ WebViewQml::WebViewQml(QQuickItem * parent):
     browser = dynamic_cast<BrowserPluginObject*>(PluginManager::instance()->getByRole(ROLE_BROWSER));
     browser->setUseQml(true);
 
-    page = dynamic_cast<WebPage*>(browser->createNewPage());
+    page = dynamic_cast<QtWebPage*>(browser->createNewPage());
     webView = page->webView();
     webView->moveToThread(qApp->thread());
 

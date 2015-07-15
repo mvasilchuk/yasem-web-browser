@@ -2,7 +2,7 @@
 #define WEBPAGE_H
 
 #include "enums.h"
-#include "abstractwebpage.h"
+#include "webpage.h"
 
 #include <QWidget>
 #include <QWebPage>
@@ -16,14 +16,14 @@ class InterceptorManager;
 
 namespace SDK {
 class StbPluginObject;
-class BrowserPluginObject;
+class Browser;
 }
 
-class WebPage : public QWebPage, public virtual SDK::AbstractWebPage
+class QtWebPage : public QWebPage, public virtual SDK::WebPage
 {
     Q_OBJECT
 public:
-    explicit WebPage(WebView *parent = 0);
+    explicit QtWebPage(WebView *parent = 0);
 
     void  javaScriptAlert ( QWebFrame * frame, const QString & msg );
     bool  javaScriptConfirm ( QWebFrame * frame, const QString & msg );
@@ -71,7 +71,7 @@ protected slots:
 protected:
     WebView* parent;
     SDK::StbPluginObject* m_stb_plugin;
-    SDK::BrowserPluginObject* m_browser;
+    SDK::Browser* m_browser;
     QString defaultUserAgent;
     QString customUserAgent;
     WebPluginFactory* pluginFactory;

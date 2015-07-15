@@ -8,7 +8,7 @@
 
 namespace yasem
 {
-class WebPage;
+class QtWebPage;
 
 namespace SDK {
 class StbPluginObject;
@@ -18,7 +18,7 @@ class WebPluginFactoryImpl : public WebPluginFactory
 {
     Q_OBJECT
 public:
-    WebPluginFactoryImpl(WebPage *parent = 0);
+    WebPluginFactoryImpl(QtWebPage *parent = 0);
 public slots:
     virtual bool addPlugin(SDK::StbPluginObject *plugin);
     virtual QObject *create(const QString &mimeType,
@@ -28,7 +28,7 @@ public slots:
     virtual QList<QWebPluginFactory::Plugin> plugins() const;
 
 protected:
-    WebPage* page;
+    QtWebPage* page;
 
     // QWebPluginFactory interface
 public:

@@ -15,9 +15,9 @@ namespace yasem
 class WebkitPluginObject;
 
 namespace SDK {
-class GuiPluginObject;
-class MediaPlayerPluginObject;
-class BrowserPluginObject;
+class GUI;
+class MediaPlayer;
+class Browser;
 }
 
 class WebView : public QWebView
@@ -26,7 +26,7 @@ class WebView : public QWebView
 public:
     explicit WebView(QWidget *parent = 0);
     virtual QWebView* createWindow(QWebPage::WebWindowType type);
-    SDK::GuiPluginObject* gui;
+    SDK::GUI* gui;
 
 public slots:
     void onLoadStarted();
@@ -69,7 +69,7 @@ protected:
 
     int mouseBorderThreshold;
 
-    SDK::BrowserPluginObject* m_browser;
+    SDK::Browser* m_browser;
 
     QMenu* m_contextMenu;
     QAction* m_backToPreviousPageAction;
@@ -90,7 +90,7 @@ protected:
 
     bool m_allow_repaint;
     bool m_allow_transparency;
-    SDK::MediaPlayerPluginObject* m_player;
+    SDK::MediaPlayer* m_player;
     bool m_skip_full_render;
 
     // QWidget interface

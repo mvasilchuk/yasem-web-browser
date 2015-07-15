@@ -1,7 +1,7 @@
 #ifndef WEBBROWSERPLUGINOBJECT_H
 #define WEBBROWSERPLUGINOBJECT_H
 
-#include "browserpluginobject.h"
+#include "browser.h"
 
 #include <QRect>
 #include <QUrl>
@@ -14,11 +14,11 @@ class WebView;
 class BrowserKeyEvent;
 
 namespace SDK {
-class GuiPluginObject;
+class GUI;
 class StbPluginObject;
 }
 
-class WebkitPluginObject: public SDK::BrowserPluginObject
+class WebkitPluginObject: public SDK::Browser
 {
     Q_OBJECT
 public:
@@ -52,7 +52,7 @@ public:
 
     //virtual void setTransparentColor(QPalette palette);
 protected:
-    SDK::GuiPluginObject* guiPlugin;
+    SDK::GUI* guiPlugin;
     QRect browserRect;
     float browserScale;
     SDK::StbPluginObject* m_stb_plugin;
@@ -95,12 +95,12 @@ protected slots:
 
     // BrowserPlugin interface
 public:
-    SDK::AbstractWebPage *getFirstPage();
-    SDK::AbstractWebPage* createNewPage(bool child = false);
+    SDK::WebPage *getFirstPage();
+    SDK::WebPage* createNewPage(bool child = false);
 
     // BrowserPlugin interface
 public:
-    SDK::AbstractWebPage *getActiveWebPage();
+    SDK::WebPage *getActiveWebPage();
 };
 }
 

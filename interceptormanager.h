@@ -9,11 +9,11 @@
 namespace yasem {
 
 namespace SDK {
-class BrowserPluginObject;
-class YasemSettings;
+class Browser;
+class Config;
 }
 
-class WebPage;
+class QtWebPage;
 class NetworkInterceptorEntry;
 class NetworkReply;
 
@@ -21,19 +21,19 @@ class InterceptorManager : public QNetworkAccessManager
 {
     Q_OBJECT
 public:
-   InterceptorManager(WebPage *parent = 0);
+   InterceptorManager(QtWebPage *parent = 0);
 
    QNetworkReply *createRequest(Operation op, const QNetworkRequest &request, QIODevice *outgoingData);
    bool addInterceptorEntry(NetworkInterceptorEntry *entry);
-   void setPage(WebPage* page);
+   void setPage(QtWebPage* page);
 
 public slots:
    void initNetworkStatisticGathering();
 protected:
    QList<NetworkInterceptorEntry*> entryList;
-   WebPage* page;
-   SDK::BrowserPluginObject* m_browserPlugin;
-   SDK::YasemSettings* m_settings;
+   QtWebPage* page;
+   SDK::Browser* m_browserPlugin;
+   SDK::Config* m_settings;
    bool m_statistics_enabled;
    int m_slow_request_timeout;
 
