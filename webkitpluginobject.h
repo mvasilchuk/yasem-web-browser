@@ -57,7 +57,7 @@ protected:
     float browserScale;
     SDK::StbPluginObject* m_stb_plugin;
     QString rootDir;
-    QHash<SDK::RC_KEY, BrowserKeyEvent*> keyEventValues;
+    QHash<SDK::GUI::RcKey, BrowserKeyEvent*> keyEventValues;
     WebView* activeWebView;
     QList<WebView*> webViewList;
     bool isFullscreen;
@@ -65,7 +65,7 @@ protected:
 
 
 public:
-    QHash<SDK::RC_KEY, BrowserKeyEvent*> getKeyEventValues();
+    QHash<SDK::GUI::RcKey, BrowserKeyEvent*> getKeyEventValues();
 
 
     // BrowserPlugin interface
@@ -74,9 +74,9 @@ public:
     virtual QString browserRootDir();
     void setUserAgent(const QString &userAgent);
     void addFont(const QString &fileName);
-    void registerKeyEvent(SDK::RC_KEY rc_key, int keyCode);
-    void registerKeyEvent(SDK::RC_KEY rc_key, int keyCode, int which, bool alt = false, bool ctrl = false, bool shift = false);
-    void registerKeyEvent(SDK::RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false) ;
+    void registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode);
+    void registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode, int which, bool alt = false, bool ctrl = false, bool shift = false);
+    void registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false) ;
     void clearKeyEvents();
     WebView *getWebView();
     void setWebView(WebView* view);

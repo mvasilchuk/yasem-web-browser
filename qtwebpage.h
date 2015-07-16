@@ -3,6 +3,7 @@
 
 #include "enums.h"
 #include "webpage.h"
+#include "gui.h"
 
 #include <QWidget>
 #include <QWebPage>
@@ -46,7 +47,7 @@ public slots:
     void resetPage();
     void showWebInspector();
 
-    bool receiveKeyCode(SDK::RC_KEY keyCode);
+    bool receiveKeyCode(SDK::GUI::RcKey keyCode);
     void evalJs(const QString &js);
 
     QColor getChromaKey()  const;

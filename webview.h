@@ -26,7 +26,6 @@ class WebView : public QWebView
 public:
     explicit WebView(QWidget *parent = 0);
     virtual QWebView* createWindow(QWebPage::WebWindowType type);
-    SDK::GUI* gui;
 
 public slots:
     void onLoadStarted();

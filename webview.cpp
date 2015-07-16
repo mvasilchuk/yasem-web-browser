@@ -26,14 +26,13 @@ using namespace yasem;
 
 WebView::WebView(QWidget *parent) :
     QWebView(parent),
-    m_browser(__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER)),
+    m_browser(SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER)),
     m_allow_repaint(true),
     m_allow_transparency(true),
     m_skip_full_render(false)
 {
     setObjectName("WebView");
-    gui = __get_plugin<SDK::GUI*>(SDK::ROLE_GUI);
-    m_player = __get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA);
+    m_player = SDK::__get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA);
 
     rendering_started = false;
     m_is_context_menu_valid = false;
@@ -85,10 +84,17 @@ void WebView::setupContextMenu()
     // Context menu shouldn't be transparent like a browser
     m_contextMenu->setStyleSheet("background: none");
 
-    for(QMenu* submenu: gui->getMenuItems())
+    SDK::GUI* gui = SDK::GUI::instance();
+    if(gui)
     {
-        m_contextMenu->addMenu(submenu);
+        for(QMenu* submenu: gui->getMenuItems())
+        {
+            m_contextMenu->addMenu(submenu);
+        }
     }
+    else
+        WARN() << "No GUI module found!";
+
     m_contextMenu->addSeparator();
 
     m_backToPreviousPageAction = new QAction(tr("Back"), m_contextMenu);
@@ -454,7 +460,7 @@ void WebView::fullUpdate()
 
 void WebView::updateTopWidget()
 {
-    SDK::Browser* browser = __get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
+    SDK::Browser* browser = SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
     Q_ASSERT(browser);
     switch(browser->getTopWidget())
     {

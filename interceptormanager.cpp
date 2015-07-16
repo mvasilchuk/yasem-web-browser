@@ -23,7 +23,7 @@ InterceptorManager::InterceptorManager(QtWebPage *parent):
 {
     webServerHost = "http://127.0.0.1";
     webServerPort = SDK::Core::instance()->settings()->value("web-server/port", 9999).toInt();
-    m_browserPlugin = __get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
+    m_browserPlugin = SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
 
     SDK::ConfigContainer* network_statistics = SDK::__get_config_item<SDK::ConfigContainer*>(QStringList() << SETTINGS_GROUP_OTHER << NETWORK_STATISTICS);
     m_statistics_enabled = network_statistics->findItemByKey(NETWORK_STATISTICS_ENABLED)->value().toBool();

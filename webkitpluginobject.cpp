@@ -101,7 +101,7 @@ void WebkitPluginObject::hide()
     activeWebView->hide();
 }
 
-QHash<SDK::RC_KEY, BrowserKeyEvent *> WebkitPluginObject::getKeyEventValues()
+QHash<SDK::GUI::RcKey, BrowserKeyEvent *> WebkitPluginObject::getKeyEventValues()
 {
     return keyEventValues;
 }
@@ -155,7 +155,7 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
 {
     Q_UNUSED(event)
     if(!guiPlugin) {
-        guiPlugin = __get_plugin<SDK::GUI*>(SDK::ROLE_GUI);
+        guiPlugin = SDK::__get_plugin<SDK::GUI*>(SDK::ROLE_GUI);
         if(!guiPlugin) return;
     }
 
@@ -171,15 +171,15 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
     }
 }
 
-void WebkitPluginObject::registerKeyEvent(SDK::RC_KEY rc_key, int keyCode)
+void WebkitPluginObject::registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode)
 {
     registerKeyEvent(rc_key, keyCode, keyCode);
 }
 
-void WebkitPluginObject::registerKeyEvent(SDK::RC_KEY rc_key, int keyCode, int which, bool alt, bool ctrl, bool shift)
+void WebkitPluginObject::registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode, int which, bool alt, bool ctrl, bool shift)
 {
     DEBUG() << "registerKeyEvent {key:"
-            << SDK::Core::instance()->getKeycodeHashes().key(rc_key)
+            << SDK::GUI::instance()->getRcKeyName(rc_key)
             << ", code:"
             << keyCode
             << ", which:"
@@ -191,7 +191,7 @@ void WebkitPluginObject::registerKeyEvent(SDK::RC_KEY rc_key, int keyCode, int w
     keyEventValues[rc_key] = new BrowserKeyEvent(keyCode, which, alt, ctrl, shift);
 }
 
-void WebkitPluginObject::registerKeyEvent(SDK::RC_KEY rc_key, int keyCode, int which, int keyCode2, int which2, bool alt, bool ctrl, bool shift)
+void WebkitPluginObject::registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode, int which, int keyCode2, int which2, bool alt, bool ctrl, bool shift)
 {
 
     keyEventValues[rc_key] = new BrowserKeyEvent(keyCode, which, keyCode2, which2, alt, ctrl, shift);
