@@ -251,7 +251,7 @@ bool QtWebPage::event(QEvent *event)
 
             case Qt::Key_F11:
             {
-                    parent->gui->setFullscreen(!parent->gui->getFullscreen());
+                    SDK::GUI::instance()->setFullscreen(!SDK::GUI::instance()->getFullscreen());
                     break;
             }
 
