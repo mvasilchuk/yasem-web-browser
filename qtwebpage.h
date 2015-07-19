@@ -33,8 +33,7 @@ public:
     void setUserAgent(const QString &userAgent);
 
     WebView* webView();
-public:
-    InterceptorManager* interceptor;
+
 public slots:
     bool load(const QUrl &url);
     void close();
@@ -68,6 +67,7 @@ public slots:
 
 protected slots:
     void attachJsStbApi();
+    void setupInterceptor();
 
 protected:
     WebView* parent;
@@ -83,25 +83,17 @@ protected:
     float m_opacity; // 0.0 - 1.0
     bool m_chromakey_enabled;
 
+    InterceptorManager* m_interceptor;
+
 public:
      bool isChildWindow();
-    // QWebPage interface
     QString userAgentForUrl(const QUrl &url) const;
-public:
     void triggerAction(WebAction action, bool checked);
 
-
-    // AbstractWebPage interface
-public:
     void setPageViewportSize(QSize new_size);
     QSize getVieportSize();
 
-    // AbstractWebPage interface
-public:
     qreal scale();
-
-    // AbstractWebPage interface
-public:
     QRect getPageRect();
 
 
@@ -112,13 +104,11 @@ protected:
     // AbstractWebPage interface
 public slots:
     virtual void execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol);
-
-    // AbstractWebPage interface
-public slots:
     virtual QWidget *widget();
 
 signals:
     void closed();
+    void load_started(const QString& url);
 };
 
 }

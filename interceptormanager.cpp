@@ -14,6 +14,7 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QDebug>
 #include <QElapsedTimer>
+#include <QAbstractNetworkCache>
 
 using namespace yasem;
 
@@ -83,10 +84,12 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
 
     connect(real, &QNetworkReply::encrypted, [=]() {
         WARN() << "encrypted" << real->url();
+        emit connection_encrypted(real->url().toString());
     });
 
     connect(real, &QNetworkReply::sslErrors, [=](const QList<QSslError> &errors) {
         WARN() << "sslErrors" << real->url();
+        emit encryption_error(real->url().toString(), errors);
     });
 
     connect(real, &QNetworkReply::uploadProgress, [=, &marked_as_slow](qint64 bytesSent, qint64 bytesTotal) {

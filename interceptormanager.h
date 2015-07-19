@@ -5,6 +5,7 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QList>
+#include <QSslError>
 
 namespace yasem {
 
@@ -46,6 +47,8 @@ signals:
    void request_succeeded();
    void request_failed();
    void slow_request_detected();
+   void connection_encrypted(const QString& url);
+   void encryption_error(const QString& url, const QList<QSslError> &errors);
 };
 
 }

@@ -30,7 +30,8 @@ QtWebPage::QtWebPage(WebView *parent) :
     m_chromakey(QColor(0, 0, 0)),
     m_chromamask(QColor(0xFF, 0xFF, 0xFF)),
     m_opacity(1.0),
-    m_chromakey_enabled(true)
+    m_chromakey_enabled(true),
+    m_interceptor(NULL)
 {
     this->parent = parent;
     this->setObjectName("WebPage");
@@ -38,11 +39,6 @@ QtWebPage::QtWebPage(WebView *parent) :
 
     defaultUserAgent = "Mozilla/5.0 (%Platform%%Security%%Subplatform%) AppleWebKit/%WebKitVersion% (KHTML, like Gecko) %AppVersion Safari/%WebKitVersion%";
     customUserAgent = "";
-
-    interceptor = new InterceptorManager(this);
-    interceptor->setPage(this);
-
-    this->setNetworkAccessManager(interceptor);
 
     settings()->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls,true);
     settings()->setAttribute(QWebSettings::LocalContentCanAccessFileUrls,true);
@@ -121,6 +117,20 @@ void QtWebPage::attachJsStbApi()
         }
     }
     DEBUG() << "JS API attached";
+}
+
+void QtWebPage::setupInterceptor()
+{
+    if(m_interceptor)
+        delete m_interceptor;
+    m_interceptor = new InterceptorManager(this);
+    m_interceptor->setPage(this);
+
+    this->setNetworkAccessManager(m_interceptor);
+
+    connect(this, &QtWebPage::load_started, m_browser, &SDK::Browser::page_loading_started);
+    connect(m_interceptor, &InterceptorManager::connection_encrypted, m_browser, &SDK::Browser::connection_encrypted);
+    connect(m_interceptor, &InterceptorManager::encryption_error, m_browser, &SDK::Browser::encryption_error);
 }
 
 void QtWebPage::triggerAction(QWebPage::WebAction action, bool checked)
@@ -503,6 +513,7 @@ bool QtWebPage::load(const QUrl &url)
 #endif
 
     resetPage();
+    setupInterceptor();
     int max_rps = SDK::ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
     if(max_rps > 0)
     {
@@ -513,7 +524,7 @@ bool QtWebPage::load(const QUrl &url)
                 proxy->stopServer();
             proxy->setMaxRequestPerSecond(max_rps);
             proxy->startServer();
-            interceptor->setProxy(QNetworkProxy(QNetworkProxy::HttpProxy, proxy->hostName(), proxy->port()));
+            m_interceptor->setProxy(QNetworkProxy(QNetworkProxy::HttpProxy, proxy->hostName(), proxy->port()));
         }
         else
             WARN() << "Http proxy not found! Requests will not be limited!";
@@ -526,14 +537,12 @@ bool QtWebPage::load(const QUrl &url)
         {
             proxy->stopServer();
         }
-        interceptor->setProxy(QNetworkProxy());
+        m_interceptor->setProxy(QNetworkProxy());
     }
     webView()->load(url);
+    emit load_started(url.toString());
     return true;
 }
-
-
-
 
 QWebPage *QtWebPage::createWindow(WebWindowType type)
 {
