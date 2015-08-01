@@ -505,8 +505,11 @@ bool QtWebPage::load(const QUrl &url)
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     QWebSecurityOrigin origin(url);
     origin.addAccessWhitelistEntry("http", "", QWebSecurityOrigin::AllowSubdomains);
+    origin.addAccessWhitelistEntry("https", "", QWebSecurityOrigin::AllowSubdomains);
     origin.addAccessWhitelistEntry("qrc", "", QWebSecurityOrigin::AllowSubdomains);
     origin.addAccessWhitelistEntry("http", "www.youtube.com", QWebSecurityOrigin::AllowSubdomains);
+    origin.addAccessWhitelistEntry("https", "www.youtube.com", QWebSecurityOrigin::AllowSubdomains);
+    origin.addAccessWhitelistEntry(url.scheme(), url.host(), QWebSecurityOrigin::AllowSubdomains);
     mainFrame()->securityOrigin().allOrigins().append(origin);
 #else
     WARN(QString("Cross-origin resource sharing (CORS) is only available since Qt 5.2. CORS will be disabled!"));
