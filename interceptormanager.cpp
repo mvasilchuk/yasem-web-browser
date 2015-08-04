@@ -8,7 +8,7 @@
 #include "pluginmanager.h"
 #include "statistics.h"
 #include "networkstatistics.h"
-#include "config.h"
+#include "yasemsettings.h"
 #include "configuration_items.h"
 
 #include <QtNetwork/QNetworkRequest>

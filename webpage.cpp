@@ -79,6 +79,12 @@ QtWebPage::QtWebPage(WebView *parent) :
     });
 }
 
+QtWebPage::~QtWebPage()
+{
+    if(m_interceptor != NULL)
+        delete m_interceptor;
+}
+
 WebView *QtWebPage::webView()
 {
     return parent;
@@ -306,9 +312,9 @@ bool QtWebPage::receiveKeyCode(SDK::GUI::RcKey keyCode)
 
     WebkitPluginObject* browser = dynamic_cast<WebkitPluginObject*>(m_browser);
 
-    BrowserKeyEvent* keyEvent = browser->getKeyEventValues()[keyCode];
+    QSharedPointer<BrowserKeyEvent> keyEvent = browser->getKeyEventValues()[keyCode];
 
-    if(keyEvent == NULL)
+    if(keyEvent.data() == NULL)
     {
         qDebug() << "Key code not registered:" <<  QString("0x").append(QString::number(keyCode, 16)) <<  browser->getKeyEventValues();
         return false;

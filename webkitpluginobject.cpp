@@ -31,10 +31,9 @@ WebkitPluginObject::WebkitPluginObject(SDK::Plugin* plugin):
 
 WebkitPluginObject::~WebkitPluginObject()
 {
-
+    STUB();
+    clearKeyEvents();
 }
-
-
 
 SDK::PluginObjectResult yasem::WebkitPluginObject::init()
 {
@@ -101,9 +100,9 @@ void WebkitPluginObject::hide()
     activeWebView->hide();
 }
 
-QHash<SDK::GUI::RcKey, BrowserKeyEvent *> WebkitPluginObject::getKeyEventValues()
+QHash<SDK::GUI::RcKey, QSharedPointer<BrowserKeyEvent>> WebkitPluginObject::getKeyEventValues()
 {
-    return keyEventValues;
+    return m_key_events;
 }
 
 QUrl WebkitPluginObject::url()
@@ -188,18 +187,17 @@ void WebkitPluginObject::registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode, i
             << ctrl << ", shift:"
             << shift << "}";
 
-    keyEventValues[rc_key] = new BrowserKeyEvent(keyCode, which, alt, ctrl, shift);
+    m_key_events[rc_key] = QSharedPointer<BrowserKeyEvent>(new BrowserKeyEvent(keyCode, which, alt, ctrl, shift));
 }
 
 void WebkitPluginObject::registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode, int which, int keyCode2, int which2, bool alt, bool ctrl, bool shift)
 {
-
-    keyEventValues[rc_key] = new BrowserKeyEvent(keyCode, which, keyCode2, which2, alt, ctrl, shift);
+    m_key_events[rc_key] = QSharedPointer<BrowserKeyEvent>(new BrowserKeyEvent(keyCode, which, keyCode2, which2, alt, ctrl, shift));
 }
 
 void WebkitPluginObject::clearKeyEvents()
 {
-    keyEventValues.clear();
+    m_key_events.clear();
 }
 
 WebView *WebkitPluginObject::getWebView()

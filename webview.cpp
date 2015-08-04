@@ -27,6 +27,9 @@ using namespace yasem;
 WebView::WebView(QWidget *parent) :
     QWebView(parent),
     m_browser(SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER)),
+    m_contextMenu(NULL),
+    m_backToPreviousPageAction(NULL),
+    m_openWebInspectorAction(NULL),
     m_allow_repaint(true),
     m_allow_transparency(true),
     m_skip_full_render(false)
@@ -75,6 +78,11 @@ WebView::WebView(QWidget *parent) :
     connect(m_player, &MediaPlayerPluginObject::stopped, this, &WebView::fullUpdate);
     connect(m_player, &MediaPlayerPluginObject::paused, this, &WebView::fullUpdate);
 #endif //USE_REAL_TRANSPARENCY
+}
+
+WebView::~WebView()
+{
+    STUB();
 }
 
 void WebView::setupContextMenu()
@@ -244,7 +252,7 @@ QString WebView::loadFix(const QString &name)
 QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 {
     STUB();
-    WebView *webView = new WebView();
+    WebView *webView = new WebView(parentWidget());
     QtWebPage *newWeb = new QtWebPage(webView);
     webView->setPage(newWeb);
     webView->show();

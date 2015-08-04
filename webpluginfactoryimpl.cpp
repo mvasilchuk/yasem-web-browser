@@ -51,7 +51,7 @@ QObject *WebPluginFactoryImpl::create(const QString &mimeType, const QUrl &url, 
 
     QWidget* webObject = getWebObjectByMimeType(mimeType, classid);
 
-    qDebug() << "webObject: " << webObject;;
+    qDebug() << "webObject: " << webObject ;
 
     if (webObject == NULL)
     {
@@ -72,8 +72,8 @@ QList<QWebPluginFactory::Plugin> WebPluginFactoryImpl::plugins() const
     foreach(SDK::StbPluginObject* plugin, pluginList)
     {
         QWebPluginFactory::Plugin wPlugin;
-        wPlugin.name = plugin->webName;
-        wPlugin.description = plugin->description;
+        wPlugin.name = plugin->m_web_name;
+        wPlugin.description = plugin->m_description;
         wPlugin.mimeTypes = QList<MimeType>();
 
         foreach(SDK::WebObjectInfo info, plugin->getWebObjects())
@@ -129,7 +129,7 @@ QWidget* WebPluginFactoryImpl::getWebObjectByMimeType(const QString &mimeType, c
                 if(info.widgetFactory != NULL)
                     webObject = info.widgetFactory();
                 else
-                    webObject = static_cast<QWidget*>(info.webObject);
+                    webObject = info.webObject;
                 return webObject;
             }
         }

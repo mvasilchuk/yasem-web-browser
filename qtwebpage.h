@@ -25,6 +25,7 @@ class QtWebPage : public QWebPage, public virtual SDK::WebPage
     Q_OBJECT
 public:
     explicit QtWebPage(WebView *parent = 0);
+    virtual ~QtWebPage();
 
     void  javaScriptAlert ( QWebFrame * frame, const QString & msg );
     bool  javaScriptConfirm ( QWebFrame * frame, const QString & msg );
