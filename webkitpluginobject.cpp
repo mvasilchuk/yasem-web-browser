@@ -24,9 +24,8 @@ using namespace yasem;
 
 WebkitPluginObject::WebkitPluginObject(SDK::Plugin* plugin):
     SDK::Browser(plugin),
-    m_stb_plugin(NULL)
+    m_gui(NULL)
 {
-    guiPlugin = NULL;
 }
 
 WebkitPluginObject::~WebkitPluginObject()
@@ -85,7 +84,7 @@ QRect WebkitPluginObject::rect()
     return this->browserRect;
 }
 
-SDK::StbPluginObject *WebkitPluginObject::stb()
+SDK::StbPluginObject* WebkitPluginObject::stb()
 {
     return this->m_stb_plugin;
 }
@@ -131,7 +130,7 @@ void WebkitPluginObject::addFont(const QString &fileName)
 }
 
 
-void WebkitPluginObject::stb(SDK::StbPluginObject *stbPlugin)
+void WebkitPluginObject::stb(SDK::StbPluginObject* stbPlugin)
 {
     this->m_stb_plugin = stbPlugin;
     foreach(QObject* child, webViewList)
@@ -139,7 +138,7 @@ void WebkitPluginObject::stb(SDK::StbPluginObject *stbPlugin)
         WebView* childView = qobject_cast<WebView*>(child);
         if(childView != NULL)
         {
-            ((QtWebPage*)childView->page())->stb(stbPlugin);
+            static_cast<QtWebPage*>(childView->page())->stb(stbPlugin);
         }
     }
 }
@@ -153,9 +152,11 @@ void WebkitPluginObject::resize(QResizeEvent* event)
 void WebkitPluginObject::moveEvent ( QMoveEvent * event )
 {
     Q_UNUSED(event)
-    if(!guiPlugin) {
-        guiPlugin = SDK::__get_plugin<SDK::GUI*>(SDK::ROLE_GUI);
-        if(!guiPlugin) return;
+
+    if(!m_gui)
+    {
+        m_gui = SDK::GUI::instance();
+        if(!m_gui) return;
     }
 
     foreach(QWidget* child, webViewList)
@@ -163,7 +164,7 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
         WebView* vChild = dynamic_cast<WebView*>(child);
         if(vChild != NULL)
         {
-            vChild->resizeView(guiPlugin->widgetRect());
+            vChild->resizeView(m_gui->widgetRect());
         }
 
         else qWarning() << "child warn:" << child;
@@ -245,7 +246,7 @@ void WebkitPluginObject::setupMousePositionHandler(const QObject *receiver, cons
     connect(activeWebView, SIGNAL(mousePositionChanged(int)), receiver, method, Qt::DirectConnection);
 }
 
-SDK::WebPage *WebkitPluginObject::getFirstPage()
+SDK::WebPage* WebkitPluginObject::getFirstPage()
 {
     return dynamic_cast<SDK::WebPage*>(activeWebView->page());
 }
@@ -277,7 +278,7 @@ SDK::WebPage* WebkitPluginObject::createNewPage(bool child)
     fullscreen(false);
 
     addWebView(webView);
-    return page;
+    return dynamic_cast<SDK::WebPage*>(webView->page());
 }
 
 /*
@@ -288,7 +289,7 @@ void WebkitBrowser::componentComplete()
 }*/
 
 
-SDK::WebPage *WebkitPluginObject::getActiveWebPage()
+SDK::WebPage* WebkitPluginObject::getActiveWebPage()
 {
     return dynamic_cast<SDK::WebPage*>(activeWebView->page());
 }

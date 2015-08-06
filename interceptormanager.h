@@ -26,20 +26,21 @@ public:
 
    QNetworkReply *createRequest(Operation op, const QNetworkRequest &request, QIODevice *outgoingData);
    bool addInterceptorEntry(NetworkInterceptorEntry *entry);
-   void setPage(QtWebPage* page);
+   void setPage(QtWebPage* m_page);
 
 public slots:
    void initNetworkStatisticGathering();
 protected:
    QList<NetworkInterceptorEntry*> entryList;
-   QtWebPage* page;
-   SDK::Browser* m_browserPlugin;
-   SDK::Config* m_settings;
+   QtWebPage* m_page;
+   SDK::Browser* m_browser;
    bool m_statistics_enabled;
    int m_slow_request_timeout;
 
    QString webServerHost;
    int webServerPort;
+
+   SDK::Config* settings();
 
 signals:
    void request_started();

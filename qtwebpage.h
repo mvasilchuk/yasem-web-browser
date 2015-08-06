@@ -20,11 +20,11 @@ class StbPluginObject;
 class Browser;
 }
 
-class QtWebPage : public QWebPage, public virtual SDK::WebPage
+class QtWebPage : public QWebPage, public SDK::WebPage
 {
     Q_OBJECT
 public:
-    explicit QtWebPage(WebView *parent = 0);
+    explicit QtWebPage(WebView *m_parent = 0);
     virtual ~QtWebPage();
 
     void  javaScriptAlert ( QWebFrame * frame, const QString & msg );
@@ -71,7 +71,7 @@ protected slots:
     void setupInterceptor();
 
 protected:
-    WebView* parent;
+    WebView* m_parent;
     SDK::StbPluginObject* m_stb_plugin;
     SDK::Browser* m_browser;
     QString defaultUserAgent;

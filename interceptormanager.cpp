@@ -19,12 +19,11 @@
 using namespace yasem;
 
 InterceptorManager::InterceptorManager(QtWebPage *parent):
-    QNetworkAccessManager(parent),
-    m_settings(SDK::Core::instance()->yasem_settings())
+    QNetworkAccessManager(parent)
 {
     webServerHost = "http://127.0.0.1";
     webServerPort = SDK::Core::instance()->settings()->value("web-server/port", 9999).toInt();
-    m_browserPlugin = SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
+    m_browser = SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER);
 
     SDK::ConfigContainer* network_statistics = SDK::__get_config_item<SDK::ConfigContainer*>(QStringList() << SETTINGS_GROUP_OTHER << NETWORK_STATISTICS);
     m_statistics_enabled = network_statistics->findItemByKey(NETWORK_STATISTICS_ENABLED)->value().toBool();
@@ -45,6 +44,11 @@ void InterceptorManager::initNetworkStatisticGathering()
     connect(this, &InterceptorManager::slow_request_detected,   network_statistics, &SDK::NetworkStatistics::incTooSlowConnections);
 }
 
+SDK::Config* InterceptorManager::settings()
+{
+    return SDK::Core::instance()->yasem_settings();
+}
+
 QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkRequest &request, QIODevice *outgoingData)
 {
     //DEBUG() << QString("Loading URL (before): %1").arg(request.url().toString());
@@ -52,12 +56,12 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
     QUrl url;
     if(!request.url().toString().startsWith("data:"))
     {
-        url = page->handleUrl(request.url());
+        url = m_page->handleUrl(request.url());
 
         QString urlString = url.url().trimmed();
 
         // TODO: Need to get url, not from browser but from webview
-        QString rootDir = m_browserPlugin->browserRootDir();
+        QString rootDir = m_browser->browserRootDir();
 
         if(urlString.startsWith("file://") && (!(urlString.startsWith("file://" + rootDir)) || urlString.contains(".php")))
         {
@@ -71,7 +75,7 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
 
     //DEBUG() << "Loading URL:" << request.url() << "->" << url;
     QNetworkRequest req = request;
-    req.setHeader(QNetworkRequest::UserAgentHeader, page->userAgentForUrl(QUrl()));
+    req.setHeader(QNetworkRequest::UserAgentHeader, m_page->userAgentForUrl(QUrl()));
 
     QNetworkReply* real = QNetworkAccessManager::createRequest(op, req, outgoingData);
     real->ignoreSslErrors();
@@ -135,5 +139,5 @@ bool InterceptorManager::addInterceptorEntry(NetworkInterceptorEntry* entry)
 
 void InterceptorManager::setPage(QtWebPage *page)
 {
-    this->page = page;
+    this->m_page = page;
 }

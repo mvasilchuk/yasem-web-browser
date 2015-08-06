@@ -26,7 +26,7 @@ using namespace yasem;
 
 WebView::WebView(QWidget *parent) :
     QWebView(parent),
-    m_browser(SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER)),
+    m_browser(SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER)),
     m_contextMenu(NULL),
     m_backToPreviousPageAction(NULL),
     m_openWebInspectorAction(NULL),
@@ -35,7 +35,6 @@ WebView::WebView(QWidget *parent) :
     m_skip_full_render(false)
 {
     setObjectName("WebView");
-    m_player = SDK::__get_plugin<SDK::MediaPlayer*>(SDK::ROLE_MEDIA);
 
     rendering_started = false;
     m_is_context_menu_valid = false;
@@ -253,8 +252,7 @@ QWebView *WebView::createWindow(QWebPage::WebWindowType type)
 {
     STUB();
     WebView *webView = new WebView(parentWidget());
-    QtWebPage *newWeb = new QtWebPage(webView);
-    webView->setPage(newWeb);
+    webView->setPage(new QtWebPage(webView));
     webView->show();
     return webView;
 }
@@ -468,7 +466,7 @@ void WebView::fullUpdate()
 
 void WebView::updateTopWidget()
 {
-    SDK::Browser* browser = SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER);
+    SDK::Browser* browser = SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER);
     Q_ASSERT(browser);
     switch(browser->getTopWidget())
     {
@@ -481,7 +479,7 @@ void WebView::updateTopWidget()
         case SDK::Browser::TOP_WIDGET_PLAYER:
         {
             DEBUG() << "raising player";
-            m_player->widget()->raise();
+            SDK::MediaPlayer::instance()->widget()->raise();
             break;
         }
         default: {

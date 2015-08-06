@@ -13,11 +13,13 @@ class QPainter;
 namespace yasem
 {
 class WebkitPluginObject;
+class QtWebPage;
 
 namespace SDK {
 class GUI;
 class MediaPlayer;
 class Browser;
+
 }
 
 class WebView : public QWebView
@@ -48,7 +50,6 @@ public slots:
     QSize getViewportSize();
     qreal getScale();
     QRect getRect();
-
 protected:
 
     void setupContextMenu();
@@ -69,7 +70,7 @@ protected:
 
     int mouseBorderThreshold;
 
-    SDK::Browser* m_browser;
+    QSharedPointer<SDK::Browser> m_browser;
 
     QMenu* m_contextMenu;
     QAction* m_backToPreviousPageAction;
@@ -90,7 +91,6 @@ protected:
 
     bool m_allow_repaint;
     bool m_allow_transparency;
-    SDK::MediaPlayer* m_player;
     bool m_skip_full_render;
 
     // QWidget interface

@@ -53,7 +53,7 @@ public:
 
     //virtual void setTransparentColor(QPalette palette);
 protected:
-    SDK::GUI* guiPlugin;
+    SDK::GUI* m_gui;
     QRect browserRect;
     float browserScale;
     SDK::StbPluginObject* m_stb_plugin;
@@ -96,12 +96,12 @@ protected slots:
 
     // BrowserPlugin interface
 public:
-    SDK::WebPage *getFirstPage();
+    SDK::WebPage* getFirstPage();
     SDK::WebPage* createNewPage(bool child = false);
 
     // BrowserPlugin interface
 public:
-    SDK::WebPage *getActiveWebPage();
+    SDK::WebPage* getActiveWebPage();
 };
 }
 

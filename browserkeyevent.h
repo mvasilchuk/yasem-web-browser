@@ -13,10 +13,10 @@ class BrowserKeyEvent : public QObject, public SDK::CustomKeyEvent
     Q_OBJECT
 
 public:
-    explicit BrowserKeyEvent(int keyCode, int which, bool alt = false, bool ctrl = false, bool shift = false);
-    explicit BrowserKeyEvent(int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false);
+    explicit BrowserKeyEvent(int m_key_code, int m_which, bool m_alt = false, bool m_ctrl = false, bool m_shift = false);
+    explicit BrowserKeyEvent(int m_key_code, int m_which, int m_key_code2, int m_which_2, bool m_alt = false, bool m_ctrl = false, bool m_shift = false);
 
-    void init(int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false);
+    void init(int m_key_code, int m_which, int m_key_code2, int m_which_2, bool m_alt = false, bool m_ctrl = false, bool m_shift = false);
     QString toString();
 
 

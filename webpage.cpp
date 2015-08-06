@@ -26,16 +26,15 @@ using namespace yasem;
 
 QtWebPage::QtWebPage(WebView *parent) :
     QWebPage(parent),
-    m_browser(SDK::__get_plugin<SDK::Browser*>(SDK::ROLE_BROWSER)),
+    m_browser(SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER)),
     m_chromakey(QColor(0, 0, 0)),
     m_chromamask(QColor(0xFF, 0xFF, 0xFF)),
     m_opacity(1.0),
     m_chromakey_enabled(true),
     m_interceptor(NULL)
 {
-    this->parent = parent;
+    this->m_parent = parent;
     this->setObjectName("WebPage");
-    this->stb(NULL);
 
     defaultUserAgent = "Mozilla/5.0 (%Platform%%Security%%Subplatform%) AppleWebKit/%WebKitVersion% (KHTML, like Gecko) %AppVersion Safari/%WebKitVersion%";
     customUserAgent = "";
@@ -87,7 +86,7 @@ QtWebPage::~QtWebPage()
 
 WebView *QtWebPage::webView()
 {
-    return parent;
+    return m_parent;
 }
 
 bool QtWebPage::isChildWindow()
@@ -163,7 +162,7 @@ bool QtWebPage::javaScriptConfirm ( QWebFrame * frame, const QString & msg )
     const QString title = QObject::tr("Confirm action");
 
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this->parent, title, msg,
+    reply = QMessageBox::question(this->m_parent, title, msg,
                                 QMessageBox::Yes|QMessageBox::No, QMessageBox::No);
     return reply == QMessageBox::Yes;
 }
@@ -384,14 +383,14 @@ void QtWebPage::reset()
     m_opacity = 1.0;
 }
 
-bool QtWebPage::stb(SDK::StbPluginObject *plugin)
+bool QtWebPage::stb(SDK::StbPluginObject* plugin)
 {
     STUB();
     this->m_stb_plugin = plugin;
     return true;
 }
 
-SDK::StbPluginObject *QtWebPage::stb()
+SDK::StbPluginObject* QtWebPage::stb()
 {
     return this->m_stb_plugin;
 }
@@ -417,7 +416,7 @@ void QtWebPage::recreateObjects()
 {
     STUB();
 
-    SDK::Profile* profile = SDK::ProfileManager::instance()->getActiveProfile();
+    const QSharedPointer<SDK::Profile>& profile = SDK::ProfileManager::instance()->getActiveProfile();
 
     if(profile)
     {
@@ -434,7 +433,7 @@ void QtWebPage::resetPage()
 {
     STUB();
     pluginFactory->getPluginList().clear();
-    SDK::Profile* profile =  SDK::ProfileManager::instance()->getActiveProfile();
+    const SDK::Profile* profile =  SDK::ProfileManager::instance()->getActiveProfile().data();
 
     if(profile)
     {
@@ -470,7 +469,7 @@ QString QtWebPage::userAgentForUrl(const QUrl & url) const
 
 void QtWebPage::close()
 {
-    this->parent->close();
+    this->m_parent->close();
     emit closed();
 }
 
@@ -526,8 +525,8 @@ bool QtWebPage::load(const QUrl &url)
     int max_rps = SDK::ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
     if(max_rps > 0)
     {
-        SDK::HttpProxy* proxy = SDK::__get_plugin<SDK::HttpProxy*>(SDK::ROLE_HTTP_PROXY);
-        if(proxy != NULL)
+        SDK::HttpProxy* proxy = SDK::__get_plugin<SDK::HttpProxy>(SDK::ROLE_HTTP_PROXY);
+        if(proxy)
         {
             if(proxy->isRunning())
                 proxy->stopServer();
@@ -541,8 +540,8 @@ bool QtWebPage::load(const QUrl &url)
     }
     else
     {
-        SDK::HttpProxy* proxy = SDK::__get_plugin<SDK::HttpProxy*>(SDK::ROLE_HTTP_PROXY);
-        if(proxy != NULL)
+        SDK::HttpProxy* proxy = SDK::__get_plugin<SDK::HttpProxy>(SDK::ROLE_HTTP_PROXY);
+        if(proxy)
         {
             proxy->stopServer();
         }
@@ -556,9 +555,9 @@ bool QtWebPage::load(const QUrl &url)
 QWebPage *QtWebPage::createWindow(WebWindowType type)
 {
     STUB();
-    QtWebPage* page = dynamic_cast<QtWebPage*>(m_browser->createNewPage(true));
+    QtWebPage* page = static_cast<QtWebPage*>(m_browser->createNewPage(true));
     page->setObjectName("Child window");
-    page->parent->setObjectName("Child Web View");
+    page->m_parent->setObjectName("Child Web View");
     return page;
 }
 

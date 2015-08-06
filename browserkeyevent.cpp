@@ -23,13 +23,13 @@ BrowserKeyEvent::BrowserKeyEvent(int keyCode, int which, int keyCode2, int which
 void BrowserKeyEvent::init(int keyCode, int which, int keyCode2, int which2, bool alt, bool ctrl, bool shift)
 {
     initJsCode();
-    this->keyCode = keyCode;
-    this->which = which > 0 ? which : keyCode;
-    this->keyCode2 = keyCode2;
-    this->which2 = which2 > 0 ? which2 : keyCode2;
-    this->alt = alt;
-    this->ctrl = ctrl;
-    this->shift = shift;
+    this->m_key_code = keyCode;
+    this->m_which = which > 0 ? which : keyCode;
+    this->m_key_code2 = keyCode2;
+    this->m_which_2 = which2 > 0 ? which2 : keyCode2;
+    this->m_alt = alt;
+    this->m_ctrl = ctrl;
+    this->m_shift = shift;
 
 }
 
@@ -44,13 +44,13 @@ QString BrowserKeyEvent::toString()
 
     for(int index = 0; index < MAX_EVENTS; index++)
     {
-        int keyCode = this->keyCode;
-        int which = this->which;
+        int keyCode = this->m_key_code;
+        int which = this->m_which;
         if(index == CustomKeyEvent::KeyPress)
         {
             eventName = "keypress";
-            keyCode = this->keyCode2;
-            which = this->which2;
+            keyCode = this->m_key_code2;
+            which = this->m_which_2;
             type = TypeKeyboard;
         }
         else if(index == CustomKeyEvent::KeyDown)
@@ -66,13 +66,13 @@ QString BrowserKeyEvent::toString()
         }
         else if(index == CustomKeyEvent::MouseDown)
         {
-            if(this->keyCode != 13) continue;
+            if(this->m_key_code != 13) continue;
             eventName = "mousedown";
             type = TypeMouse;
         }
         else if(index == CustomKeyEvent::MouseClick)
         {
-            if(this->keyCode != 13) continue;
+            if(this->m_key_code != 13) continue;
             eventName = "click";
             type = TypeMouse;
         }
@@ -89,9 +89,9 @@ QString BrowserKeyEvent::toString()
             result.append(BrowserKeyEvent::keyboardEventJs
                           .arg(keyCode)
                           .arg(which)
-                          .arg(QVariant::fromValue(alt).toString())
-                          .arg(QVariant::fromValue(ctrl).toString())
-                          .arg(QVariant::fromValue(shift).toString())
+                          .arg(QVariant::fromValue(m_alt).toString())
+                          .arg(QVariant::fromValue(m_ctrl).toString())
+                          .arg(QVariant::fromValue(m_shift).toString())
                           .arg(eventName));
         }
         else if(type == TypeMouse)

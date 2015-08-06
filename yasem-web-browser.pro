@@ -56,11 +56,10 @@ OTHER_FILES += \
     LICENSE \
     README.md
 
-RESOURCES += \
-    resources.qrc
-
 contains(DEFINES, USE_QML_WIDGETS) {
     CONFIG += qml quick
     SOURCES += webviewqml.cpp
     HEADERS += webviewqml.h
 }
+
+RESOURCES +=  resources.qrc
