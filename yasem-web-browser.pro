@@ -36,8 +36,12 @@ HEADERS +=\
     cmd_line.h \
     webkitbrowserplugin.h \
     webkitpluginobject.h \
-    qtwebpage.h \
+    qtwebpage.h
+
+win32: {
+HEADERS +=
     $${SDK_DIR}/browser.h
+}
 
 unix:!symbian {
     maemo5 {
