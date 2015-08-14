@@ -189,10 +189,10 @@ bool QtWebPage::event(QEvent *event)
             qWarning() << "No STB API found!";
             return false;
         }
-        QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-        Qt::KeyboardModifiers modifiers = keyEvent->modifiers();
-        bool hasShift = (modifiers & Qt::ShiftModifier) == Qt::ShiftModifier;
-        bool hasCtrl = (modifiers & Qt::ControlModifier) == Qt::ControlModifier;
+        const QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+        const Qt::KeyboardModifiers modifiers = keyEvent->modifiers();
+        const bool hasShift = (modifiers & Qt::ShiftModifier) == Qt::ShiftModifier;
+        const bool hasCtrl = (modifiers & Qt::ControlModifier) == Qt::ControlModifier;
         //bool hasAlt = (modifiers & Qt::AltModifier) == Qt::AltModifier;
         //bool hasMeta = (modifiers & Qt::MetaModifier) == Qt::MetaModifier;
 
@@ -311,7 +311,7 @@ bool QtWebPage::receiveKeyCode(SDK::GUI::RcKey keyCode)
 
     WebkitPluginObject* browser = dynamic_cast<WebkitPluginObject*>(m_browser);
 
-    QSharedPointer<BrowserKeyEvent> keyEvent = browser->getKeyEventValues()[keyCode];
+    const QSharedPointer<BrowserKeyEvent> keyEvent = browser->getKeyEventValues()[keyCode];
 
     if(keyEvent.data() == NULL)
     {
@@ -522,7 +522,7 @@ bool QtWebPage::load(const QUrl &url)
 
     resetPage();
     setupInterceptor();
-    int max_rps = SDK::ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
+    const int max_rps = SDK::ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
     if(max_rps > 0)
     {
         SDK::HttpProxy* proxy = SDK::__get_plugin<SDK::HttpProxy>(SDK::ROLE_HTTP_PROXY);

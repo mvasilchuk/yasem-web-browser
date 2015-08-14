@@ -104,7 +104,7 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
 
     connect(real, &QNetworkReply::downloadProgress, [=, &marked_as_slow](qint64 bytesReceived, qint64 bytesTotal) {
         //WARN() << "downloadProgress" << real->url() << bytesReceived << bytesTotal;
-        if(elapsed_timer->elapsed() > m_slow_request_timeout && !marked_as_slow)
+        if((elapsed_timer->elapsed() > m_slow_request_timeout) && !marked_as_slow)
             slow_request_detected();
     });
 

@@ -40,8 +40,6 @@ QString BrowserKeyEvent::toString()
     QStringList result;
     int type = CustomKeyEvent::TypeUnknown;
 
-
-
     for(int index = 0; index < MAX_EVENTS; index++)
     {
         int keyCode = this->m_key_code;
