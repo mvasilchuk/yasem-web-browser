@@ -70,8 +70,6 @@ protected:
 
     int mouseBorderThreshold;
 
-    QSharedPointer<SDK::Browser> m_browser;
-
     QMenu* m_contextMenu;
     QAction* m_backToPreviousPageAction;
     QAction* m_openWebInspectorAction;

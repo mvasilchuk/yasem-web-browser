@@ -23,7 +23,6 @@ InterceptorManager::InterceptorManager(QtWebPage *parent):
 {
     webServerHost = "http://127.0.0.1";
     webServerPort = SDK::Core::instance()->settings()->value("web-server/port", 9999).toInt();
-    m_browser = SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER);
 
     SDK::ConfigContainer* network_statistics = SDK::__get_config_item<SDK::ConfigContainer*>(QStringList() << SETTINGS_GROUP_OTHER << NETWORK_STATISTICS);
     m_statistics_enabled = network_statistics->findItemByKey(NETWORK_STATISTICS_ENABLED)->value().toBool();
@@ -61,7 +60,7 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
         QString urlString = url.url().trimmed();
 
         // TODO: Need to get url, not from browser but from webview
-        QString rootDir = m_browser->browserRootDir();
+        QString rootDir = SDK::Browser::instance()->browserRootDir();
 
         if(urlString.startsWith("file://") && (!(urlString.startsWith("file://" + rootDir)) || urlString.contains(".php")))
         {

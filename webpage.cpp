@@ -10,6 +10,7 @@
 #include "webkitpluginobject.h"
 #include "abstracthttpproxy.h"
 #include "macros.h"
+#include "browser.h"
 
 #include "cmd_line.h"
 #include "stbprofile.h"
@@ -26,7 +27,6 @@ using namespace yasem;
 
 QtWebPage::QtWebPage(WebView *parent) :
     QWebPage(parent),
-    m_browser(SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER)),
     m_chromakey(QColor(0, 0, 0)),
     m_chromamask(QColor(0xFF, 0xFF, 0xFF)),
     m_opacity(1.0),
@@ -133,9 +133,16 @@ void QtWebPage::setupInterceptor()
 
     this->setNetworkAccessManager(m_interceptor);
 
-    connect(this, &QtWebPage::load_started, m_browser, &SDK::Browser::page_loading_started);
-    connect(m_interceptor, &InterceptorManager::connection_encrypted, m_browser, &SDK::Browser::connection_encrypted);
-    connect(m_interceptor, &InterceptorManager::encryption_error, m_browser, &SDK::Browser::encryption_error);
+    SDK::Browser* browser = SDK::Browser::instance();
+
+    if(browser)
+    {
+        connect(this, &QtWebPage::load_started, browser, &SDK::Browser::page_loading_started);
+        connect(m_interceptor, &InterceptorManager::connection_encrypted, browser, &SDK::Browser::connection_encrypted);
+        connect(m_interceptor, &InterceptorManager::encryption_error, browser, &SDK::Browser::encryption_error);
+    }
+    else
+        WARN() << __FUNCTION__ << "Browser not found!";
 }
 
 void QtWebPage::triggerAction(QWebPage::WebAction action, bool checked)
@@ -309,7 +316,7 @@ bool QtWebPage::receiveKeyCode(SDK::GUI::RcKey keyCode)
 {
     STUB() << SDK::GUI::instance()->getRcKeyName(keyCode) << keyCode; //int)keyCode;
 
-    WebkitPluginObject* browser = dynamic_cast<WebkitPluginObject*>(m_browser);
+    WebkitPluginObject* browser = dynamic_cast<WebkitPluginObject*>(SDK::Browser::instance());
 
     const QSharedPointer<BrowserKeyEvent> keyEvent = browser->getKeyEventValues()[keyCode];
 
@@ -525,7 +532,7 @@ bool QtWebPage::load(const QUrl &url)
     const int max_rps = SDK::ProfileManager::instance()->getActiveProfile()->get(CONFIG_LIMIT_MAX_REQUESTS, "0").toInt();
     if(max_rps > 0)
     {
-        SDK::HttpProxy* proxy = SDK::__get_plugin<SDK::HttpProxy>(SDK::ROLE_HTTP_PROXY);
+        SDK::HttpProxy* proxy = SDK::PluginManager::instance()->getByRole<SDK::HttpProxy>(SDK::ROLE_HTTP_PROXY);
         if(proxy)
         {
             if(proxy->isRunning())
@@ -540,7 +547,7 @@ bool QtWebPage::load(const QUrl &url)
     }
     else
     {
-        SDK::HttpProxy* proxy = SDK::__get_plugin<SDK::HttpProxy>(SDK::ROLE_HTTP_PROXY);
+        SDK::HttpProxy* proxy = SDK::PluginManager::instance()->getByRole<SDK::HttpProxy>(SDK::ROLE_HTTP_PROXY);
         if(proxy)
         {
             proxy->stopServer();
@@ -555,7 +562,7 @@ bool QtWebPage::load(const QUrl &url)
 QWebPage *QtWebPage::createWindow(WebWindowType type)
 {
     STUB();
-    QtWebPage* page = static_cast<QtWebPage*>(m_browser->createNewPage(true));
+    QtWebPage* page = static_cast<QtWebPage*>(SDK::Browser::instance()->createNewPage(true));
     page->setObjectName("Child window");
     page->m_parent->setObjectName("Child Web View");
     return page;

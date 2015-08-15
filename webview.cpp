@@ -26,7 +26,6 @@ using namespace yasem;
 
 WebView::WebView(QWidget *parent) :
     QWebView(parent),
-    m_browser(SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER)),
     m_contextMenu(NULL),
     m_backToPreviousPageAction(NULL),
     m_openWebInspectorAction(NULL),
@@ -329,7 +328,7 @@ void WebView::onUrlChanged(const QUrl &url)
     DEBUG() << QString("onUrlChanged(%1)").arg(url.toString());
 
     triggered = false;
-    m_browser->resize();
+    SDK::Browser::instance()->resize();
     raise();
 }
 
@@ -466,7 +465,7 @@ void WebView::fullUpdate()
 
 void WebView::updateTopWidget()
 {
-    SDK::Browser* browser = SDK::__get_plugin<SDK::Browser>(SDK::ROLE_BROWSER);
+    SDK::Browser* browser = SDK::Browser::instance();
     Q_ASSERT(browser);
     switch(browser->getTopWidget())
     {

@@ -73,7 +73,6 @@ protected slots:
 protected:
     WebView* m_parent;
     SDK::StbPluginObject* m_stb_plugin;
-    SDK::Browser* m_browser;
     QString defaultUserAgent;
     QString customUserAgent;
     WebPluginFactory* pluginFactory;

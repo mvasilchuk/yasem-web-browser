@@ -33,7 +33,6 @@ public slots:
 protected:
    QList<NetworkInterceptorEntry*> entryList;
    QtWebPage* m_page;
-   SDK::Browser* m_browser;
    bool m_statistics_enabled;
    int m_slow_request_timeout;
 
