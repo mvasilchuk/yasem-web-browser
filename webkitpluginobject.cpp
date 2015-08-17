@@ -263,7 +263,7 @@ SDK::WebPage* WebkitPluginObject::createNewPage(bool child)
 #ifdef USE_REAL_TRANSPARENCY
     connect(this, &WebkitPluginObject::topWidgetChanged, webView, &WebView::fullUpdate);
 #else
-    connect(this, &WebkitPluginObject::topWidgetChanged, webView, &WebView::updateTopWidget);
+    connect(this, SIGNAL(topWidgetChanged()), webView, SLOT(updateTopWidget()));
 #endif //USE_REAL_TRANSPARENCY
     }
     else
