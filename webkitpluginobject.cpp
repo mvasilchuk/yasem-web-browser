@@ -293,3 +293,8 @@ SDK::WebPage* WebkitPluginObject::getActiveWebPage()
 {
     return dynamic_cast<SDK::WebPage*>(activeWebView->page());
 }
+
+void yasem::WebkitPluginObject::showDeveloperTools()
+{
+    ((QtWebPage*)getActiveWebPage())->showWebInspector();
+}

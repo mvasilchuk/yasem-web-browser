@@ -423,7 +423,7 @@ void QtWebPage::recreateObjects()
 {
     STUB();
 
-    const QSharedPointer<SDK::Profile>& profile = SDK::ProfileManager::instance()->getActiveProfile();
+    const SDK::Profile* profile = SDK::ProfileManager::instance()->getActiveProfile();
 
     if(profile)
     {
@@ -440,7 +440,7 @@ void QtWebPage::resetPage()
 {
     STUB();
     pluginFactory->getPluginList().clear();
-    const SDK::Profile* profile =  SDK::ProfileManager::instance()->getActiveProfile().data();
+    const SDK::Profile* profile =  SDK::ProfileManager::instance()->getActiveProfile();
 
     if(profile)
     {

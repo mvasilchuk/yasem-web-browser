@@ -15,14 +15,14 @@ QT       += core gui widgets webkit webkitwidgets
 DEFINES += WEBKITBROWSER_LIBRARY
 
 SOURCES += \
-    webpage.cpp \
     webview.cpp \
     webpluginfactoryimpl.cpp \
     interceptormanager.cpp \
     networkreply.cpp \
     browserkeyevent.cpp \
     webkitbrowserplugin.cpp \
-    webkitpluginobject.cpp
+    webkitpluginobject.cpp \
+    qtwebpage.cpp
 
 HEADERS +=\
     webkitbrowser_global.h \

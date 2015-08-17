@@ -102,6 +102,10 @@ public:
     // BrowserPlugin interface
 public:
     SDK::WebPage* getActiveWebPage();
+
+    // Browser interface
+public slots:
+    virtual void showDeveloperTools();
 };
 }
 
