@@ -203,7 +203,6 @@ bool QtWebPage::event(QEvent *event)
         //bool hasAlt = (modifiers & Qt::AltModifier) == Qt::AltModifier;
         //bool hasMeta = (modifiers & Qt::MetaModifier) == Qt::MetaModifier;
 
-
         switch(keyEvent->key())
         {
             case Qt::Key_Left:      {
@@ -273,8 +272,9 @@ bool QtWebPage::event(QEvent *event)
 
             case Qt::Key_F11:
             {
-                    SDK::GUI::instance()->setFullscreen(!SDK::GUI::instance()->getFullscreen());
-                    break;
+                SDK::GUI::instance()->setFullscreen(!SDK::GUI::instance()->getFullscreen());
+                result = true;
+                break;
             }
 
 
