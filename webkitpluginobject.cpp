@@ -104,14 +104,14 @@ QHash<SDK::GUI::RcKey, QSharedPointer<BrowserKeyEvent>> WebkitPluginObject::getK
     return m_key_events;
 }
 
-QUrl WebkitPluginObject::url()
+QUrl WebkitPluginObject::url() const
 {
     return activeWebView->url();
 }
 
-QString WebkitPluginObject::browserRootDir()
+QString WebkitPluginObject::browserRootDir() const
 {
-    return this->rootDir;
+    return url().toString(QUrl::RemoveFilename | QUrl::StripTrailingSlash | QUrl::RemoveQuery);
 }
 
 void WebkitPluginObject::setUserAgent(const QString &userAgent)

@@ -22,7 +22,7 @@ InterceptorManager::InterceptorManager(QtWebPage *parent):
     QNetworkAccessManager(parent)
 {
     webServerHost = "http://127.0.0.1";
-    webServerPort = SDK::Core::instance()->settings()->value("web-server/port", 9999).toInt();
+    webServerPort = SDK::Core::instance()->settings()->value("web-server/port", 19999).toInt();
 
     SDK::ConfigContainer* network_statistics = SDK::__get_config_item<SDK::ConfigContainer*>(QStringList() << SETTINGS_GROUP_OTHER << NETWORK_STATISTICS);
     m_statistics_enabled = network_statistics->findItemByKey(NETWORK_STATISTICS_ENABLED)->value().toBool();
@@ -64,7 +64,7 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
 
         if(urlString.startsWith("file://") && (!(urlString.startsWith("file://" + rootDir)) || urlString.contains(".php")))
         {
-            urlString = urlString.replace(QString("file://%1").arg(rootDir), QString("%1:%2").arg(webServerHost).arg(webServerPort));
+            //urlString = urlString.replace(QString("file://%1").arg(rootDir), QString("%1:%2").arg(webServerHost).arg(webServerPort));
         }
 
         url.setUrl(urlString);
@@ -74,6 +74,7 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
 
     //DEBUG() << "Loading URL:" << request.url() << "->" << url;
     QNetworkRequest req = request;
+    req.setUrl(url);
     req.setHeader(QNetworkRequest::UserAgentHeader, m_page->userAgentForUrl(QUrl()));
 
     QNetworkReply* real = QNetworkAccessManager::createRequest(op, req, outgoingData);

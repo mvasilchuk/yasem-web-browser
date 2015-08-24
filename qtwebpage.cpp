@@ -84,7 +84,7 @@ QtWebPage::~QtWebPage()
         delete m_interceptor;
 }
 
-WebView *QtWebPage::webView()
+WebView *QtWebPage::webView() const
 {
     return m_parent;
 }
@@ -589,7 +589,24 @@ void QtWebPage::execKeyEvent(const QString &action, int code, Qt::KeyboardModifi
 }
 
 
-QWidget *QtWebPage::widget()
+QWidget *QtWebPage::widget() const
 {
     return webView();
+}
+
+
+QString yasem::QtWebPage::getTitle() const
+{
+    return webView()->title();
+}
+
+QUrl yasem::QtWebPage::getURL() const
+{
+    return webView()->url();
+}
+
+
+QString yasem::QtWebPage::getRootDir() const
+{
+    return getURL().toString(QUrl::RemoveFilename | QUrl::StripTrailingSlash | QUrl::RemoveQuery);
 }

@@ -33,7 +33,7 @@ public:
     bool  javaScriptPrompt ( QWebFrame * frame, const QString & msg, const QString & defaultValue, QString * result );
     void setUserAgent(const QString &userAgent);
 
-    WebView* webView();
+    WebView* webView() const;
 
 public slots:
     bool load(const QUrl &url);
@@ -101,14 +101,19 @@ public:
 protected:
     virtual QWebPage *createWindow(WebWindowType type);
 
-    // AbstractWebPage interface
 public slots:
     virtual void execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol);
-    virtual QWidget *widget();
+    virtual QWidget *widget() const;
 
 signals:
     void closed();
     void load_started(const QString& url);
+
+    // WebPage interface
+public slots:
+    QString getTitle() const;
+    QUrl getURL() const;
+    QString getRootDir() const;
 };
 
 }

@@ -71,8 +71,8 @@ public:
 
     // BrowserPlugin interface
 public:
-    QUrl url();
-    virtual QString browserRootDir();
+    QUrl url() const;
+    virtual QString browserRootDir() const;
     void setUserAgent(const QString &userAgent);
     void addFont(const QString &fileName);
     virtual void registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode);
