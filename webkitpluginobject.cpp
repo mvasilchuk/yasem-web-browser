@@ -274,6 +274,7 @@ SDK::WebPage* WebkitPluginObject::createNewPage(bool child, bool visible)
     else
     {
         page->setObjectName("Child web page");
+        page->setupInterceptor();
     }
 
     if(getActiveWebPage())

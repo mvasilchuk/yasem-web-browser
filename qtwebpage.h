@@ -65,10 +65,11 @@ public slots:
     void reset();
     bool openWindow(const QString &url, const QString &params, const QString &name);
 
+    void setupInterceptor();
+
 
 protected slots:
     void attachJsStbApi();
-    void setupInterceptor();
 
 protected:
     WebView* m_parent;

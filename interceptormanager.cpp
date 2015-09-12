@@ -66,7 +66,6 @@ QNetworkReply* InterceptorManager::createRequest(Operation op, const QNetworkReq
         {
             //urlString = urlString.replace(QString("file://%1").arg(rootDir), QString("%1:%2").arg(webServerHost).arg(webServerPort));
         }
-
         url.setUrl(urlString);
     }
     else

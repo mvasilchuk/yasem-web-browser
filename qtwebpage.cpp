@@ -126,6 +126,7 @@ void QtWebPage::attachJsStbApi()
 
 void QtWebPage::setupInterceptor()
 {
+    STUB();
     if(m_interceptor)
         delete m_interceptor;
     m_interceptor = new InterceptorManager(this);
