@@ -50,6 +50,9 @@ public slots:
     QSize getViewportSize();
     qreal getScale();
     QRect getRect();
+
+    void updatePosition(int x, int y);
+    void resize(int width, int height);
 protected:
 
     void setupContextMenu();
@@ -74,8 +77,9 @@ protected:
     QAction* m_backToPreviousPageAction;
     QAction* m_openWebInspectorAction;
 
-    QRect m_viewRect;
-    QSize m_viewportSize;
+    QRect m_view_rect;
+    QSize m_viewport_size;
+    QRect m_window_rect;
     qreal m_pageScale;
 
     QPixmap m_video_frame;

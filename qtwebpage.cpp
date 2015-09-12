@@ -476,7 +476,16 @@ QString QtWebPage::userAgentForUrl(const QUrl & url) const
 
 void QtWebPage::close()
 {
-    this->m_parent->close();
+    for(QObject* child: m_parent->parentWidget()->children())
+    {
+        WebView* page = dynamic_cast<WebView*>(child);
+        if(page)
+        {
+            DEBUG() << "Children to close" << page;
+            page->close();
+        }
+    }
+
     emit closed();
 }
 
@@ -516,12 +525,20 @@ bool QtWebPage::load(const QUrl &url)
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     QWebSecurityOrigin origin(url);
-    origin.addAccessWhitelistEntry("http", "", QWebSecurityOrigin::AllowSubdomains);
-    origin.addAccessWhitelistEntry("https", "", QWebSecurityOrigin::AllowSubdomains);
-    origin.addAccessWhitelistEntry("qrc", "", QWebSecurityOrigin::AllowSubdomains);
-    origin.addAccessWhitelistEntry("http", "www.youtube.com", QWebSecurityOrigin::AllowSubdomains);
-    origin.addAccessWhitelistEntry("https", "www.youtube.com", QWebSecurityOrigin::AllowSubdomains);
-    origin.addAccessWhitelistEntry(url.scheme(), url.host(), QWebSecurityOrigin::AllowSubdomains);
+    //origin.addAccessWhitelistEntry("http", "", QWebSecurityOrigin::AllowSubdomains);
+    //origin.addAccessWhitelistEntry("https", "", QWebSecurityOrigin::AllowSubdomains);
+    //origin.addAccessWhitelistEntry("qrc", "", QWebSecurityOrigin::AllowSubdomains);
+    //origin.addAccessWhitelistEntry("http", "youtube.com", QWebSecurityOrigin::AllowSubdomains);
+    //origin.addAccessWhitelistEntry("https", "youtube.com", QWebSecurityOrigin::AllowSubdomains);
+    //origin.addAccessWhitelistEntry("http", "vimeo.com", QWebSecurityOrigin::AllowSubdomains);
+    //origin.addAccessWhitelistEntry("https", "vimeo.com", QWebSecurityOrigin::AllowSubdomains);
+    //origin.addAccessWhitelistEntry(url.scheme(), url.host(), QWebSecurityOrigin::AllowSubdomains);
+    /*
+      Allowing to access all hosts via XMLHttpRequest
+      */
+    origin.addLocalScheme("http");
+    origin.addLocalScheme("https");
+    origin.addLocalScheme("ftp");
     mainFrame()->securityOrigin().allOrigins().append(origin);
 #else
     WARN(QString("Cross-origin resource sharing (CORS) is only available since Qt 5.2. CORS will be disabled!"));
@@ -609,4 +626,38 @@ QUrl yasem::QtWebPage::getURL() const
 QString yasem::QtWebPage::getRootDir() const
 {
     return getURL().toString(QUrl::RemoveFilename | QUrl::StripTrailingSlash | QUrl::RemoveQuery);
+}
+
+
+void yasem::QtWebPage::move(int x, int y)
+{
+    webView()->updatePosition(x, y);
+}
+
+void yasem::QtWebPage::resize(int width, int height)
+{
+    webView()->resize(width, height);
+}
+
+void yasem::QtWebPage::show()
+{
+    setVisibilityState(QWebPage::VisibilityStateVisible);
+    webView()->show();
+}
+
+void yasem::QtWebPage::hide()
+{
+    setVisibilityState(QWebPage::VisibilityStateHidden);
+    webView()->hide();
+}
+
+
+void yasem::QtWebPage::setStyleSheet(const QString &stylesheet)
+{
+    webView()->setStyleSheet(stylesheet);
+}
+
+void yasem::QtWebPage::raise()
+{
+    webView()->raise();
 }

@@ -24,7 +24,9 @@ using namespace yasem;
 
 WebkitPluginObject::WebkitPluginObject(SDK::Plugin* plugin):
     SDK::Browser(plugin),
-    m_gui(NULL)
+    m_gui(NULL),
+    m_stb_plugin(NULL),
+    m_active_web_view(NULL)
 {
 }
 
@@ -91,12 +93,12 @@ SDK::StbPluginObject* WebkitPluginObject::stb()
 
 void WebkitPluginObject::show()
 {
-    activeWebView->show();
+    m_active_web_view->show();
 }
 
 void WebkitPluginObject::hide()
 {
-    activeWebView->hide();
+    m_active_web_view->hide();
 }
 
 QHash<SDK::GUI::RcKey, QSharedPointer<BrowserKeyEvent>> WebkitPluginObject::getKeyEventValues()
@@ -106,7 +108,7 @@ QHash<SDK::GUI::RcKey, QSharedPointer<BrowserKeyEvent>> WebkitPluginObject::getK
 
 QUrl WebkitPluginObject::url() const
 {
-    return activeWebView->url();
+    return m_active_web_view->url();
 }
 
 QString WebkitPluginObject::browserRootDir() const
@@ -116,7 +118,7 @@ QString WebkitPluginObject::browserRootDir() const
 
 void WebkitPluginObject::setUserAgent(const QString &userAgent)
 {
-    QtWebPage* p = (QtWebPage*)activeWebView->page();
+    QtWebPage* p = (QtWebPage*)m_active_web_view->page();
 
     qDebug() << "Using User Agent" << userAgent;
 
@@ -203,12 +205,12 @@ void WebkitPluginObject::clearKeyEvents()
 
 WebView *WebkitPluginObject::getWebView()
 {
-    return activeWebView;
+    return m_active_web_view;
 }
 
 void WebkitPluginObject::setWebView(WebView *webView)
 {
-    activeWebView = webView;
+    m_active_web_view = webView;
 }
 
 void WebkitPluginObject::addWebView(WebView* view)
@@ -238,23 +240,26 @@ bool WebkitPluginObject::fullscreen()
 
 void WebkitPluginObject::passEvent(QEvent *event)
 {
-    QCoreApplication::sendEvent(activeWebView, event);
+    QCoreApplication::sendEvent(m_active_web_view, event);
 }
 
 void WebkitPluginObject::setupMousePositionHandler(const QObject *receiver, const char *method)
 {
-    connect(activeWebView, SIGNAL(mousePositionChanged(int)), receiver, method, Qt::DirectConnection);
+    connect(m_active_web_view, SIGNAL(mousePositionChanged(int)), receiver, method, Qt::DirectConnection);
 }
 
 SDK::WebPage* WebkitPluginObject::getFirstPage()
 {
-    return dynamic_cast<SDK::WebPage*>(activeWebView->page());
+    return dynamic_cast<SDK::WebPage*>(m_active_web_view->page());
 }
 
-SDK::WebPage* WebkitPluginObject::createNewPage(bool child)
+SDK::WebPage* WebkitPluginObject::createNewPage(bool child, bool visible)
 {
-    WebView* webView = new WebView(getParentWidget());
+    QWidget* parent_widget = m_active_web_view ? m_active_web_view : getParentWidget();
+    DEBUG() << "Web page parent" << parent_widget;
+    WebView* webView = new WebView(parent_widget);
     QtWebPage* page = new QtWebPage(webView);
+    page->setVisibilityState(QWebPage::VisibilityStateHidden);
 
     if(!child) // If it's not a child view
     {
@@ -271,10 +276,21 @@ SDK::WebPage* WebkitPluginObject::createNewPage(bool child)
         page->setObjectName("Child web page");
     }
 
+    if(getActiveWebPage())
+    {
+        QtWebPage* p = (QtWebPage*)getActiveWebPage();
+        page->stb(p->stb());
+    }
+
     webView->setPage(page);
     webView->setViewportSize(QSize(1280, 720));
-    webView->show();
-    webView->raise();
+    if(visible)
+    {
+        page->show();
+        page->raise();
+    }
+    else
+        page->hide();
     fullscreen(false);
 
     addWebView(webView);
@@ -291,7 +307,7 @@ void WebkitBrowser::componentComplete()
 
 SDK::WebPage* WebkitPluginObject::getActiveWebPage()
 {
-    return dynamic_cast<SDK::WebPage*>(activeWebView->page());
+    return dynamic_cast<SDK::WebPage*>(m_active_web_view->page());
 }
 
 void yasem::WebkitPluginObject::showDeveloperTools()

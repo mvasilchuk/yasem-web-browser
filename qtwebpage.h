@@ -114,6 +114,18 @@ public slots:
     QString getTitle() const;
     QUrl getURL() const;
     QString getRootDir() const;
+
+    // WebPage interface
+public slots:
+    void move(int x, int y);
+    void resize(int width, int height);
+    void show();
+    void hide();
+    void raise();
+    void setStyleSheet(const QString &stylesheet);
+
+
+
 };
 
 }

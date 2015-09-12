@@ -23,12 +23,13 @@
 using namespace yasem;
 
 
-
 WebView::WebView(QWidget *parent) :
     QWebView(parent),
     m_contextMenu(NULL),
     m_backToPreviousPageAction(NULL),
     m_openWebInspectorAction(NULL),
+    m_viewport_size(1280, 720),
+    m_window_rect(QRect(0, 0, 1280, 720)),
     m_allow_repaint(true),
     m_allow_transparency(true),
     m_skip_full_render(false)
@@ -133,46 +134,64 @@ void WebView::showContextMenu(const QPoint &pos)
 void WebView::resizeView(const QRect &containerRect)
 {
     DEBUG() << "WebView::resizeView" << objectName() << containerRect;
-    const float w_ratio = (float)m_viewportSize.width() / containerRect.width();
-    const float h_ratio = (float)m_viewportSize.height() / containerRect.height();
+    const float w_ratio = (float)m_viewport_size.width() / containerRect.width();
+    const float h_ratio = (float)m_viewport_size.height() / containerRect.height();
 
-    int width;
-    int height;
+    int wp_width;
+    int wp_height;
+    int x;
+    int y;
 
     if(w_ratio > h_ratio)
     {
-        width = containerRect.width();
-        height = (int)((float)m_viewportSize.height() / w_ratio);
+        wp_width = containerRect.width();
+        wp_height = (int)((float)m_viewport_size.height() / w_ratio);
     }
     else
     {
-        height = containerRect.height();
-        width = (int)((float)m_viewportSize.width() / h_ratio);
+        wp_height = containerRect.height();
+        wp_width = (int)((float)m_viewport_size.width() / h_ratio);
     }
 
-    const int left =  (int)(((float)containerRect.width() - width) / 2);
-    const int top = (int)(((float)containerRect.height() - height) / 2);
+    const int left =  (int)(((float)containerRect.width() - wp_width) / 2);
+    const int top = (int)(((float)containerRect.height() - wp_height) / 2);
 
-    m_viewRect.setLeft(left);
-    m_viewRect.setTop(top);
-    m_viewRect.setWidth(width);
-    m_viewRect.setHeight(height);
+    //m_viewRect.setLeft(left);
+    //m_viewRect.setTop(top);
+    //m_viewRect.setWidth(wp_width);
+    //m_viewRect.setHeight(wp_height);
 
-    m_pageScale = (qreal)m_viewRect.width() / m_viewportSize.width();
+    Q_ASSERT(m_viewport_size.width());
+
+    m_pageScale = (qreal)wp_width / m_viewport_size.width();
+
+    DEBUG() << "RECT"
+            << m_pageScale
+            << left + m_window_rect.left() * m_pageScale
+            << top + m_window_rect.top() * m_pageScale
+            << m_window_rect.width() * m_pageScale
+            << m_window_rect.height() * m_pageScale;
+
+
+    m_view_rect.setLeft(left + m_window_rect.left() * m_pageScale);
+    m_view_rect.setTop(top + m_window_rect.top() * m_pageScale);
+    m_view_rect.setWidth(m_window_rect.width() * m_pageScale);
+    m_view_rect.setHeight(m_window_rect.height() * m_pageScale);
 
     setZoomFactor(m_pageScale);
-    setGeometry(m_viewRect);
+    setGeometry(m_view_rect);
 }
 
 void WebView::setViewportSize(QSize newSize)
 {
-    DEBUG() << "WebView::setViewportSize";
-    m_viewportSize = newSize;
+    DEBUG() << "WebView::setViewportSize" << newSize;
+    m_viewport_size = newSize;
+    m_window_rect = QRect(0, 0, newSize.width(), newSize.height());
 }
 
 QSize WebView::getViewportSize()
 {
-    return m_viewportSize;
+    return m_viewport_size;
 }
 
 qreal WebView::getScale()
@@ -182,7 +201,19 @@ qreal WebView::getScale()
 
 QRect WebView::getRect()
 {
-    return m_viewRect;
+    return m_view_rect;
+}
+
+void WebView::updatePosition(int x, int y)
+{
+    m_window_rect.setX(x);
+    m_window_rect.setY(y);
+}
+
+void WebView::resize(int width, int height)
+{
+    m_window_rect.setWidth(width);
+    m_window_rect.setHeight(height);
 }
 
 void WebView::readSettings()
@@ -453,7 +484,7 @@ void yasem::WebView::paintEvent(QPaintEvent *event)
 
 void yasem::WebView::resizeEvent(QResizeEvent *event)
 {
-    move(m_viewRect.left(), m_viewRect.top());
+    move(m_view_rect.left(), m_view_rect.top());
     QWebView::resizeEvent(event);
 }
 

@@ -59,7 +59,7 @@ protected:
     SDK::StbPluginObject* m_stb_plugin;
     QString rootDir;
     QHash<SDK::GUI::RcKey, QSharedPointer<BrowserKeyEvent>> m_key_events;
-    WebView* activeWebView;
+    WebView* m_active_web_view;
     QList<WebView*> webViewList;
     bool isFullscreen;
     // BrowserPlugin interface
@@ -97,7 +97,7 @@ protected slots:
     // BrowserPlugin interface
 public:
     SDK::WebPage* getFirstPage();
-    SDK::WebPage* createNewPage(bool child = false);
+    SDK::WebPage* createNewPage(bool child = false, bool visible = true);
 
     // BrowserPlugin interface
 public:
