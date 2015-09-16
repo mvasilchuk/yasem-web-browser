@@ -27,6 +27,8 @@ using namespace yasem;
 
 QtWebPage::QtWebPage(WebView *parent) :
     QWebPage(parent),
+    SDK::WebPage(),
+    m_stb_plugin(0),
     m_chromakey(QColor(0, 0, 0)),
     m_chromamask(QColor(0xFF, 0xFF, 0xFF)),
     m_opacity(1.0),

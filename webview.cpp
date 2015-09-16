@@ -216,6 +216,20 @@ void WebView::resize(int width, int height)
     m_window_rect.setHeight(height);
 }
 
+void WebView::setId(const QString &id)
+{
+    SDK::WebPage* web_page = dynamic_cast<SDK::WebPage*>(page());
+    Q_ASSERT(web_page);
+    web_page->setId("id");
+}
+
+QString WebView::getId() const
+{
+    SDK::WebPage* web_page = dynamic_cast<SDK::WebPage*>(page());
+    Q_ASSERT(web_page);
+    return web_page->getId();
+}
+
 void WebView::readSettings()
 {
     QSettings* settings = SDK::Core::instance()->settings();

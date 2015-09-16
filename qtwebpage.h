@@ -125,8 +125,6 @@ public slots:
     void raise();
     void setStyleSheet(const QString &stylesheet);
 
-
-
 };
 
 }

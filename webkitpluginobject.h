@@ -60,8 +60,9 @@ protected:
     QString rootDir;
     QHash<SDK::GUI::RcKey, QSharedPointer<BrowserKeyEvent>> m_key_events;
     WebView* m_active_web_view;
-    QList<WebView*> webViewList;
+
     bool isFullscreen;
+    QHash<QString, SDK::WebPage*> m_pages;
     // BrowserPlugin interface
 
 
@@ -81,9 +82,6 @@ public:
     virtual void clearKeyEvents();
     WebView *getWebView();
     void setWebView(WebView* view);
-    void addWebView(WebView* view);
-    void removeWebView(WebView* view);
-    QList<WebView*> getWebViewList();
 
     void fullscreen(bool setFullscreen);
     bool fullscreen();
@@ -106,6 +104,10 @@ public:
     // Browser interface
 public slots:
     virtual void showDeveloperTools();
+
+    // Browser interface
+public:
+    QHash<QString, SDK::WebPage*> pages() const;
 };
 }
 

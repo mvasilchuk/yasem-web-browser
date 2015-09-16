@@ -135,13 +135,9 @@ void WebkitPluginObject::addFont(const QString &fileName)
 void WebkitPluginObject::stb(SDK::StbPluginObject* stbPlugin)
 {
     this->m_stb_plugin = stbPlugin;
-    foreach(QObject* child, webViewList)
+    foreach(const QString& id, pages().keys())
     {
-        WebView* childView = qobject_cast<WebView*>(child);
-        if(childView != NULL)
-        {
-            static_cast<QtWebPage*>(childView->page())->stb(stbPlugin);
-        }
+        static_cast<QtWebPage*>(pages().value(id))->stb(stbPlugin);
     }
 }
 
@@ -161,15 +157,9 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
         if(!m_gui) return;
     }
 
-    foreach(QWidget* child, webViewList)
+    foreach(const QString& id, pages().keys())
     {
-        WebView* vChild = dynamic_cast<WebView*>(child);
-        if(vChild != NULL)
-        {
-            vChild->resizeView(m_gui->widgetRect());
-        }
-
-        else qWarning() << "child warn:" << child;
+        dynamic_cast<QtWebPage*>(pages().value(id))->webView()->resizeView(m_gui->widgetRect());
     }
 }
 
@@ -213,21 +203,6 @@ void WebkitPluginObject::setWebView(WebView *webView)
     m_active_web_view = webView;
 }
 
-void WebkitPluginObject::addWebView(WebView* view)
-{
-   webViewList.append(view);
-}
-
-void WebkitPluginObject::removeWebView(WebView* view)
-{
-    webViewList.removeOne(view);
-}
-
-QList<WebView *> WebkitPluginObject::getWebViewList()
-{
-    return webViewList;
-}
-
 void WebkitPluginObject::fullscreen(bool setFullscreen)
 {
     isFullscreen = setFullscreen;
@@ -259,6 +234,8 @@ SDK::WebPage* WebkitPluginObject::createNewPage(bool child, bool visible)
     DEBUG() << "Web page parent" << parent_widget;
     WebView* webView = new WebView(parent_widget);
     QtWebPage* page = new QtWebPage(webView);
+    page->setId(SDK::Browser::nextPageId());
+
     page->setVisibilityState(QWebPage::VisibilityStateHidden);
 
     if(!child) // If it's not a child view
@@ -294,8 +271,8 @@ SDK::WebPage* WebkitPluginObject::createNewPage(bool child, bool visible)
         page->hide();
     fullscreen(false);
 
-    addWebView(webView);
-    return dynamic_cast<SDK::WebPage*>(webView->page());
+    pages().insert(page->getId(), page);
+    return page;
 }
 
 /*
@@ -314,4 +291,9 @@ SDK::WebPage* WebkitPluginObject::getActiveWebPage()
 void yasem::WebkitPluginObject::showDeveloperTools()
 {
     ((QtWebPage*)getActiveWebPage())->showWebInspector();
+}
+
+QHash<QString, SDK::WebPage*> yasem::WebkitPluginObject::pages() const
+{
+    return m_pages;
 }
