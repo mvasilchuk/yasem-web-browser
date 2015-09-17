@@ -8,6 +8,8 @@
 #include <QMoveEvent>
 #include <QSharedPointer>
 
+class QLayout;
+
 namespace yasem
 {
 
@@ -37,8 +39,6 @@ public:
     virtual void scale(qreal scale);
     virtual qreal scale();
 
-    virtual QWidget *widget();
-
     Q_INVOKABLE void rect(const QRect &rect);
     Q_INVOKABLE void rect(int x, int y, int width, int height);
     virtual QRect rect();
@@ -46,8 +46,6 @@ public:
     void stb(SDK::StbPluginObject* m_stb_plugin) ;
     SDK::StbPluginObject* stb();
 
-    void show();
-    void hide();
 
     //virtual void componentComplete();
 
@@ -59,20 +57,21 @@ protected:
     SDK::StbPluginObject* m_stb_plugin;
     QString rootDir;
     QHash<SDK::GUI::RcKey, QSharedPointer<BrowserKeyEvent>> m_key_events;
-    WebView* m_active_web_view;
 
     bool isFullscreen;
-    QHash<QString, SDK::WebPage*> m_pages;
+    QHash<int, SDK::WebPage*> m_pages;
+    QLayout* m_layout;
+    QWidget* m_parent_widget;
     // BrowserPlugin interface
 
 
 public:
     QHash<SDK::GUI::RcKey, QSharedPointer<BrowserKeyEvent>> getKeyEventValues();
+    void printRegisteredKeys();
 
 
     // BrowserPlugin interface
 public:
-    QUrl url() const;
     virtual QString browserRootDir() const;
     void setUserAgent(const QString &userAgent);
     void addFont(const QString &fileName);
@@ -80,13 +79,10 @@ public:
     virtual void registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode, int which, bool alt = false, bool ctrl = false, bool shift = false);
     virtual void registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode, int which, int keyCode2, int which2, bool alt = false, bool ctrl = false, bool shift = false) ;
     virtual void clearKeyEvents();
-    WebView *getWebView();
-    void setWebView(WebView* view);
 
     void fullscreen(bool setFullscreen);
     bool fullscreen();
 
-    void passEvent(QEvent *event);
     void setupMousePositionHandler(const QObject *receiver, const char* method);
 protected slots:
 
@@ -95,19 +91,29 @@ protected slots:
     // BrowserPlugin interface
 public:
     SDK::WebPage* getFirstPage();
-    SDK::WebPage* createNewPage(bool child = false, bool visible = true);
+    SDK::WebPage* createNewPage(const int page_id = -1, bool visible = true);
 
     // BrowserPlugin interface
 public:
-    SDK::WebPage* getActiveWebPage();
+    SDK::WebPage* getMainWebPage() const;
 
     // Browser interface
 public slots:
     virtual void showDeveloperTools();
 
-    // Browser interface
+    void passEvent(QEvent *event);
 public:
-    QHash<QString, SDK::WebPage*> pages() const;
+    QHash<int, SDK::WebPage*> pages() const;
+    QUrl url() const;
+    void setLayout(QLayout *layout);
+    QLayout *layout() const;
+
+    virtual void addPage(SDK::WebPage* page);
+    virtual void removePage(SDK::WebPage* page);
+
+protected slots:
+    void printWidgetStack();
+    void repaintWebViews();
 };
 }
 

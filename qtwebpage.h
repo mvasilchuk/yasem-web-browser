@@ -107,6 +107,9 @@ public slots:
     virtual QWidget *widget() const;
 
 signals:
+    void showed();
+    void hidden();
+    void raised();
     void closed();
     void load_started(const QString& url);
 

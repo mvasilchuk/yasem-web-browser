@@ -19,6 +19,7 @@
 #include <QGraphicsOpacityEffect>
 #include <QLinearGradient>
 #include <QWebSecurityOrigin>
+#include <QLayout>
 
 using namespace yasem;
 
@@ -26,8 +27,9 @@ WebkitPluginObject::WebkitPluginObject(SDK::Plugin* plugin):
     SDK::Browser(plugin),
     m_gui(NULL),
     m_stb_plugin(NULL),
-    m_active_web_view(NULL)
+    m_layout(0)
 {
+    connect(this, &WebkitPluginObject::pageCountChanged, this, &WebkitPluginObject::printWidgetStack);
 }
 
 WebkitPluginObject::~WebkitPluginObject()
@@ -48,12 +50,15 @@ SDK::PluginObjectResult yasem::WebkitPluginObject::deinit()
 
 void yasem::WebkitPluginObject::setParentWidget(QWidget *parent)
 {
-    this->setParent(parent);
+    m_parent_widget = parent;
+
+    //TODO: Move this to a slot for SDK::PluginManager::pluginInitialized() signal
+    connect(SDK::GUI::instance(), &SDK::GUI::topWidgetChanged, this, &WebkitPluginObject::repaintWebViews);
 }
 
 QWidget *yasem::WebkitPluginObject::getParentWidget()
 {
-     return static_cast<QWidget*>(this->parent());
+     return m_parent_widget;
 }
 
 void WebkitPluginObject::scale(qreal scale)
@@ -64,11 +69,6 @@ void WebkitPluginObject::scale(qreal scale)
 qreal WebkitPluginObject::scale()
 {
     return this->browserScale;
-}
-
-QWidget *WebkitPluginObject::widget()
-{
-    return getWebView();
 }
 
 void WebkitPluginObject::rect(const QRect &rect)
@@ -91,24 +91,27 @@ SDK::StbPluginObject* WebkitPluginObject::stb()
     return this->m_stb_plugin;
 }
 
-void WebkitPluginObject::show()
-{
-    m_active_web_view->show();
-}
-
-void WebkitPluginObject::hide()
-{
-    m_active_web_view->hide();
-}
 
 QHash<SDK::GUI::RcKey, QSharedPointer<BrowserKeyEvent>> WebkitPluginObject::getKeyEventValues()
 {
     return m_key_events;
 }
 
+void WebkitPluginObject::printRegisteredKeys()
+{
+    DEBUG() << "Registered keys:";
+    int keyEnumIndex = SDK::GUI::staticMetaObject.indexOfEnumerator("RcKey");
+    for(SDK::GUI::RcKey key: m_key_events.keys())
+    {
+        DEBUG() << "    ->"
+                << SDK::GUI::staticMetaObject.enumerator(keyEnumIndex).valueToKey(key)
+                << m_key_events.value(key)->toJsonString();
+    }
+}
+
 QUrl WebkitPluginObject::url() const
 {
-    return m_active_web_view->url();
+    return getMainWebPage()->getURL();
 }
 
 QString WebkitPluginObject::browserRootDir() const
@@ -118,7 +121,7 @@ QString WebkitPluginObject::browserRootDir() const
 
 void WebkitPluginObject::setUserAgent(const QString &userAgent)
 {
-    QtWebPage* p = (QtWebPage*)m_active_web_view->page();
+    QtWebPage* p = (QtWebPage*)getMainWebPage();
 
     qDebug() << "Using User Agent" << userAgent;
 
@@ -135,9 +138,10 @@ void WebkitPluginObject::addFont(const QString &fileName)
 void WebkitPluginObject::stb(SDK::StbPluginObject* stbPlugin)
 {
     this->m_stb_plugin = stbPlugin;
-    foreach(const QString& id, pages().keys())
+    foreach(const int id, pages().keys())
     {
-        static_cast<QtWebPage*>(pages().value(id))->stb(stbPlugin);
+        SDK::WebPage* page = pages().value(id);
+        dynamic_cast<QtWebPage*>(page)->stb(stbPlugin);
     }
 }
 
@@ -151,16 +155,7 @@ void WebkitPluginObject::moveEvent ( QMoveEvent * event )
 {
     Q_UNUSED(event)
 
-    if(!m_gui)
-    {
-        m_gui = SDK::GUI::instance();
-        if(!m_gui) return;
-    }
-
-    foreach(const QString& id, pages().keys())
-    {
-        dynamic_cast<QtWebPage*>(pages().value(id))->webView()->resizeView(m_gui->widgetRect());
-    }
+    repaintWebViews();
 }
 
 void WebkitPluginObject::registerKeyEvent(SDK::GUI::RcKey rc_key, int keyCode)
@@ -193,15 +188,6 @@ void WebkitPluginObject::clearKeyEvents()
     m_key_events.clear();
 }
 
-WebView *WebkitPluginObject::getWebView()
-{
-    return m_active_web_view;
-}
-
-void WebkitPluginObject::setWebView(WebView *webView)
-{
-    m_active_web_view = webView;
-}
 
 void WebkitPluginObject::fullscreen(bool setFullscreen)
 {
@@ -213,50 +199,44 @@ bool WebkitPluginObject::fullscreen()
     return isFullscreen;
 }
 
-void WebkitPluginObject::passEvent(QEvent *event)
-{
-    QCoreApplication::sendEvent(m_active_web_view, event);
-}
 
 void WebkitPluginObject::setupMousePositionHandler(const QObject *receiver, const char *method)
 {
-    connect(m_active_web_view, SIGNAL(mousePositionChanged(int)), receiver, method, Qt::DirectConnection);
+    connect(getMainWebPage()->widget(), SIGNAL(mousePositionChanged(int)), receiver, method, Qt::DirectConnection);
 }
 
 SDK::WebPage* WebkitPluginObject::getFirstPage()
 {
-    return dynamic_cast<SDK::WebPage*>(m_active_web_view->page());
+    return dynamic_cast<SDK::WebPage*>(getMainWebPage());
 }
 
-SDK::WebPage* WebkitPluginObject::createNewPage(bool child, bool visible)
+SDK::WebPage* WebkitPluginObject::createNewPage(const int page_id, bool visible)
 {
-    QWidget* parent_widget = m_active_web_view ? m_active_web_view : getParentWidget();
-    DEBUG() << "Web page parent" << parent_widget;
-    WebView* webView = new WebView(parent_widget);
+    Q_ASSERT_X(m_layout, "WebKitPluginObject::createNewPage", "Layout not set!");
+
+    WebView* webView = new WebView(getParentWidget());
+    m_layout->addWidget(webView);
     QtWebPage* page = new QtWebPage(webView);
-    page->setId(SDK::Browser::nextPageId());
+    if(page_id > -1)
+        page->setId(page_id);
+    else
+        page->setId(nextPageId());
+
 
     page->setVisibilityState(QWebPage::VisibilityStateHidden);
+    page->setObjectName(QString("Web page ").append(QString::number(page->getId())));
+    webView->setObjectName(QString("Web view ").append(QString::number(page->getId())));
+    page->setupInterceptor();
 
-    if(!child) // If it's not a child view
-    {
-        page->setObjectName("Main web page");
-        setWebView(webView);
-#ifdef USE_REAL_TRANSPARENCY
-    connect(this, &WebkitPluginObject::topWidgetChanged, webView, &WebView::fullUpdate);
-#else
-    connect(this, SIGNAL(topWidgetChanged()), webView, SLOT(updateTopWidget()));
-#endif //USE_REAL_TRANSPARENCY
-    }
-    else
-    {
-        page->setObjectName("Child web page");
-        page->setupInterceptor();
-    }
+    addPage(page);
 
-    if(getActiveWebPage())
+    connect(page, &QtWebPage::raised, this, &WebkitPluginObject::printWidgetStack);
+    connect(page, &QtWebPage::showed, this, &WebkitPluginObject::printWidgetStack);
+    connect(page, &QtWebPage::hidden, this, &WebkitPluginObject::printWidgetStack);
+
+    if(getMainWebPage())
     {
-        QtWebPage* p = (QtWebPage*)getActiveWebPage();
+        QtWebPage* p = (QtWebPage*)getMainWebPage();
         page->stb(p->stb());
     }
 
@@ -271,7 +251,8 @@ SDK::WebPage* WebkitPluginObject::createNewPage(bool child, bool visible)
         page->hide();
     fullscreen(false);
 
-    pages().insert(page->getId(), page);
+    DEBUG() << "Page id" << page->getId();
+
     return page;
 }
 
@@ -283,17 +264,66 @@ void WebkitBrowser::componentComplete()
 }*/
 
 
-SDK::WebPage* WebkitPluginObject::getActiveWebPage()
+SDK::WebPage* WebkitPluginObject::getMainWebPage() const
 {
-    return dynamic_cast<SDK::WebPage*>(m_active_web_view->page());
+    SDK::WebPage* page = pages().value(0);
+    Q_ASSERT(page);
+    return page;
 }
 
 void yasem::WebkitPluginObject::showDeveloperTools()
 {
-    ((QtWebPage*)getActiveWebPage())->showWebInspector();
+    ((QtWebPage*)getMainWebPage())->showWebInspector();
 }
 
-QHash<QString, SDK::WebPage*> yasem::WebkitPluginObject::pages() const
+QHash<int, SDK::WebPage*> WebkitPluginObject::pages() const
 {
     return m_pages;
+}
+
+void WebkitPluginObject::setLayout(QLayout *layout)
+{
+    m_layout = layout;
+}
+
+QLayout *WebkitPluginObject::layout() const
+{
+    return m_layout;
+}
+
+void WebkitPluginObject::addPage(SDK::WebPage *page)
+{
+    m_pages.insert(page->getId(), page);
+    emit pageCountChanged();
+}
+
+void WebkitPluginObject::removePage(SDK::WebPage *page)
+{
+    m_pages.remove(page->getId());
+    emit pageCountChanged();
+}
+
+void WebkitPluginObject::printWidgetStack()
+{
+    SDK::GUI::instance()->widgetStack();
+}
+
+void WebkitPluginObject::repaintWebViews()
+{
+    if(!m_gui)
+    {
+        m_gui = SDK::GUI::instance();
+        if(!m_gui) return;
+    }
+
+    foreach(const int id, pages().keys())
+    {
+        QtWebPage* page = dynamic_cast<QtWebPage*>( pages().value(id));
+        page->webView()->resizeView(m_gui->widgetRect());
+    }
+}
+
+void WebkitPluginObject::passEvent(QEvent *event)
+{
+    QCoreApplication::sendEvent(getMainWebPage()->widget(), event);
 }

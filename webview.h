@@ -105,7 +105,6 @@ protected:
 
 public slots:
     void fullUpdate();
-    void updateTopWidget();
 };
 
 }

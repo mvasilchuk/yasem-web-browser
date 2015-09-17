@@ -28,14 +28,15 @@ using namespace yasem;
 QtWebPage::QtWebPage(WebView *parent) :
     QWebPage(parent),
     SDK::WebPage(),
+    m_parent(parent),
     m_stb_plugin(0),
+    pluginFactory(0),
     m_chromakey(QColor(0, 0, 0)),
     m_chromamask(QColor(0xFF, 0xFF, 0xFF)),
     m_opacity(1.0),
     m_chromakey_enabled(true),
     m_interceptor(NULL)
 {
-    this->m_parent = parent;
     this->setObjectName("WebPage");
 
     defaultUserAgent = "Mozilla/5.0 (%Platform%%Security%%Subplatform%) AppleWebKit/%WebKitVersion% (KHTML, like Gecko) %AppVersion Safari/%WebKitVersion%";
@@ -82,12 +83,15 @@ QtWebPage::QtWebPage(WebView *parent) :
 
 QtWebPage::~QtWebPage()
 {
+    STUB();
     if(m_interceptor != NULL)
         delete m_interceptor;
+    settings()->clearMemoryCaches();
 }
 
 WebView *QtWebPage::webView() const
 {
+    Q_ASSERT(m_parent);
     return m_parent;
 }
 
@@ -234,7 +238,7 @@ bool QtWebPage::event(QEvent *event)
             case Qt::Key_Return:
             case Qt::Key_Enter:     result = receiveKeyCode(SDK::GUI::RC_KEY_OK);        break;
 
-            case Qt::Key_Home:
+            case Qt::Key_Home:      result = receiveKeyCode(SDK::GUI::RC_KEY_MENU);      break;
             case Qt::Key_Back:      result = receiveKeyCode(SDK::GUI::RC_KEY_BACK);      break;
             case Qt::Key_Escape:    result = receiveKeyCode(SDK::GUI::RC_KEY_EXIT);      break;
 
@@ -242,11 +246,11 @@ bool QtWebPage::event(QEvent *event)
             case Qt::Key_F2:        result = receiveKeyCode(SDK::GUI::RC_KEY_GREEN);     break;
             case Qt::Key_F3:        result = receiveKeyCode(SDK::GUI::RC_KEY_YELLOW);    break;
             case Qt::Key_F4:        result = receiveKeyCode(SDK::GUI::RC_KEY_BLUE);      break;
+            case Qt::Key_F6:        result = receiveKeyCode(SDK::GUI::RC_KEY_INFO);  break;
 
             case Qt::Key_Tab:       result = receiveKeyCode(SDK::GUI::RC_KEY_MENU);      break;
             case Qt::Key_PageUp:    result = receiveKeyCode(SDK::GUI::RC_KEY_PAGE_UP);   break;
             case Qt::Key_PageDown:  result = receiveKeyCode(SDK::GUI::RC_KEY_PAGE_DOWN); break;
-            case Qt::Key_Control:   result = receiveKeyCode(SDK::GUI::RC_KEY_INFO);      break;
 
             case Qt::Key_0:         result = receiveKeyCode(SDK::GUI::RC_KEY_NUMBER_0);  break;
             case Qt::Key_1:         result = receiveKeyCode(SDK::GUI::RC_KEY_NUMBER_1);  break;
@@ -268,9 +272,11 @@ bool QtWebPage::event(QEvent *event)
             case Qt::Key_MediaTogglePlayPause:      result = receiveKeyCode(SDK::GUI::RC_KEY_PLAY_PAUSE);    break;
             case Qt::Key_MediaPlay:                 result = receiveKeyCode(SDK::GUI::RC_KEY_PLAY);          break;
             case Qt::Key_MediaPause:                result = receiveKeyCode(SDK::GUI::RC_KEY_PAUSE);         break;
+
             case Qt::Key_MediaStop:     result = receiveKeyCode(SDK::GUI::RC_KEY_STOP);          break;
             case Qt::Key_MediaPrevious: result = receiveKeyCode(SDK::GUI::RC_KEY_REWIND);        break;
             case Qt::Key_MediaNext:     result = receiveKeyCode(SDK::GUI::RC_KEY_FAST_FORWARD);  break;
+
             case Qt::Key_Info:          result = receiveKeyCode(SDK::GUI::RC_KEY_INFO);  break;
 
             case Qt::Key_F11:
@@ -325,7 +331,8 @@ bool QtWebPage::receiveKeyCode(SDK::GUI::RcKey keyCode)
 
     if(keyEvent.data() == NULL)
     {
-        qDebug() << "Key code not registered:" <<  QString("0x").append(QString::number(keyCode, 16)) <<  browser->getKeyEventValues();
+        DEBUG() << "Key code not registered:" <<  QString("0x").append(QString::number(keyCode, 16));
+        browser->printRegisteredKeys();
         return false;
     }
     else
@@ -341,7 +348,8 @@ bool QtWebPage::receiveKeyCode(SDK::GUI::RcKey keyCode)
 
 void QtWebPage::evalJs(const QString &js)
 {
-    mainFrame()->evaluateJavaScript(js);
+    if(mainFrame()) // May not exists if page is already deleted
+        mainFrame()->evaluateJavaScript(js);
 }
 
 QColor QtWebPage::getChromaKey() const
@@ -479,16 +487,9 @@ QString QtWebPage::userAgentForUrl(const QUrl & url) const
 
 void QtWebPage::close()
 {
-    for(QObject* child: m_parent->parentWidget()->children())
-    {
-        WebView* page = dynamic_cast<WebView*>(child);
-        if(page)
-        {
-            DEBUG() << "Children to close" << page;
-            page->close();
-        }
-    }
-
+    SDK::Browser::instance()->removePage(this);
+    webView()->close();
+    webView()->deleteLater();
     emit closed();
 }
 
@@ -582,9 +583,7 @@ bool QtWebPage::load(const QUrl &url)
 QWebPage *QtWebPage::createWindow(WebWindowType type)
 {
     STUB();
-    QtWebPage* page = static_cast<QtWebPage*>(SDK::Browser::instance()->createNewPage(true));
-    page->setObjectName("Child window");
-    page->m_parent->setObjectName("Child Web View");
+    QtWebPage* page = static_cast<QtWebPage*>(SDK::Browser::instance()->createNewPage());
     return page;
 }
 
@@ -646,12 +645,14 @@ void yasem::QtWebPage::show()
 {
     setVisibilityState(QWebPage::VisibilityStateVisible);
     webView()->show();
+    emit showed();
 }
 
 void yasem::QtWebPage::hide()
 {
     setVisibilityState(QWebPage::VisibilityStateHidden);
     webView()->hide();
+    emit hidden();
 }
 
 
@@ -663,4 +664,5 @@ void yasem::QtWebPage::setStyleSheet(const QString &stylesheet)
 void yasem::QtWebPage::raise()
 {
     webView()->raise();
+    emit raised();
 }
