@@ -240,15 +240,25 @@ bool QtWebPage::event(QEvent *event)
 
             case Qt::Key_Home:      result = receiveKeyCode(SDK::GUI::RC_KEY_MENU);      break;
             case Qt::Key_Back:      result = receiveKeyCode(SDK::GUI::RC_KEY_BACK);      break;
-            case Qt::Key_Escape:    result = receiveKeyCode(SDK::GUI::RC_KEY_EXIT);      break;
+            case Qt::Key_Escape:
+            {
+                if(hasShift)
+                    result = receiveKeyCode(SDK::GUI::RC_KEY_EXIT);
+                else
+                    result = receiveKeyCode(SDK::GUI::RC_KEY_BACK);
+                break;
+            }
 
             case Qt::Key_F1:        result = receiveKeyCode(SDK::GUI::RC_KEY_RED);       break;
             case Qt::Key_F2:        result = receiveKeyCode(SDK::GUI::RC_KEY_GREEN);     break;
             case Qt::Key_F3:        result = receiveKeyCode(SDK::GUI::RC_KEY_YELLOW);    break;
             case Qt::Key_F4:        result = receiveKeyCode(SDK::GUI::RC_KEY_BLUE);      break;
-            case Qt::Key_F6:        result = receiveKeyCode(SDK::GUI::RC_KEY_INFO);  break;
 
-            case Qt::Key_Tab:       result = receiveKeyCode(SDK::GUI::RC_KEY_MENU);      break;
+            case Qt::Key_F6:
+            case Qt::Key_Info:      result = receiveKeyCode(SDK::GUI::RC_KEY_INFO);      break;
+
+            case Qt::Key_Tab:
+            case Qt::Key_Menu:      result = receiveKeyCode(SDK::GUI::RC_KEY_MENU);      break;
             case Qt::Key_PageUp:    result = receiveKeyCode(SDK::GUI::RC_KEY_PAGE_UP);   break;
             case Qt::Key_PageDown:  result = receiveKeyCode(SDK::GUI::RC_KEY_PAGE_DOWN); break;
 
@@ -263,8 +273,6 @@ bool QtWebPage::event(QEvent *event)
             case Qt::Key_8:         result = receiveKeyCode(SDK::GUI::RC_KEY_NUMBER_8);  break;
             case Qt::Key_9:         result = receiveKeyCode(SDK::GUI::RC_KEY_NUMBER_9);  break;
 
-            case Qt::Key_Menu:      result = receiveKeyCode(SDK::GUI::RC_KEY_MENU);      break;
-
             case Qt::Key_VolumeDown:    result = receiveKeyCode(SDK::GUI::RC_KEY_VOLUME_DOWN);    break;
             case Qt::Key_VolumeUp:      result = receiveKeyCode(SDK::GUI::RC_KEY_VOLUME_UP);      break;
             case Qt::Key_VolumeMute:    result = receiveKeyCode(SDK::GUI::RC_KEY_MUTE);           break;
@@ -277,15 +285,12 @@ bool QtWebPage::event(QEvent *event)
             case Qt::Key_MediaPrevious: result = receiveKeyCode(SDK::GUI::RC_KEY_REWIND);        break;
             case Qt::Key_MediaNext:     result = receiveKeyCode(SDK::GUI::RC_KEY_FAST_FORWARD);  break;
 
-            case Qt::Key_Info:          result = receiveKeyCode(SDK::GUI::RC_KEY_INFO);  break;
-
             case Qt::Key_F11:
             {
                 SDK::GUI::instance()->setFullscreen(!SDK::GUI::instance()->getFullscreen());
                 result = true;
                 break;
             }
-
 
             default:
             {
@@ -583,19 +588,29 @@ bool QtWebPage::load(const QUrl &url)
 QWebPage *QtWebPage::createWindow(WebWindowType type)
 {
     STUB();
-    QtWebPage* page = static_cast<QtWebPage*>(SDK::Browser::instance()->createNewPage());
+    SDK::Browser* browser = SDK::Browser::instance();
+    int page_id;
+    // If browser->isWindowOpenRequested() is set that means page id was created earilier and should be used here
+    if(browser->isWindowOpenRequested())
+        page_id = browser->lastPageId();
+    else
+        page_id = browser->nextPageId();
+    browser->setWindowOpenRequested(false);
+
+    QtWebPage* page = static_cast<QtWebPage*>(browser->createNewPage(page_id));
     return page;
 }
 
 
 
-bool QtWebPage::openWindow(const QString &url, const QString &params = "", const QString &name = "")
+int QtWebPage::openWindow(const QString &url, const QString &params = "", const QString &name = "")
 {
+    int page_id = SDK::Browser::instance()->nextPageId();
     evalJs(QString("setTimeout(function(){window.open('%1', '%2', '%3');}, 1)")
                     .arg(url)
-                    .arg(name)
+                    .arg(name.isEmpty() ? QString::number(page_id) : name)
                     .arg(params));
-    return true;
+    return page_id;
 }
 
 

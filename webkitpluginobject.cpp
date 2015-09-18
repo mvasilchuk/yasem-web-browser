@@ -233,6 +233,7 @@ SDK::WebPage* WebkitPluginObject::createNewPage(const int page_id, bool visible)
     connect(page, &QtWebPage::raised, this, &WebkitPluginObject::printWidgetStack);
     connect(page, &QtWebPage::showed, this, &WebkitPluginObject::printWidgetStack);
     connect(page, &QtWebPage::hidden, this, &WebkitPluginObject::printWidgetStack);
+    connect(page, &QtWebPage::closed, this, &WebkitPluginObject::repaintWebViews);
 
     if(getMainWebPage())
     {
@@ -266,7 +267,7 @@ void WebkitBrowser::componentComplete()
 
 SDK::WebPage* WebkitPluginObject::getMainWebPage() const
 {
-    SDK::WebPage* page = pages().value(0);
+    SDK::WebPage* page = pages().value(1);
     Q_ASSERT(page);
     return page;
 }
@@ -318,7 +319,7 @@ void WebkitPluginObject::repaintWebViews()
 
     foreach(const int id, pages().keys())
     {
-        QtWebPage* page = dynamic_cast<QtWebPage*>( pages().value(id));
+        QtWebPage* page = dynamic_cast<QtWebPage*>(pages().value(id));
         page->webView()->resizeView(m_gui->widgetRect());
     }
 }
