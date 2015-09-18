@@ -216,6 +216,21 @@ void WebView::resize(int width, int height)
     m_window_rect.setHeight(height);
 }
 
+void WebView::setId(const QString &id)
+{
+    SDK::WebPage* web_page = dynamic_cast<SDK::WebPage*>(page());
+    Q_ASSERT(web_page);
+    //web_page->setId("id");
+}
+
+QString WebView::getId() const
+{
+    SDK::WebPage* web_page = dynamic_cast<SDK::WebPage*>(page());
+    Q_ASSERT(web_page);
+    //return web_page->getId();
+    return "";
+}
+
 void WebView::readSettings()
 {
     QSettings* settings = SDK::Core::instance()->settings();
@@ -494,27 +509,3 @@ void WebView::fullUpdate()
     repaint(rect());
 }
 
-void WebView::updateTopWidget()
-{
-    SDK::Browser* browser = SDK::Browser::instance();
-    Q_ASSERT(browser);
-    switch(browser->getTopWidget())
-    {
-        case SDK::Browser::TOP_WIDGET_BROWSER:
-        {
-            DEBUG() << "raising browser";
-            raise();
-            break;
-        }
-        case SDK::Browser::TOP_WIDGET_PLAYER:
-        {
-            DEBUG() << "raising player";
-            SDK::MediaPlayer::instance()->widget()->raise();
-            break;
-        }
-        default: {
-            DEBUG() << "raising unknown";
-            break;
-        }
-    }
-}

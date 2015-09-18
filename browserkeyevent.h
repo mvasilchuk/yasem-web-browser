@@ -18,8 +18,7 @@ public:
 
     void init(int m_key_code, int m_which, int m_key_code2, int m_which_2, bool m_alt = false, bool m_ctrl = false, bool m_shift = false);
     QString toString();
-
-
+    QString toJsonString();
 
 protected:
     void initJsCode();

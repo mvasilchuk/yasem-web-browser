@@ -53,6 +53,9 @@ public slots:
 
     void updatePosition(int x, int y);
     void resize(int width, int height);
+
+    void setId(const QString& id);
+    QString getId() const;
 protected:
 
     void setupContextMenu();
@@ -94,6 +97,7 @@ protected:
     bool m_allow_repaint;
     bool m_allow_transparency;
     bool m_skip_full_render;
+    QString m_id;
 
     // QWidget interface
 protected:
@@ -101,7 +105,6 @@ protected:
 
 public slots:
     void fullUpdate();
-    void updateTopWidget();
 };
 
 }

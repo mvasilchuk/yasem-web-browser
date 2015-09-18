@@ -27,18 +27,18 @@ public:
     explicit QtWebPage(WebView *m_parent = 0);
     virtual ~QtWebPage();
 
-    void  javaScriptAlert ( QWebFrame * frame, const QString & msg );
-    bool  javaScriptConfirm ( QWebFrame * frame, const QString & msg );
-    void  javaScriptConsoleMessage ( const QString & message, int lineNumber, const QString & sourceID );
-    bool  javaScriptPrompt ( QWebFrame * frame, const QString & msg, const QString & defaultValue, QString * result );
+    void  javaScriptAlert ( QWebFrame * frame, const QString & msg ) Q_DECL_OVERRIDE;
+    bool  javaScriptConfirm ( QWebFrame * frame, const QString & msg ) Q_DECL_OVERRIDE;
+    void  javaScriptConsoleMessage ( const QString & message, int lineNumber, const QString & sourceID ) Q_DECL_OVERRIDE;
+    bool  javaScriptPrompt ( QWebFrame * frame, const QString & msg, const QString & defaultValue, QString * result ) Q_DECL_OVERRIDE;
     void setUserAgent(const QString &userAgent);
 
     WebView* webView() const;
 
 public slots:
-    bool load(const QUrl &url);
-    void close();
-    virtual bool event(QEvent*);
+    bool load(const QUrl &url) Q_DECL_OVERRIDE;
+    void close() Q_DECL_OVERRIDE;
+    virtual bool event(QEvent*) Q_DECL_OVERRIDE;
 
     bool stb(SDK::StbPluginObject* plugin);
     SDK::StbPluginObject* stb();
@@ -48,22 +48,22 @@ public slots:
     void showWebInspector();
 
     bool receiveKeyCode(SDK::GUI::RcKey keyCode);
-    void evalJs(const QString &js);
+    void evalJs(const QString &js) Q_DECL_OVERRIDE;
 
-    QColor getChromaKey()  const;
-    void setChromaKey(QColor color);
+    QColor getChromaKey() const Q_DECL_OVERRIDE;
+    void setChromaKey(QColor color) Q_DECL_OVERRIDE;
 
-    QColor getChromaMask()  const;
-    void setChromaMask(QColor color);
+    QColor getChromaMask() const Q_DECL_OVERRIDE;
+    void setChromaMask(QColor color) Q_DECL_OVERRIDE;
 
-    float getOpacity()  const;
-    void setOpacity(float opacity) ;
+    float getOpacity() const Q_DECL_OVERRIDE;
+    void setOpacity(float opacity) Q_DECL_OVERRIDE;
 
-    bool isChromaKeyEnabled()  const;
-    void setChromaKeyEnabled(bool enabled);
+    bool isChromaKeyEnabled() const Q_DECL_OVERRIDE;
+    void setChromaKeyEnabled(bool enabled) Q_DECL_OVERRIDE;
 
-    void reset();
-    bool openWindow(const QString &url, const QString &params, const QString &name);
+    void reset() Q_DECL_OVERRIDE;
+    int openWindow(const QString &url, const QString &params, const QString &name) Q_DECL_OVERRIDE;
 
     void setupInterceptor();
 
@@ -88,44 +88,45 @@ protected:
 
 public:
      bool isChildWindow();
-    QString userAgentForUrl(const QUrl &url) const;
-    void triggerAction(WebAction action, bool checked);
+    QString userAgentForUrl(const QUrl &url) const Q_DECL_OVERRIDE;
+    void triggerAction(WebAction action, bool checked) Q_DECL_OVERRIDE;
 
-    void setPageViewportSize(QSize new_size);
-    QSize getVieportSize();
+    void setPageViewportSize(QSize new_size) Q_DECL_OVERRIDE;
+    QSize getVieportSize() Q_DECL_OVERRIDE;
 
-    qreal scale();
-    QRect getPageRect();
+    qreal scale() Q_DECL_OVERRIDE;
+    QRect getPageRect() Q_DECL_OVERRIDE;
 
 
     // QWebPage interface
 protected:
-    virtual QWebPage *createWindow(WebWindowType type);
+    virtual QWebPage *createWindow(WebWindowType type) Q_DECL_OVERRIDE;
 
 public slots:
-    virtual void execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol);
-    virtual QWidget *widget() const;
+    virtual void execKeyEvent(const QString &action, int code, Qt::KeyboardModifiers mods, const QString &symbol) Q_DECL_OVERRIDE;
+    virtual QWidget *widget() const Q_DECL_OVERRIDE;
 
 signals:
+    void showed();
+    void hidden();
+    void raised();
     void closed();
     void load_started(const QString& url);
 
     // WebPage interface
 public slots:
-    QString getTitle() const;
-    QUrl getURL() const;
-    QString getRootDir() const;
+    QString getTitle() const Q_DECL_OVERRIDE;
+    QUrl getURL() const Q_DECL_OVERRIDE;
+    QString getRootDir() const Q_DECL_OVERRIDE;
 
     // WebPage interface
 public slots:
-    void move(int x, int y);
-    void resize(int width, int height);
-    void show();
-    void hide();
-    void raise();
-    void setStyleSheet(const QString &stylesheet);
-
-
+    void move(int x, int y) Q_DECL_OVERRIDE;
+    void resize(int width, int height) Q_DECL_OVERRIDE;
+    void show() Q_DECL_OVERRIDE;
+    void hide() Q_DECL_OVERRIDE;
+    void raise() Q_DECL_OVERRIDE;
+    void setStyleSheet(const QString &stylesheet) Q_DECL_OVERRIDE;
 
 };
 

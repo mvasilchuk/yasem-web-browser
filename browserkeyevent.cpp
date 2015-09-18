@@ -2,6 +2,8 @@
 #include <QStringList>
 #include <QDebug>
 #include <QFile>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 using namespace yasem;
 
@@ -100,6 +102,21 @@ QString BrowserKeyEvent::toString()
     }
 
     return QString("(function(){").append(m_pre_data).append(result.join(" && ")).append("})();");
+}
+
+QString BrowserKeyEvent::toJsonString()
+{
+    QJsonObject obj;
+
+    obj.insert("key_code", m_key_code);
+    obj.insert("which", m_which);
+    obj.insert("key_code2", m_key_code2);
+    obj.insert("which2", m_which_2);
+    obj.insert("alt", m_alt);
+    obj.insert("ctrl", m_ctrl);
+    obj.insert("shift", m_shift);
+
+    return QJsonDocument(obj).toJson(QJsonDocument::Compact);
 }
 
 void BrowserKeyEvent::initJsCode()
