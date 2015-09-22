@@ -87,9 +87,6 @@ protected:
 
     QPixmap m_video_frame;
 
-signals:
-    void mousePositionChanged(int position);
-
     // QWidget interface
 protected:
     void paintEvent(QPaintEvent *);

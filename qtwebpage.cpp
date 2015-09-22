@@ -602,10 +602,10 @@ QWebPage *QtWebPage::createWindow(WebWindowType type)
 }
 
 
-
 int QtWebPage::openWindow(const QString &url, const QString &params = "", const QString &name = "")
 {
     int page_id = SDK::Browser::instance()->nextPageId();
+    // If run window.open() without timeout the app freezes
     evalJs(QString("setTimeout(function(){window.open('%1', '%2', '%3');}, 1)")
                     .arg(url)
                     .arg(name.isEmpty() ? QString::number(page_id) : name)

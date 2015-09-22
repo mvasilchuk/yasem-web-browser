@@ -62,6 +62,7 @@ WebView::WebView(QWidget *parent) :
 #endif // USE_REAL_TRANSPARENCY
 
     setContextMenuPolicy(Qt::CustomContextMenu);
+    //setAttribute(Qt::WA_TransparentForMouseEvents, false);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(showContextMenu(const QPoint&)));
 
 #ifdef USE_REAL_TRANSPARENCY
@@ -234,9 +235,6 @@ QString WebView::getId() const
 void WebView::readSettings()
 {
     QSettings* settings = SDK::Core::instance()->settings();
-    settings->beginGroup("WebBrowser");
-    mouseBorderThreshold = settings->value("mouse_border_threshold", 50).toInt();
-    settings->endGroup();
 }
 
 void WebView::keyPressEvent(QKeyEvent *event)
@@ -253,26 +251,7 @@ void WebView::keyReleaseEvent(QKeyEvent *event)
 
 void WebView::mouseMoveEvent(QMouseEvent *e)
 {
-    //DEBUG() << e;
-    int position = SDK::MOUSE_POSITION::MIDDLE;
-
-    int y_pos = e->pos().y();
-    int x_pos = e->pos().x();
-    int height = this->height();
-    int width = this->width();
-
-    if(y_pos < (mouseBorderThreshold))
-        position |= SDK::MOUSE_POSITION::TOP;
-    else if(y_pos > height - mouseBorderThreshold)
-        position |= SDK::MOUSE_POSITION::BOTTOM;
-
-    if(x_pos < mouseBorderThreshold)
-        position |= SDK::MOUSE_POSITION::LEFT;
-    else if(x_pos > width - mouseBorderThreshold)
-        position |= SDK::MOUSE_POSITION::RIGHT;
-
-    emit mousePositionChanged(position);
-
+    qApp->sendEvent(parent()->parent(), e);
     QWebView::mouseMoveEvent(e);
 }
 
